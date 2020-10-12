@@ -1,0 +1,86 @@
+server_name: "matrix.local"
+
+pid_file: /data/homeserver.pid
+
+listeners:
+
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+
+    resources:
+      - names: [client, federation]
+        compress: false
+
+limit_remote_rooms:
+
+retention:
+
+acme:
+    enabled: false
+    port: 80
+    bind_addresses: ['::', '0.0.0.0']
+    reprovision_threshold: 30
+    domain: matrix.example.com
+    account_key_file: /data/acme_account.key
+
+federation_ip_range_blacklist:
+  - '127.0.0.0/8'
+  - '10.0.0.0/8'
+  - '172.16.0.0/12'
+  - '192.168.0.0/16'
+  - '100.64.0.0/10'
+  - '169.254.0.0/16'
+  - '::1/128'
+  - 'fe80::/64'
+  - 'fc00::/7'
+
+caches:
+   per_cache_factors:
+
+database:
+  name: sqlite3
+  args:
+    database: /data/homeserver.db
+
+log_config: "/config/matrix.local.log.config"
+
+media_store_path: "/data/media_store"
+
+url_preview_accept_language:
+
+enable_registration: true
+
+account_validity:
+
+registration_shared_secret: "K#tme*z#,*;Ep1VlN88PZ47OT:C.Z&87c-Caos-+h.lDznq;70"
+
+account_threepid_delegates:
+
+metrics_flags:
+
+report_stats: false
+
+macaroon_secret_key: "cyh.~&v93noepvpm2Z#AP&Ctm342aeC-4jBTZ3jh2b,Wj.60JT"
+
+form_secret: "g@KmIgIb~C@Jq*di#l1Zh7T,iDLZXDFzC~4ZSD#TTN.+e^JPx:"
+
+signing_key_path: "/config/matrix.local.signing.key"
+old_signing_keys:
+
+trusted_key_servers:
+  - server_name: "matrix.org"
+
+saml2_config:
+  user_mapping_provider:
+    config:
+
+oidc_config:
+  user_mapping_provider:
+    config:
+      localpart_template: "{{ user.preferred_username }}"
+
+password_config:
+   policy:
+
