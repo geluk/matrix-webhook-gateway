@@ -1,0 +1,4 @@
+/node_modules
+
+/user-store.db
+/room-store.db

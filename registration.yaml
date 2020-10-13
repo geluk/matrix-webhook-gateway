@@ -1,0 +1,13 @@
+id: webhook-dev
+hs_token: LOCAL_DEV_hs_JWCcAqU5TmTX94nj3hlw
+as_token: LOCAL_DEV_as_eRUxytaEISYK47kgBjGo
+namespaces:
+  users:
+    - exclusive: true
+      regex: '@hook_.*'
+  aliases: []
+  rooms: []
+url: 'http://127.0.0.1:8023'
+sender_localpart: webhook
+rate_limited: true
+protocols: null
