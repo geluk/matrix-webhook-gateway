@@ -18,6 +18,7 @@ new Cli({
             homeserverUrl: "http://127.0.0.1:8008",
             domain: "matrix.local",
             registration: "registration.yaml",
+            disableStores: true,
             controller: {
                 onUserQuery: function(user: MatrixUser): Object {
                     console.log(`User provision requested: ${user.localpart}:${user.host}`);
