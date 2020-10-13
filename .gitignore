@@ -1,3 +1,5 @@
 /node_modules
 
 /synapse-dev/synapse-data/homeserver.db
+
+appservice-db.sqlite
