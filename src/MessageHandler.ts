@@ -6,7 +6,7 @@ export default abstract class MessageHandler implements MatrixEventHandler {
 
     handleEvent(context: EventContext): boolean {
         if (context.event.type === "m.room.message") {
-            var message = new MessageContext(context.event, context.bridge);
+            const message = new MessageContext(context.event, context.bridge);
             return this.handleMessage(message);
         }
         return false;

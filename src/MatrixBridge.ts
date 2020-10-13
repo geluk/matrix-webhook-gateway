@@ -1,7 +1,6 @@
 import { Cli, Bridge, AppServiceRegistration, MatrixUser, WeakEvent, Request, BridgeContext } from "matrix-appservice-bridge";
 import MatrixEventHandler from "./MatrixEventHandler"
-import MessageContext, { EventContext } from "./MessageContext";
-import MessageHandler from "./MessageHandler";
+import { EventContext } from "./MessageContext";
 
 export default class MatrixBridge {
 
@@ -37,12 +36,12 @@ export default class MatrixBridge {
         this.cli.run();
     }
 
-    private onStart(port: number, config: Record<string, unknown>) {
+    private onStart(port: number, config: Record<string, unknown> | null) {
         console.log(`Ready on port ${port}`);
         this.bridge.run(8023, config);
     }
 
-    private handleUserQuery(user: MatrixUser): Object {
+    private handleUserQuery(user: MatrixUser): Record<string, unknown> {
         console.log(`User provision requested: ${user.localpart}:${user.host}`);
         return {};
     }
@@ -55,7 +54,7 @@ export default class MatrixBridge {
         }
     }
 
-    private generateRegistration(reg: AppServiceRegistration, callback) {
+    private generateRegistration(reg: AppServiceRegistration, callback: (f: AppServiceRegistration) => void) {
         reg.setId(AppServiceRegistration.generateToken());
         reg.setHomeserverToken(AppServiceRegistration.generateToken());
         reg.setAppServiceToken(AppServiceRegistration.generateToken());
@@ -64,9 +63,9 @@ export default class MatrixBridge {
         callback(reg);
     }
 
-    private handleEvent(request: Request<WeakEvent>, _: BridgeContext) {
-        let event = request.getData();
-        let context = new EventContext(event, this.bridge);
+    private handleEvent(request: Request<WeakEvent>, _: any) {
+        const event = request.getData();
+        const context = new EventContext(event, this.bridge);
         let handled = false;
         this.eventHandlers.forEach((h) => handled = h.handleEvent(context));
 

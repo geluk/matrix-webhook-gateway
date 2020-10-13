@@ -10,9 +10,9 @@ export class CommandHandler extends MessageHandler {
 
     public handleMessage(context: MessageContext): boolean {
         if (context.event.sender == context.bridge.getBot().getUserId()) {
-            return;
+            return true;
         }
-        let message = context.event.content as unknown as Message;
+        const message = context.event.content as unknown as Message;
 
         if (message.body.match(/^-[A-z]/)) {
             new Command(message.body.substr(1), context).execute();
@@ -28,7 +28,7 @@ class Command {
 
     public constructor(command: string, context: MessageContext) {
         this.args = command.split(" ");
-        this.command = this.args.shift().toLowerCase();
+        this.command = this.args.shift()!.toLowerCase();
         this.context = context;
     }
 

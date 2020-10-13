@@ -20,7 +20,6 @@ export class EventContext {
 
 export default class MessageContext extends EventContext {
     private _message: Message;
-    private _sender: string;
 
     public constructor(event: WeakEvent, bridge: Bridge) {
         super(event, bridge);

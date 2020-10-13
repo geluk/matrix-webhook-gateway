@@ -9,7 +9,7 @@ type EventHandler = (ctx: EventContext) => any;
 
 export class MatrixEventHandlers {
     static eventType(eventType: string, handler: EventHandler): MatrixEventHandler {
-        let typeMatch: EventMatcher = (ctx) => ctx.event.type === eventType;
+        const typeMatch: EventMatcher = (ctx) => ctx.event.type === eventType;
         return new GenericEventHandler(typeMatch, handler);
     }
 
@@ -18,7 +18,7 @@ export class MatrixEventHandlers {
     }
 
     static invite(handler: EventHandler): MatrixEventHandler {
-        let typeMatch: EventMatcher = (ctx) => {
+        const typeMatch: EventMatcher = (ctx) => {
             return ctx.event.type === "m.room.member" &&
             ctx.event.content.membership === "invite"
         }

@@ -1,10 +1,11 @@
 
-import * as express from "express";
+
+import Express = require("express");
 
 export default class WebHook {
 
     public constructor() {
-        const app = express();
+        const app = Express();
 
         app.get("*", (rq, rs, next) => {
             console.log(`${rq.method} ${rq.url}`);
