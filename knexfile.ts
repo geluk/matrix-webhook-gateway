@@ -3,9 +3,9 @@
 module.exports = {
 
   development: {
-    client: "sqlite3",
+    client: 'sqlite3',
     connection: {
-      filename: "appservice-db.sqlite"
+      filename: 'appservice-db.sqlite',
     },
     useNullAsDefault: true,
   },
