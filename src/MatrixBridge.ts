@@ -1,5 +1,7 @@
 import { Cli, Bridge, AppServiceRegistration, MatrixUser, WeakEvent, Request, BridgeContext } from "matrix-appservice-bridge";
 import MatrixEventHandler from "./MatrixEventHandler"
+import MessageContext, { EventContext } from "./MessageContext";
+import MessageHandler from "./MessageHandler";
 
 export default class MatrixBridge {
 
@@ -7,7 +9,7 @@ export default class MatrixBridge {
     private cli: Cli<Record<string, unknown>>;
     private eventHandlers: MatrixEventHandler[] = [];
 
-    private constructor() {
+    public constructor() {
         this.bridge = new Bridge({
             homeserverUrl: "http://127.0.0.1:8008",
             domain: "matrix.local",
@@ -31,13 +33,7 @@ export default class MatrixBridge {
         this.eventHandlers.push(eventHandler);
     }
 
-    static create(): MatrixBridge {
-        let appservice = new MatrixBridge();
-        appservice.start();
-        return appservice;
-    }
-
-    private start() {
+    public start() {
         this.cli.run();
     }
 
@@ -68,14 +64,13 @@ export default class MatrixBridge {
         callback(reg);
     }
 
-    private handleEvent(request: Request<WeakEvent>, context: BridgeContext) {
-
+    private handleEvent(request: Request<WeakEvent>, _: BridgeContext) {
         let event = request.getData();
+        let context = new EventContext(event, this.bridge);
         let handled = false;
-        this.eventHandlers.forEach((h) => handled = h.handle(event, this.bridge));
+        this.eventHandlers.forEach((h) => handled = h.handleEvent(context));
 
-        if(!handled)
-        {
+        if (!handled) {
             console.log(`Event ignored: ${event.type}`);
             return;
         }

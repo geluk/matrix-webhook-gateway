@@ -1,20 +1,16 @@
-import { Bridge, WeakEvent } from "matrix-appservice-bridge";
+import { EventContext } from "./MessageContext";
 
-type EventMatcher = (evt: WeakEvent) => boolean;
-type EventHandler = (evt: WeakEvent, bridge: Bridge) => any;
+export default interface MatrixEventHandler {
+    handleEvent(context: EventContext): boolean;
+}
 
-export default class MatrixEventHandler {
-    eventMatcher: EventMatcher;
-    handler: EventHandler;
+type EventMatcher = (ctx: EventContext) => boolean;
+type EventHandler = (ctx: EventContext) => any;
 
-    public constructor(eventMatcher: EventMatcher, handler: EventHandler) {
-        this.eventMatcher = eventMatcher;
-        this.handler = handler;
-    }
-
+export class MatrixEventHandlers {
     static eventType(eventType: string, handler: EventHandler): MatrixEventHandler {
-        let typeMatch: EventMatcher = (evt) => evt.type === eventType;
-        return new MatrixEventHandler(typeMatch, handler);
+        let typeMatch: EventMatcher = (ctx) => ctx.event.type === eventType;
+        return new GenericEventHandler(typeMatch, handler);
     }
 
     static message(handler: EventHandler): MatrixEventHandler {
@@ -22,18 +18,27 @@ export default class MatrixEventHandler {
     }
 
     static invite(handler: EventHandler): MatrixEventHandler {
-        let typeMatch: EventMatcher = (evt) => {
-            return evt.type === "m.room.member" &&
-            evt.content.membership === "invite"
+        let typeMatch: EventMatcher = (ctx) => {
+            return ctx.event.type === "m.room.member" &&
+            ctx.event.content.membership === "invite"
         }
-        return new MatrixEventHandler(typeMatch, handler);
+        return new GenericEventHandler(typeMatch, handler);
+    }
+}
+
+class GenericEventHandler implements MatrixEventHandler {
+    typeMatch: EventMatcher;
+    handler: EventHandler;
+
+    public constructor(typeMatch: EventMatcher, handler: EventHandler) {
+        this.typeMatch = typeMatch;
+        this.handler = handler;
     }
 
-    public handle(event: WeakEvent, bridge: Bridge): boolean {
-        if(this.eventMatcher(event)) {
-            this.handler(event, bridge);
-            return true;
+    handleEvent(context: EventContext): boolean {
+        if (this.typeMatch(context)) {
+            return this.handler(context);
         }
-        return false;
+        return true;
     }
 }
