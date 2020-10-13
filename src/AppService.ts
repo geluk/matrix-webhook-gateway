@@ -1,12 +1,11 @@
-
-
-
 import { Cli, Bridge, AppServiceRegistration, MatrixUser, WeakEvent, Request, BridgeContext } from "matrix-appservice-bridge";
+import MatrixEventHandler from "./MatrixEventHandler"
 
 export default class AppService {
 
     private bridge: Bridge;
     private cli: Cli<Record<string, unknown>>;
+    private eventHandlers: MatrixEventHandler[] = [];
 
     private constructor() {
         this.bridge = new Bridge({
@@ -28,12 +27,16 @@ export default class AppService {
         console.log(`Bridge ready`);
     }
 
+    public registerHandler(eventHandler: MatrixEventHandler) {
+        this.eventHandlers.push(eventHandler);
+    }
+
     static create(): AppService {
         let appservice = new AppService();
         appservice.start();
         return appservice;
     }
-    
+
     private start() {
         this.cli.run();
     }
@@ -66,23 +69,13 @@ export default class AppService {
     }
 
     private handleEvent(request: Request<WeakEvent>, context: BridgeContext) {
+
         let event = request.getData();
-        if (event.type === "m.room.message") {
-            console.log(`New message: ${event.content.body}`);
-            if (event.sender != this.bridge.getBot().getUserId()) {
-                this.bridge.getIntent().sendMessage(event.room_id, {
-                    msgtype: "m.text",
-                    body: "PONG"
-                });
-            }
-        } else if (event.type === "m.room.member" && event.content.membership === "invite") {
-            console.log(`${event.state_key} was invited to ${event.room_id}`);
-            if (event.state_key === this.bridge.getBot().getUserId()) {
-                console.log(`Accepting invite.`);
-                this.bridge.getIntent(event.state_key)
-                    .join(event.room_id);
-            }
-        }else {
+        let handled = false;
+        this.eventHandlers.forEach((h) => handled = h.handle(event, this.bridge));
+
+        if(!handled)
+        {
             console.log(`Event ignored: ${event.type}`);
             return;
         }
