@@ -11,6 +11,11 @@ cd synapse-dev
 
 Go to http://localhost:8009 and log in using the following credentials:
 
-Username: `dev`
-
+Username: `dev`  
 Password: `appservice-dev`
+
+Start the app service:
+```bash
+npm ci
+npm run start
+```
