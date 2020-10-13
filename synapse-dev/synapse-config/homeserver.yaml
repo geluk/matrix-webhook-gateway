@@ -10,8 +10,11 @@ listeners:
     x_forwarded: true
 
     resources:
-      - names: [client, federation]
+      - names: [client]
         compress: false
+
+auto_join_rooms:
+  - "#dev-room:matrix.local"
 
 limit_remote_rooms:
 
@@ -25,16 +28,7 @@ acme:
     domain: matrix.example.com
     account_key_file: /data/acme_account.key
 
-federation_ip_range_blacklist:
-  - '127.0.0.0/8'
-  - '10.0.0.0/8'
-  - '172.16.0.0/12'
-  - '192.168.0.0/16'
-  - '100.64.0.0/10'
-  - '169.254.0.0/16'
-  - '::1/128'
-  - 'fe80::/64'
-  - 'fc00::/7'
+federation_domain_whitelist: []
 
 caches:
    per_cache_factors:
@@ -72,8 +66,7 @@ form_secret: "g@KmIgIb~C@Jq*di#l1Zh7T,iDLZXDFzC~4ZSD#TTN.+e^JPx:"
 signing_key_path: "/config/matrix.local.signing.key"
 old_signing_keys:
 
-trusted_key_servers:
-  - server_name: "matrix.org"
+trusted_key_servers: []
 
 saml2_config:
   user_mapping_provider:
