@@ -48,6 +48,9 @@ log_config: "/config/matrix.local.log.config"
 
 media_store_path: "/data/media_store"
 
+app_service_config_files:
+  - /config/appservices/webhook-dev.yml
+
 url_preview_accept_language:
 
 enable_registration: true
