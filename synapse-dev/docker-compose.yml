@@ -4,23 +4,37 @@ services:
   synapse:
     image: matrixdotorg/synapse
     environment:
-      - TZ=Europe/Amsterdam
-      - SYNAPSE_SERVER_NAME=matrix.local
-      - SYNAPSE_REPORT_STATS=no
-      - SYNAPSE_CONFIG_DIR=/config
-      - SYNAPSE_DATA_DIR=/data
-      - UID=${SYNAPSE_UID}
-      - GID=${SYNAPSE_GID}
+    - TZ=Europe/Amsterdam
+    - SYNAPSE_SERVER_NAME=matrix.local
+    - SYNAPSE_REPORT_STATS=no
+    - SYNAPSE_CONFIG_DIR=/config
+    - SYNAPSE_DATA_DIR=/data
+    - UID=${SYNAPSE_UID}
+    - GID=${SYNAPSE_GID}
     volumes:
-      - ./synapse-data:/data
-      - ./synapse-config:/config
+    - ./synapse-data:/data
+    - ./synapse-config:/config
     ports:
-      - 8008:8008
+    - 8008:8008
     restart: unless-stopped
+    networks:
+      matrix:
+        ipv4_address: 172.31.0.10
   riot:
     image: vectorim/riot-web
     volumes:
-      - ./riot.json:/app/config.json
+    - ./riot.json:/app/config.json
     ports:
-      - 8009:80
+    - 8009:80
     restart: unless-stopped
+    networks:
+      matrix:
+        ipv4_address: 172.31.0.11
+networks:
+  matrix:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.31.0.0/24
+        gateway: 172.31.0.1

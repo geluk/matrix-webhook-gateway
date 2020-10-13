@@ -7,7 +7,7 @@ namespaces:
       regex: '@hook_.*'
   aliases: []
   rooms: []
-url: 'http://127.0.0.1:8023'
+url: 'http://172.31.0.1:8023'
 sender_localpart: webhook
 rate_limited: true
 protocols: null
