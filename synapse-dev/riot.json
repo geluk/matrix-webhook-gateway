@@ -34,7 +34,6 @@
     },
     "default_federate": true,
     "default_theme": "light",
-    "welcomeUserId": "@riot-bot:matrix.org",
     "piwik": {
         "url": "https://piwik.riot.im/",
         "whitelistedHSUrls": ["https://matrix.org"],
