@@ -1,7 +1,7 @@
 import { Cli, Bridge, AppServiceRegistration, MatrixUser, WeakEvent, Request, BridgeContext } from "matrix-appservice-bridge";
 import MatrixEventHandler from "./MatrixEventHandler"
 
-export default class AppService {
+export default class MatrixBridge {
 
     private bridge: Bridge;
     private cli: Cli<Record<string, unknown>>;
@@ -31,8 +31,8 @@ export default class AppService {
         this.eventHandlers.push(eventHandler);
     }
 
-    static create(): AppService {
-        let appservice = new AppService();
+    static create(): MatrixBridge {
+        let appservice = new MatrixBridge();
         appservice.start();
         return appservice;
     }

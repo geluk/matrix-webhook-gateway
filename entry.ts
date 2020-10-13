@@ -1,10 +1,10 @@
 
 
-import AppService from "./src/AppService"
+import MatrixBridge from "./src/MatrixBridge"
 import MatrixEventHandler from "./src/MatrixEventHandler";
 import WebHook from "./src/WebHook";
 
-const appService = AppService.create();
+const appService = MatrixBridge.create();
 
 appService.registerHandler(MatrixEventHandler.message((event, bridge) => {
     console.log(`New message: ${event.content.body}`);
