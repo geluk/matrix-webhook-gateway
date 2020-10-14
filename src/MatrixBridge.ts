@@ -1,11 +1,16 @@
 import {
   Cli, Bridge, AppServiceRegistration, MatrixUser, WeakEvent, Request,
 } from 'matrix-appservice-bridge';
+
 import MatrixEventHandler from './MatrixEventHandler';
 import EventContext from './EventContext';
 import logger from './util/logger';
 
 type RegistrationCallback = (r: AppServiceRegistration) => void;
+
+const bridgeLog = logger.getChildLogger({
+  name: 'bridge',
+});
 
 export default class MatrixBridge {
   private bridge: Bridge;
@@ -54,9 +59,9 @@ export default class MatrixBridge {
 
   private handleLog(text: string, isError: boolean) {
     if (isError) {
-      logger.error(`[appservice] ${text}`);
+      bridgeLog.error(text);
     } else {
-      logger.debug(`[appservice] ${text}`);
+      bridgeLog.silly(text);
     }
   }
 

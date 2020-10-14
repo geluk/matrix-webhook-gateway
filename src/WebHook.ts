@@ -9,19 +9,19 @@ export default class WebHook {
 
     this.app.get('*', (rq, rs) => {
       logger.debug(`${rq.method} ${rq.url}`);
-      logger.trace(rq.body);
+      logger.debug(rq.body);
       rs.contentType('application/json').send('{}');
     });
 
     this.app.post('*', (rq, rs) => {
       logger.debug(`${rq.method} ${rq.url}`);
-      logger.trace(rq.body);
+      logger.debug(rq.body);
       rs.contentType('application/json').send('{}');
     });
 
     this.app.put('*', (rq, rs) => {
       logger.debug(`${rq.method} ${rq.url}`);
-      logger.trace(rq.body);
+      logger.debug(rq.body);
       rs.contentType('application/json').send('{}');
     });
   }

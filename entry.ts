@@ -6,7 +6,6 @@ import User from './src/models/User';
 import WebhookService from './src/WebhookService';
 
 import toSnakeCase from './src/util/toSnakeCase';
-import logger from './src/util/logger';
 
 const config: Knex.Config = {
   client: 'sqlite3',
