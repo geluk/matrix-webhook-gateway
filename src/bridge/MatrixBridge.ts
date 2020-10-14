@@ -1,5 +1,5 @@
 import {
-  Cli, Bridge, AppServiceRegistration, MatrixUser, WeakEvent, Request,
+  Bridge, AppServiceRegistration, MatrixUser, WeakEvent, Request,
 } from 'matrix-appservice-bridge';
 
 import MatrixEventHandler from './MatrixEventHandler';
@@ -17,8 +17,6 @@ const BRIDGE_PORT = 8023;
 export default class MatrixBridge {
   private bridge: Bridge;
 
-  private cli: Cli<Record<string, unknown>>;
-
   private eventHandlers: MatrixEventHandler[] = [];
 
   public constructor() {
@@ -32,11 +30,6 @@ export default class MatrixBridge {
         onLog: this.handleLog.bind(this),
         onEvent: this.handleEvent.bind(this),
       },
-    });
-    this.cli = new Cli({
-      registrationPath: '',
-      generateRegistration: this.generateRegistration,
-      run: this.onStart.bind(this),
     });
   }
 
@@ -52,12 +45,8 @@ export default class MatrixBridge {
   }
 
   public start(): void {
-    this.cli.run();
-  }
-
-  private onStart(_: number, config: Record<string, unknown> | null) {
+    this.bridge.run(BRIDGE_PORT, null);
     logger.info(`Matrix bridge running on port ${BRIDGE_PORT}`);
-    this.bridge.run(BRIDGE_PORT, config);
   }
 
   private handleUserQuery(user: MatrixUser): Record<string, unknown> {
