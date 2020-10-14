@@ -41,9 +41,10 @@ export default class MatrixBridge {
     this.cli.run();
   }
 
-  private onStart(port: number, config: Record<string, unknown> | null) {
+  private onStart(_: number, config: Record<string, unknown> | null) {
+    const port = 8023;
     logger.info(`Matrix bridge running on port ${port}`);
-    this.bridge.run(8023, config);
+    this.bridge.run(port, config);
   }
 
   private handleUserQuery(user: MatrixUser): Record<string, unknown> {
