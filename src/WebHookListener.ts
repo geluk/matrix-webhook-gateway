@@ -1,6 +1,8 @@
 import * as Express from 'express';
 import logger from './util/logger';
 
+const WEBHOOK_PORT = 8020;
+
 export default class WebHookListener {
   app: Express.Express;
 
@@ -27,9 +29,9 @@ export default class WebHookListener {
   }
 
   public start(): void {
-    const port = 8020;
+    const port = WEBHOOK_PORT;
     this.app.listen(port, () => {
-      logger.info(`Web server running on port ${port}.`);
+      logger.info(`Web server running on port ${port}`);
     });
   }
 }

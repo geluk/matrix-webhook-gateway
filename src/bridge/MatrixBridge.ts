@@ -12,6 +12,8 @@ const bridgeLog = logger.getChildLogger({
   name: 'bridge',
 });
 
+const BRIDGE_PORT = 8023;
+
 export default class MatrixBridge {
   private bridge: Bridge;
 
@@ -54,9 +56,8 @@ export default class MatrixBridge {
   }
 
   private onStart(_: number, config: Record<string, unknown> | null) {
-    const port = 8023;
-    logger.info(`Matrix bridge running on port ${port}`);
-    this.bridge.run(port, config);
+    logger.info(`Matrix bridge running on port ${BRIDGE_PORT}`);
+    this.bridge.run(BRIDGE_PORT, config);
   }
 
   private handleUserQuery(user: MatrixUser): Record<string, unknown> {

@@ -7,6 +7,8 @@ import WebhookRepository from './repositories/WebhookRepository';
 import Command, { CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand } from './Command';
 import randomString from './util/randomString';
 
+const HOOK_SECRET_LENGTH = 48;
+
 export default class WebHookService {
   bridge: MatrixBridge;
 
@@ -33,6 +35,7 @@ export default class WebHookService {
         break;
       case 'deleteWebHook':
         this.deleteWebHook(command.commandParameters, command);
+        break;
       default:
         break;
     }
@@ -41,11 +44,12 @@ export default class WebHookService {
   private async createWebHook(command: CreateWebhookCommand, context: Command) {
     const webhook = {
       id: undefined,
-      path: `/hook/${randomString(48)}`,
+      path: `/hook/${randomString(HOOK_SECRET_LENGTH)}`,
       user_id: command.webhook_user_id,
       room_id: context.message.event.room_id,
     };
     await this.webhookRepository.add(webhook);
+    context.message.bridge.getIntent(webhook.user_id).join(webhook.room_id);
     logger.info(context.message.message.msgtype);
     context.reply(webhook.path);
   }
