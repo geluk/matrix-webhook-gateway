@@ -17,10 +17,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      with:
-        fetch_depth: 0
     - name: Build the Docker image
       run: |
+        git fetch --tags
         major="$(./ci/get-tags.sh --major)"
         minor="$(./ci/get-tags.sh --minor)"
         bugfix="$(./ci/get-tags.sh --bugfix)"
