@@ -14,7 +14,8 @@
     "express": "^4.17.1",
     "knex": "^0.21.6",
     "matrix-appservice-bridge": "^2.1.0",
-    "sqlite3": "^5.0.0"
+    "sqlite3": "^5.0.0",
+    "tslog": "^2.9.0"
   },
   "devDependencies": {
     "@tsconfig/node12": "^1.0.7",
