@@ -1,30 +1,46 @@
 import * as Express from 'express';
+import { Request, Response, NextFunction } from 'express';
+import WebHook from './models/WebHook';
+import WebhookRepository from './repositories/WebhookRepository';
 import logger from './util/logger';
+import Observable from './util/Observable';
 
 const WEBHOOK_PORT = 8020;
 
 export default class WebHookListener {
   app: Express.Express;
 
-  public constructor() {
+  webhookRepository: WebhookRepository;
+
+  onHookCalled = new Observable<HookCall>();
+
+  public constructor(webhookRepository: WebhookRepository) {
+    this.webhookRepository = webhookRepository;
+
     this.app = Express.default();
+    this.app.use(Express.json());
 
-    this.app.get('*', (rq, rs) => {
+    this.app.get('*', async (rq, rs) => {
       logger.debug(`${rq.method} ${rq.url}`);
-      logger.debug(rq.body);
-      rs.contentType('application/json').send('{}');
+      if (!this.match(rq)) {
+        rs.status(404).send('Not Found');
+      } else {
+        rs.send('');
+      }
     });
 
-    this.app.post('*', (rq, rs) => {
+    this.app.post('*', async (rq, rs) => {
       logger.debug(`${rq.method} ${rq.url}`);
-      logger.debug(rq.body);
-      rs.contentType('application/json').send('{}');
+      if (!await this.match(rq)) {
+        rs.status(404).send('Not Found');
+      } else {
+        rs.send('');
+      }
     });
 
-    this.app.put('*', (rq, rs) => {
-      logger.debug(`${rq.method} ${rq.url}`);
-      logger.debug(rq.body);
-      rs.contentType('application/json').send('{}');
+    this.app.use((err: unknown, req: unknown, res: Response, _next: NextFunction) => {
+      logger.error(err);
+      res.status(500).send('Internal Server Error');
     });
   }
 
@@ -34,4 +50,31 @@ export default class WebHookListener {
       logger.info(`Web server running on port ${port}`);
     });
   }
+
+  private async match(rq: Request): Promise<boolean> {
+    const hook = await this.webhookRepository.getByPath(rq.path);
+    if (!hook) {
+      return false;
+    }
+    if (!('text' in rq.body)) {
+      logger.warn('Webhook body did not contain a "text" element.');
+      return false;
+    }
+    this.onHookCalled.notify({
+      webhook: hook,
+      content: {
+        text: rq.body.text,
+      },
+    });
+    return true;
+  }
+}
+
+export interface HookCall {
+  webhook: WebHook,
+  content: SlackWebhook,
+}
+
+interface SlackWebhook {
+  text: string,
 }

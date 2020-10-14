@@ -6,6 +6,7 @@ import Database from './repositories/Database';
 import WebhookRepository from './repositories/WebhookRepository';
 import Command, { CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand } from './Command';
 import randomString from './util/randomString';
+import WebHookListener, { HookCall } from './WebHookListener';
 
 const HOOK_SECRET_LENGTH = 48;
 
@@ -18,11 +19,15 @@ export default class WebHookService {
 
   webhookRepository: WebhookRepository;
 
+  webhookListener: WebHookListener;
+
   public constructor(bridge: MatrixBridge, database: Database) {
     this.bridge = bridge;
     this.commandHandler.onCommand.observe(this.handleCommand.bind(this));
     this.database = database;
     this.webhookRepository = new WebhookRepository(this.database);
+    this.webhookListener = new WebHookListener(this.webhookRepository);
+    this.webhookListener.onHookCalled.observe(this.handleHookCall.bind(this));
   }
 
   private async handleCommand(command: Command) {
@@ -39,6 +44,10 @@ export default class WebHookService {
       default:
         break;
     }
+  }
+
+  private async handleHookCall(call: HookCall) {
+    this.bridge.sendMessage(call.webhook.room_id, call.content.text);
   }
 
   private async createWebHook(command: CreateWebhookCommand, context: Command) {
@@ -65,7 +74,7 @@ export default class WebHookService {
   }
 
   private async listWebHook(command: ListWebhookCommand, context: Command) {
-    const hooks = await this.webhookRepository.find(context.message.event.room_id);
+    const hooks = await this.webhookRepository.findByRoom(context.message.event.room_id);
     if (hooks.length === 0) {
       context.reply('No hooks active in this room.');
       return;
@@ -88,5 +97,7 @@ export default class WebHookService {
       }
       return true;
     }));
+
+    this.webhookListener.start();
   }
 }

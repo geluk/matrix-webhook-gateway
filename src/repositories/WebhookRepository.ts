@@ -20,8 +20,14 @@ export default class WebhookRepository {
       .delete();
   }
 
-  public async find(room_id: string): Promise<WebHook[]> {
+  public async findByRoom(room_id: string): Promise<WebHook[]> {
     return this.database.knex<WebHook>('webhook')
       .where('room_id', '=', room_id);
+  }
+
+  public async getByPath(path: string): Promise<WebHook | undefined> {
+    return this.database.knex<WebHook>('webhook')
+      .where('path', '=', path.toLowerCase())
+      .first();
   }
 }
