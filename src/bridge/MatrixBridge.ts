@@ -38,6 +38,13 @@ export default class MatrixBridge {
     });
   }
 
+  public async sendMessage(target: string, message: string): Promise<unknown> {
+    return this.bridge.getIntent().sendMessage(target, {
+      body: message,
+      msgtype: 'm.text',
+    });
+  }
+
   public registerHandler(eventHandler: MatrixEventHandler): void {
     this.eventHandlers.push(eventHandler);
   }
