@@ -19,3 +19,11 @@ Start the app service:
 npm ci
 npm run start
 ```
+
+# References
+
+https://github.com/matrix-org/matrix-appservice-bridge
+
+https://github.com/matrix-org/matrix-js-sdk
+
+https://github.com/woutervh-/typescript-is
