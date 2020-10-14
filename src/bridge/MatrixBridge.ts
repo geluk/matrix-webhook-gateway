@@ -4,7 +4,7 @@ import {
 
 import MatrixEventHandler from './MatrixEventHandler';
 import EventContext from './EventContext';
-import logger from './util/logger';
+import logger from '../util/logger';
 
 type RegistrationCallback = (r: AppServiceRegistration) => void;
 

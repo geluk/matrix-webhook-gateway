@@ -1,7 +1,7 @@
 import Command from './Command';
-import Message from './Message';
-import MessageContext from './MessageContext';
-import MessageHandler from './MessageHandler';
+import Message from './bridge/Message';
+import MessageContext from './bridge/MessageContext';
+import MessageHandler from './bridge/MessageHandler';
 
 export default class CommandHandler extends MessageHandler {
   public constructor() {

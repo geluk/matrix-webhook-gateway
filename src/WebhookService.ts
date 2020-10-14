@@ -1,6 +1,6 @@
 import CommandHandler from './CommandHandler';
-import MatrixBridge from './MatrixBridge';
-import MatrixEventHandlers from './MatrixEventHandlers';
+import MatrixBridge from './bridge/MatrixBridge';
+import MatrixEventHandlers from './bridge/MatrixEventHandlers';
 import logger from './util/logger';
 
 export default class WebhookService {

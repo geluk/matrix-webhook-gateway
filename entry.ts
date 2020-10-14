@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-import MatrixBridge from './src/MatrixBridge';
+import MatrixBridge from './src/bridge/MatrixBridge';
 import WebHook from './src/WebHook';
 import User from './src/models/User';
 import WebhookService from './src/WebhookService';
