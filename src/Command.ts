@@ -13,17 +13,36 @@ export default class Command {
     this.context = context;
   }
 
-  public execute(): void {
+  public execute(): ExecuteResult {
     switch (this.command) {
       case 'webhook':
-        this.context.reply('Creating webhook.');
-        break;
+        return this.createWebhook();
       case 'ping':
         this.context.reply('Pong!');
         break;
       default:
         this.context.reply('Unknown command.');
-        break;
     }
+    return null;
+  }
+
+  private createWebhook(): ExecuteResult {
+    if (this.args.length !== 1) {
+      this.context.reply('Usage: -webhook [username]');
+      return null;
+    }
+    return {
+      room_id: this.context.event.room_id,
+      webhook_user_id: this.args[0],
+    };
   }
 }
+
+export type CreateWebhookCommand = {
+  room_id: string,
+  webhook_user_id: string,
+};
+
+type ExecuteResult =
+  | CreateWebhookCommand
+  | null;
