@@ -1,0 +1,28 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches:
+    - master
+    - release/*
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: |
+        major="$(./ci/get-tags.sh --major)"
+        minor="$(./ci/get-tags.sh --minor)"
+        bugfix="$(./ci/get-tags.sh --bugfix)"
+        docker build . --file Dockerfile \
+        --tag webhook-appservice:$major.$minor.$bugfix \
+        --tag webhook-appservice:$major.$minor \
+        --tag webhook-appservice:$major
