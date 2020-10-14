@@ -1,7 +1,7 @@
 import * as Express from 'express';
 import logger from './util/logger';
 
-export default class WebHook {
+export default class WebHookListener {
   app: Express.Express;
 
   public constructor() {

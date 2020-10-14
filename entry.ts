@@ -1,6 +1,6 @@
 import MatrixBridge from './src/bridge/MatrixBridge';
 import Database from './src/repositories/Database';
-import WebHook from './src/WebHook';
+import WebHookListener from './src/WebHookListener';
 import WebHookService from './src/WebHookService';
 
 
@@ -10,5 +10,5 @@ const whs = new WebHookService(
 );
 whs.start();
 
-const webHook = new WebHook();
+const webHook = new WebHookListener();
 webHook.start();
