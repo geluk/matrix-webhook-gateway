@@ -17,8 +17,8 @@ export default class MessageContext extends EventContext {
     return this._message;
   }
 
-  public reply(message: string): void {
-    this.bridge.getIntent().sendMessage(this.event.room_id, {
+  public async reply(message: string): Promise<unknown> {
+    return this.bridge.getIntent().sendMessage(this.event.room_id, {
       body: message,
       msgtype: 'm.text',
     });

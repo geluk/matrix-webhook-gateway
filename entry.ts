@@ -1,30 +1,13 @@
-import * as Knex from 'knex';
-
 import MatrixBridge from './src/bridge/MatrixBridge';
+import Database from './src/repositories/Database';
 import WebHook from './src/WebHook';
-import User from './src/models/User';
-import WebhookService from './src/WebhookService';
+import WebHookService from './src/WebHookService';
 
-import toSnakeCase from './src/util/toSnakeCase';
 
-const config: Knex.Config = {
-  client: 'sqlite3',
-  connection: {
-    filename: 'appservice-db.sqlite',
-  },
-  wrapIdentifier: (value, origImpl) => origImpl(toSnakeCase(value)),
-  useNullAsDefault: true, // Required for SQLite support
-};
-
-const db = Knex.default(config);
-
-const fn = async () => {
-  await db.select().from<User>('user');
-};
-
-fn();
-
-const whs = new WebhookService(new MatrixBridge());
+const whs = new WebHookService(
+  new MatrixBridge(),
+  new Database(),
+);
 whs.start();
 
 const webHook = new WebHook();
