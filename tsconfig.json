@@ -2,5 +2,7 @@
     "extends": "@tsconfig/node12/tsconfig.json",
     "compilerOptions": {
         "target": "ES2020",
+        // Allows line number references from logging code.
+        "sourceMap": true,
     },
 }

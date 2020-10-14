@@ -3,6 +3,7 @@ import {
 } from 'matrix-appservice-bridge';
 import MatrixEventHandler from './MatrixEventHandler';
 import EventContext from './EventContext';
+import logger from './util/logger';
 
 type RegistrationCallback = (r: AppServiceRegistration) => void;
 
@@ -30,7 +31,6 @@ export default class MatrixBridge {
       generateRegistration: this.generateRegistration,
       run: this.onStart.bind(this),
     });
-    console.log('Bridge ready');
   }
 
   public registerHandler(eventHandler: MatrixEventHandler): void {
@@ -42,20 +42,20 @@ export default class MatrixBridge {
   }
 
   private onStart(port: number, config: Record<string, unknown> | null) {
-    console.log(`Ready on port ${port}`);
+    logger.info(`Matrix bridge running on port ${port}`);
     this.bridge.run(8023, config);
   }
 
   private handleUserQuery(user: MatrixUser): Record<string, unknown> {
-    console.log(`User provision requested: ${user.localpart}:${user.host}`);
+    logger.info(`User provision requested: ${user.localpart}:${user.host}`);
     return {};
   }
 
   private handleLog(text: string, isError: boolean) {
     if (isError) {
-      console.log(`[appservice] ${text}`);
+      logger.error(`[appservice] ${text}`);
     } else {
-      console.error(`[appservice] ${text}`);
+      logger.debug(`[appservice] ${text}`);
     }
   }
 
@@ -74,7 +74,7 @@ export default class MatrixBridge {
     const handled = this.eventHandlers.some((h) => h.handleEvent(context));
 
     if (!handled) {
-      console.log(`Event ignored: ${event.type}`);
+      logger.info(`Event ignored: ${event.type}`);
     }
   }
 }
