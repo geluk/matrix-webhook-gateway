@@ -12,4 +12,16 @@ export default class WebhookRepository {
   public async add(entity: WebHook): Promise<number> {
     return this.database.knex('webhook').insert(entity);
   }
+
+  public async deleteFromRoom(webhook_id: number, room_id: string): Promise<boolean> {
+    return this.database.knex<WebHook>('webhook')
+      .where('id', '=', webhook_id)
+      .andWhere('room_id', '=', room_id)
+      .delete();
+  }
+
+  public async find(room_id: string): Promise<WebHook[]> {
+    return this.database.knex<WebHook>('webhook')
+      .where('room_id', '=', room_id);
+  }
 }

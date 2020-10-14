@@ -11,6 +11,8 @@ export async function up(knex: Knex): Promise<void> {
       table.string('path')
         .notNullable()
         .unique();
+      table.string('room_id')
+        .notNullable();
       table.string('user_id')
         .references('id')
         .inTable('user')

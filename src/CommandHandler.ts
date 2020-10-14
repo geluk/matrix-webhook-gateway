@@ -1,11 +1,11 @@
-import Command, { CreateWebhookCommand } from './Command';
+import Command from './Command';
 import Message from './bridge/Message';
 import MessageContext from './bridge/MessageContext';
 import MessageHandler from './bridge/MessageHandler';
 import Observable from './util/Observable';
 
 export default class CommandHandler extends MessageHandler {
-  onCreateWebhook = new Observable<CreateWebhookCommand>();
+  onCommand = new Observable<Command>();
 
   public constructor() {
     super();
@@ -18,10 +18,9 @@ export default class CommandHandler extends MessageHandler {
     const message = context.event.content as unknown as Message;
 
     if (message.body.match(/^-[A-z]/)) {
-      const result = new Command(message.body.substr(1), context).execute();
-      if (result) {
-        this.onCreateWebhook.notify(result);
-      }
+      const command = new Command(message.body.substr(1), context);
+      command.execute();
+      this.onCommand.notify(command);
     }
     return true;
   }
