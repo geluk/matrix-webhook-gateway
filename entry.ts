@@ -29,3 +29,4 @@ const whs = new WebhookService(new MatrixBridge());
 whs.start();
 
 const webHook = new WebHook();
+webHook.start();

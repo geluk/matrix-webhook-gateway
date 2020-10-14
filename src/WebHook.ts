@@ -2,29 +2,34 @@ import * as Express from 'express';
 import logger from './util/logger';
 
 export default class WebHook {
+  app: Express.Express;
+
   public constructor() {
-    const app = Express.default();
+    this.app = Express.default();
 
-    app.get('*', (rq, rs) => {
+    this.app.get('*', (rq, rs) => {
       logger.debug(`${rq.method} ${rq.url}`);
       logger.trace(rq.body);
       rs.contentType('application/json').send('{}');
     });
 
-    app.post('*', (rq, rs) => {
+    this.app.post('*', (rq, rs) => {
       logger.debug(`${rq.method} ${rq.url}`);
       logger.trace(rq.body);
       rs.contentType('application/json').send('{}');
     });
 
-    app.put('*', (rq, rs) => {
+    this.app.put('*', (rq, rs) => {
       logger.debug(`${rq.method} ${rq.url}`);
       logger.trace(rq.body);
       rs.contentType('application/json').send('{}');
     });
+  }
 
-    app.listen(8020, () => {
-      logger.info('Web server ready.');
+  public start(): void {
+    const port = 8020;
+    this.app.listen(port, () => {
+      logger.info(`Web server running on port ${port}.`);
     });
   }
 }
