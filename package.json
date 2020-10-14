@@ -2,6 +2,7 @@
   "name": "webhook-appservice",
   "version": "0.0.0",
   "description": "Matrix.org webhook appservice",
+  "private": true,
   "scripts": {
     "start": "ts-node entry.ts",
     "lint": "npx eslint . --ext .ts || exit 0",
