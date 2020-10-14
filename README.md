@@ -1,4 +1,4 @@
-# Setup
+# Development setup
 
 Run `start-matrix.sh` in `./synapse-dev` to set up a local appservice 
 development environment with Docker. This will start up a Synapse and an Element
