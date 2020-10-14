@@ -1,5 +1,6 @@
 import MatrixEventHandler from './MatrixEventHandler';
-import MessageContext, { EventContext } from './MessageContext';
+import EventContext from './EventContext';
+import MessageContext from './MessageContext';
 
 export default abstract class MessageHandler implements MatrixEventHandler {
   abstract handleMessage(context: MessageContext): boolean;

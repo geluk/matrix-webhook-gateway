@@ -1,6 +1,6 @@
-import { CommandHandler } from './CommandHandler';
+import CommandHandler from './CommandHandler';
 import MatrixBridge from './MatrixBridge';
-import { MatrixEventHandlers } from './MatrixEventHandler';
+import MatrixEventHandlers from './MatrixEventHandlers';
 
 export default class WebhookService {
   bridge: MatrixBridge;
@@ -11,7 +11,7 @@ export default class WebhookService {
     this.bridge = bridge;
   }
 
-  public start() {
+  public start(): void {
     this.bridge.start();
 
     this.bridge.registerHandler(this.commandHandler);

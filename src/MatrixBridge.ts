@@ -1,8 +1,10 @@
 import {
-  Cli, Bridge, AppServiceRegistration, MatrixUser, WeakEvent, Request, BridgeContext,
+  Cli, Bridge, AppServiceRegistration, MatrixUser, WeakEvent, Request,
 } from 'matrix-appservice-bridge';
 import MatrixEventHandler from './MatrixEventHandler';
-import { EventContext } from './MessageContext';
+import EventContext from './EventContext';
+
+type RegistrationCallback = (r: AppServiceRegistration) => void;
 
 export default class MatrixBridge {
   private bridge: Bridge;
@@ -31,11 +33,11 @@ export default class MatrixBridge {
     console.log('Bridge ready');
   }
 
-  public registerHandler(eventHandler: MatrixEventHandler) {
+  public registerHandler(eventHandler: MatrixEventHandler): void {
     this.eventHandlers.push(eventHandler);
   }
 
-  public start() {
+  public start(): void {
     this.cli.run();
   }
 
@@ -57,7 +59,7 @@ export default class MatrixBridge {
     }
   }
 
-  private generateRegistration(reg: AppServiceRegistration, callback: (f: AppServiceRegistration) => void) {
+  private generateRegistration(reg: AppServiceRegistration, callback: RegistrationCallback) {
     reg.setId(AppServiceRegistration.generateToken());
     reg.setHomeserverToken(AppServiceRegistration.generateToken());
     reg.setAppServiceToken(AppServiceRegistration.generateToken());
@@ -66,11 +68,10 @@ export default class MatrixBridge {
     callback(reg);
   }
 
-  private handleEvent(request: Request<WeakEvent>, _: any) {
+  private handleEvent(request: Request<WeakEvent>) {
     const event = request.getData();
     const context = new EventContext(event, this.bridge);
-    let handled = false;
-    this.eventHandlers.forEach((h) => handled = h.handleEvent(context));
+    const handled = this.eventHandlers.some((h) => h.handleEvent(context));
 
     if (!handled) {
       console.log(`Event ignored: ${event.type}`);

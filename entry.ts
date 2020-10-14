@@ -1,5 +1,5 @@
-import Knex = require('knex');
-import MatrixBridge from './src/MatrixBridge'
+import * as Knex from 'knex';
+import MatrixBridge from './src/MatrixBridge';
 import WebHook from './src/WebHook';
 
 import User from './src/models/User';
@@ -14,11 +14,11 @@ const config: Knex.Config = {
   connection: {
     filename: 'appservice-db.sqlite',
   },
-  wrapIdentifier: (value, origImpl, _) => origImpl(toSnakeCase(value)),
+  wrapIdentifier: (value, origImpl) => origImpl(toSnakeCase(value)),
   useNullAsDefault: true, // Required for SQLite support
 };
 
-const db = Knex(config);
+const db = Knex.default(config);
 
 const fn = async () => {
   const u = await db.select().from<User>('user');

@@ -1,24 +1,6 @@
 import { Bridge, WeakEvent } from 'matrix-appservice-bridge';
 import Message from './Message';
-
-export class EventContext {
-  private _event: WeakEvent;
-
-  private _bridge: Bridge;
-
-  public constructor(event: WeakEvent, bridge: Bridge) {
-    this._event = event;
-    this._bridge = bridge;
-  }
-
-  get event(): WeakEvent {
-    return this._event;
-  }
-
-  get bridge(): Bridge {
-    return this._bridge;
-  }
-}
+import EventContext from './EventContext';
 
 export default class MessageContext extends EventContext {
   private _message: Message;
@@ -35,7 +17,7 @@ export default class MessageContext extends EventContext {
     return this._message;
   }
 
-  public reply(message: string) {
+  public reply(message: string): void {
     this.bridge.getIntent().sendMessage(this.event.room_id, {
       body: message,
       msgtype: 'm.text',
