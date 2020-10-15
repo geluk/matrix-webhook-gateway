@@ -1,0 +1,4 @@
+app_service:
+  as_token: test
+  hs_token: hello
+  url: 13

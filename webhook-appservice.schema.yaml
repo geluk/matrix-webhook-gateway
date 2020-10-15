@@ -1,0 +1,22 @@
+"$schema": "http://json-schema.org/draft-04/schema#"
+type: object
+properties:
+  app_service:
+    type: object
+    properties:
+      hs_token:
+        type: string
+      as_token:
+        type: string
+      id:
+        type: string
+      user_namespace_regex:
+        type: string
+      sender_localpart:
+        type: string
+      rate_limited:
+        type: boolean
+      url:
+        type: string
+    required: [ hs_token, as_token, url ]
+required: [ app_service ]
