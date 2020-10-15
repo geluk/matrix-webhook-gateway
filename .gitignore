@@ -2,4 +2,5 @@
 
 /synapse-dev/synapse-data/homeserver.db
 
-appservice-db.sqlite
+/appservice-db.sqlite
+/webhook-appservice.yaml
