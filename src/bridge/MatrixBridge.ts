@@ -23,7 +23,7 @@ export default class MatrixBridge {
     this.bridge = new Bridge({
       homeserverUrl: 'http://127.0.0.1:8008',
       domain: 'matrix.local',
-      registration: 'registration.yaml',
+      registration: 'appservice.yaml',
       disableStores: true,
       controller: {
         onUserQuery: this.handleUserQuery.bind(this),
