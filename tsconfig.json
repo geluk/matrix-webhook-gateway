@@ -5,5 +5,8 @@
         // Allows line number references from logging code.
         "sourceMap": true,
         "strictNullChecks": true,
+        "plugins": [
+            { "transform": "typescript-is/lib/transform-inline/transformer" },
+        ]
     },
 }
