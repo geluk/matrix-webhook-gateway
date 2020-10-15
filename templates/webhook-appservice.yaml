@@ -9,7 +9,7 @@ app_service:
   # The ID of this application service. Must be unique on your homeserver.
   id: webhook-appservice
   # Tokens used to facilitate communication between the appservice and the
-  # homeserver. Keep these secret!
+  # homeserver. Keep these secret! Randomly generated on first startup.
   hs_token: {{ hs_token }}
   as_token: {{ as_token }}
   # All webhook users IDs will be namespaced to this regex.

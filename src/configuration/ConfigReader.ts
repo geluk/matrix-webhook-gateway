@@ -1,12 +1,24 @@
 import YAML from 'js-yaml';
 import fs from 'fs';
 import validator from 'is-my-json-valid';
+import Mustache from 'mustache';
 
 import logger from '../util/logger';
 import Configuration from './Configuration';
+import randomString from '../util/randomString';
+
+const TEMPLATES_DIR = './templates';
+const CONFIG_TEMPLATE = `${TEMPLATES_DIR}/webhook-appservice.yaml`;
+const CONFIG_SCHEMA = `${TEMPLATES_DIR}/webhook-appservice.schema.yaml`;
 
 export default class ConfigReader {
   public static readConfig(path: string): Configuration | undefined {
+    if (!fs.existsSync(path)) {
+      if (!this.generateConfig(path)) {
+        logger.error('Could not generate configuration file');
+        return undefined;
+      }
+    }
     logger.debug(`Loading configuration file: '${path}'`);
     let rawYaml: string;
     try {
@@ -16,7 +28,7 @@ export default class ConfigReader {
       logger.error(error.message);
       return undefined;
     }
-    // eslint-disable-next-line @typescript-eslint/ban-types
+
     let config: string | undefined | Record<string, unknown>;
     try {
       config = YAML.safeLoad(rawYaml) as string | undefined | Record<string, unknown>;
@@ -42,8 +54,37 @@ export default class ConfigReader {
     }
   }
 
+  private static generateConfig(path: string): boolean {
+    logger.info(`Configuration file '${path}' not found, it will now be generated.`);
+    let configTemplate: string;
+    try {
+      configTemplate = fs.readFileSync(CONFIG_TEMPLATE, 'utf8');
+    } catch (error) {
+      logger.error('Could not read configuration file template');
+      logger.error(error.message);
+      return false;
+    }
+    const view = {
+      hs_token: randomString(32),
+      as_token: randomString(32),
+    };
+
+    const config = Mustache.render(configTemplate, view);
+    try {
+      fs.writeFileSync(path, config);
+    } catch (error) {
+      logger.error(`Could not write generated configuration file to '${config}'`);
+      logger.error(error.message);
+      return false;
+    }
+
+    // We won't render this template again, so no need to cache it.
+    Mustache.templateCache?.clear();
+    return true;
+  }
+
   private static validateConfig(config: Record<string, unknown>): Configuration | undefined {
-    const schema = YAML.safeLoad(fs.readFileSync('webhook-appservice.schema.yaml', 'utf8'));
+    const schema = YAML.safeLoad(fs.readFileSync(CONFIG_SCHEMA, 'utf8'));
     if (typeof schema !== 'object') {
       logger.error('Could not read configuration schema');
       return undefined;

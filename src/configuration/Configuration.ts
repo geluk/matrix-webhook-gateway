@@ -18,6 +18,6 @@ export default class Configuration {
   public constructor(config: any) {
     this.app_service = new AppServiceConfiguration(config.app_service);
     this.database = new DatabaseConfiguration(config.database);
-    this.webhooks = new WebhooksConfiguration(config.webhook);
+    this.webhooks = new WebhooksConfiguration(config.webhooks);
   }
 }
