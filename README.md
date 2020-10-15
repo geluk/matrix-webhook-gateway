@@ -1,3 +1,8 @@
+# Installation
+
+The recommended way to run the application service is using Docker.
+Alternatively, it is possible to install a release directly.
+
 # Development setup
 
 Run `start-matrix.sh` in `./synapse-dev` to set up a local appservice 
