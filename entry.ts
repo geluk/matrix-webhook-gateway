@@ -20,5 +20,6 @@ if (typeof config === 'undefined') {
 const whs = new WebHookService(
   new MatrixBridge(),
   new Database(),
+  config,
 );
 whs.start();

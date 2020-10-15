@@ -7,6 +7,7 @@ import WebhookRepository from './repositories/WebhookRepository';
 import Command, { CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand } from './Command';
 import randomString from './util/randomString';
 import WebHookListener, { HookCall } from './WebHookListener';
+import Configuration from './configuration/Configuration';
 
 const HOOK_SECRET_LENGTH = 48;
 
@@ -21,13 +22,16 @@ export default class WebHookService {
 
   webhookListener: WebHookListener;
 
-  public constructor(bridge: MatrixBridge, database: Database) {
+  config: Configuration;
+
+  public constructor(bridge: MatrixBridge, database: Database, config: Configuration) {
     this.bridge = bridge;
     this.commandHandler.onCommand.observe(this.handleCommand.bind(this));
     this.database = database;
     this.webhookRepository = new WebhookRepository(this.database);
     this.webhookListener = new WebHookListener(this.webhookRepository);
     this.webhookListener.onHookCalled.observe(this.handleHookCall.bind(this));
+    this.config = config;
   }
 
   private async handleCommand(command: Command) {
