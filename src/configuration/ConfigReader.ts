@@ -7,6 +7,7 @@ import Configuration from './Configuration';
 
 export default class ConfigReader {
   public static readConfig(path: string): Configuration | undefined {
+    logger.debug(`Loading configuration file: '${path}'`);
     let rawYaml: string;
     try {
       rawYaml = fs.readFileSync(path, 'utf8');
@@ -24,8 +25,12 @@ export default class ConfigReader {
       logger.error(error.message);
       return undefined;
     }
+    if (config === null) {
+      logger.error('Config file is empty');
+      return undefined;
+    }
     if (!config || typeof config === 'string') {
-      logger.error('Config file is invalid.');
+      logger.error('Config file is invalid');
       return undefined;
     }
     try {
@@ -40,7 +45,7 @@ export default class ConfigReader {
   private static validateConfig(config: Record<string, unknown>): Configuration | undefined {
     const schema = YAML.safeLoad(fs.readFileSync('webhook-appservice.schema.yaml', 'utf8'));
     if (typeof schema !== 'object') {
-      logger.error('Could not read configuration schema.');
+      logger.error('Could not read configuration schema');
       return undefined;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,7 +55,8 @@ export default class ConfigReader {
     const res = val(config, schema);
     if (!res) {
       val.errors.forEach((error) => {
-        logger.error(`The field ${error.field} is ${error.message}`);
+        const field = error.field.substr('data.'.length);
+        logger.error(`The field ${field} is ${error.message}`);
         logger.silly('Error value: ', error);
       });
       return undefined;
