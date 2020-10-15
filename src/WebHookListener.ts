@@ -71,10 +71,10 @@ export default class WebHookListener {
 }
 
 export interface HookCall {
-  webhook: WebHook,
-  content: SlackWebhook,
+  webhook: WebHook;
+  content: SlackWebhook;
 }
 
 interface SlackWebhook {
-  text: string,
+  text: string;
 }
