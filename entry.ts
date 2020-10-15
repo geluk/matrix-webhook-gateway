@@ -11,7 +11,7 @@ MatrixLogger.default.configure({
   maxFiles: 1,
 });
 
-const config = ConfigReader.readConfig('webhook-appservice.yaml');
+const config = ConfigReader.loadConfig('webhook-appservice.yaml');
 if (typeof config === 'undefined') {
   logger.fatal('Could not load configuration file, application will now exit');
   process.exit(1);

@@ -8,17 +8,46 @@ import Configuration from './Configuration';
 import randomString from '../util/randomString';
 
 const TEMPLATES_DIR = './templates';
+const APPSERVICE_TEMPLATE = `${TEMPLATES_DIR}/appservice.yaml`;
 const CONFIG_TEMPLATE = `${TEMPLATES_DIR}/webhook-appservice.yaml`;
 const CONFIG_SCHEMA = `${TEMPLATES_DIR}/webhook-appservice.schema.yaml`;
+const APPSERVICE_OUTPUT = './appservice.yaml';
+
+// Required to prevent Mustache from HTML-escaping template values.
+Mustache.escape = (text) => text;
 
 export default class ConfigReader {
-  public static readConfig(path: string): Configuration | undefined {
+  public static loadConfig(path: string): Configuration | undefined {
     if (!fs.existsSync(path)) {
       if (!this.generateConfig(path)) {
         logger.error('Could not generate configuration file');
         return undefined;
       }
     }
+
+    const config = this.readConfig(path);
+    if (config === undefined) {
+      return undefined;
+    }
+
+    let validatedConfig: Configuration;
+    try {
+      const validationResult = this.validateConfig(config);
+      if (!validationResult) {
+        return undefined;
+      }
+      validatedConfig = validationResult;
+    } catch (error) {
+      logger.error('Could not validate configuration file');
+      logger.error(error.message);
+      return undefined;
+    }
+
+    this.generateAppServiceConfig(validatedConfig);
+    return validatedConfig;
+  }
+
+  private static readConfig(path: string): Record<string, unknown> | undefined {
     logger.debug(`Loading configuration file: '${path}'`);
     let rawYaml: string;
     try {
@@ -45,13 +74,7 @@ export default class ConfigReader {
       logger.error('Config file is invalid');
       return undefined;
     }
-    try {
-      return this.validateConfig(config);
-    } catch (error) {
-      logger.error('Could not validate configuration file');
-      logger.error(error.message);
-      return undefined;
-    }
+    return config;
   }
 
   private static generateConfig(path: string): boolean {
@@ -103,5 +126,27 @@ export default class ConfigReader {
       return undefined;
     }
     return new Configuration(config);
+  }
+
+  private static generateAppServiceConfig(config: Configuration): void {
+    logger.debug('Generating appservice.yaml');
+
+    let appserviceTemplate: string;
+    try {
+      appserviceTemplate = fs.readFileSync(APPSERVICE_TEMPLATE, 'utf8');
+    } catch (error) {
+      logger.error('Could not read appservice template');
+      logger.error(error.message);
+      return;
+    }
+
+    const rendered = Mustache.render(appserviceTemplate, config);
+
+    try {
+      fs.writeFileSync(APPSERVICE_OUTPUT, rendered);
+    } catch (error) {
+      logger.error(`Could not write generated appservice configuration to '${APPSERVICE_OUTPUT}'`);
+      logger.error(error.message);
+    }
   }
 }
