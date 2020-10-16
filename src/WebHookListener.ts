@@ -1,21 +1,23 @@
 import * as Express from 'express';
 import { Request, Response, NextFunction } from 'express';
+import WebhooksConfiguration from './configuration/WebhooksConfiguration';
 import WebHook from './models/WebHook';
 import WebhookRepository from './repositories/WebhookRepository';
 import logger from './util/logger';
 import Observable from './util/Observable';
-
-const WEBHOOK_PORT = 8020;
 
 export default class WebHookListener {
   app: Express.Express;
 
   webhookRepository: WebhookRepository;
 
+  config: WebhooksConfiguration;
+
   onHookCalled = new Observable<HookCall>();
 
-  public constructor(webhookRepository: WebhookRepository) {
+  public constructor(webhookRepository: WebhookRepository, config: WebhooksConfiguration) {
     this.webhookRepository = webhookRepository;
+    this.config = config;
 
     this.app = Express.default();
     this.app.use(Express.json());
@@ -45,9 +47,8 @@ export default class WebHookListener {
   }
 
   public start(): void {
-    const port = WEBHOOK_PORT;
-    this.app.listen(port, () => {
-      logger.info(`Web server running on port ${port}`);
+    this.app.listen(this.config.listen_port, this.config.listen_host, () => {
+      logger.info(`Web server running on ${this.config.listen_host}:${this.config.listen_port}`);
     });
   }
 

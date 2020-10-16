@@ -11,12 +11,12 @@ const bridgeLog = logger.getChildLogger({
   name: 'bridge',
 });
 
-const BRIDGE_PORT = 8023;
-
 export default class MatrixBridge {
   private bridge: Bridge;
 
   private eventHandlers: MatrixEventHandler[] = [];
+
+  private config: AppServiceConfiguration;
 
   public constructor(config: AppServiceConfiguration) {
     this.bridge = new Bridge({
@@ -34,6 +34,7 @@ export default class MatrixBridge {
         // }
       },
     });
+    this.config = config;
   }
 
   public async sendMessage(target: string, message: string): Promise<unknown> {
@@ -48,8 +49,8 @@ export default class MatrixBridge {
   }
 
   public start(): void {
-    this.bridge.run(BRIDGE_PORT, null);
-    logger.info(`Matrix bridge running on port ${BRIDGE_PORT}`);
+    this.bridge.run(this.config.listen_port, undefined, undefined, this.config.listen_host);
+    logger.info(`Matrix bridge running on ${this.config.listen_host}:${this.config.listen_port}`);
   }
 
   private handleUserQuery(user: MatrixUser): Record<string, unknown> {

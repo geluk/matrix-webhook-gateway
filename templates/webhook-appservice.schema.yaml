@@ -26,6 +26,11 @@ properties:
         minLength: 1
       homeserver_url:
         type: string
+      listen_host:
+        type: string
+      listen_port:
+        type: integer
+        minimum: 1
     required: [ hs_token, as_token, homeserver_name, app_service_url ]
   database:
     type: object

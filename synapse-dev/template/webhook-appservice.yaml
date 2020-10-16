@@ -21,16 +21,19 @@ app_service:
   # The name of your homeserver. This should match the value of the server_name
   # configuration key in Synapse's homeserver.yaml file.
   homeserver_name: matrix.local
-  # URL used by the homeserver to access the application service.
-  app_service_url: http://127.0.0.1:8020
-  # URL used by the application service to access the homeserver.
+  # URL used by the homeserver to communicate with the application service.
+  app_service_url: http://127.0.0.1:8023
+  # URL used by the application service to communicate with the homeserver.
   homeserver_url: http://127.0.0.1:8008
+  # Address and port used to listen for incoming events from the homeserver.
+  listen_host: '0.0.0.0'
+  listen_port: 8023
 
 # Configuration for the webhook service.
 webhooks:
   # Address and port used to listen for incoming webhooks.
   listen_host: '0.0.0.0'
-  listen_port: 8023
+  listen_port: 8020
 
 # Configures the database where the webhook details are stored.
 database:

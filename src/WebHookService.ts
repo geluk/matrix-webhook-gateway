@@ -29,7 +29,7 @@ export default class WebHookService {
     this.commandHandler.onCommand.observe(this.handleCommand.bind(this));
     this.database = database;
     this.webhookRepository = new WebhookRepository(this.database);
-    this.webhookListener = new WebHookListener(this.webhookRepository);
+    this.webhookListener = new WebHookListener(this.webhookRepository, config.webhooks);
     this.webhookListener.onHookCalled.observe(this.handleHookCall.bind(this));
     this.config = config;
   }
