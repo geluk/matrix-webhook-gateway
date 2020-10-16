@@ -1,0 +1,29 @@
+version: 2.1
+orbs:
+  node: circleci/node@4.1.0
+jobs:
+  build:
+    executor: node/default
+    steps:
+    - checkout
+    - node/install-packages
+    - run:
+        name: Run linter
+        command: npm run lint
+    - run:
+        name: Build project
+        command: npm run build
+    - run:
+        name: Package project
+        command: npm run package
+    - run:
+        name: Compress artifacts
+        command: tar -czf webhook-appservice.tar.gz ./webhook-appservice
+        working_directory: ./out
+    - store_artifacts:
+        path: ./out/webhook-appservice.tar.gz
+        destination: webhook-appservice.tar.gz
+workflows:
+  node-tests:
+    jobs:
+    - build
