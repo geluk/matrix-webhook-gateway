@@ -5,7 +5,7 @@ module.exports = {
   development: {
     client: 'sqlite3',
     connection: {
-      filename: 'appservice-db.sqlite',
+      filename: 'webhook-db.sqlite',
     },
     useNullAsDefault: true,
   },
