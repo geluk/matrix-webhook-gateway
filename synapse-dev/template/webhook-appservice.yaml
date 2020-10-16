@@ -1,0 +1,46 @@
+# Modify this file to configure the webhook-appservice.
+
+# Homeserver appservice configuration.
+# These settings will be used to generate an appservice.yaml file,
+# which should be moved to a place where it's accessible from Synapse,
+# and added to the app_service_config_files configuration field in your 
+# homeserver.yaml file.
+app_service:
+  # The ID of this application service. Must be unique on your homeserver.
+  id: webhook-dev
+  # Tokens used to facilitate communication between the appservice and the
+  # homeserver. Keep these secret! Randomly generated on first startup.
+  hs_token: 'LOCAL_DEV_hs_JWCcAqU5TmTX94nj3hlw'
+  as_token: 'LOCAL_DEV_as_eRUxytaEISYK47kgBjGo'
+  # All webhook users IDs will be namespaced to this regex.
+  user_namespace_regex: '@_hook_.*'
+  # The user ID of the webhook configuration bot.
+  sender_localpart: webhook
+  # Should server rate limits be enforced on the application service?
+  rate_limited: true
+  # The name of your homeserver. This should match the value of the server_name
+  # configuration key in Synapse's homeserver.yaml file.
+  homeserver_name: matrix.local
+  # URL used by the homeserver to access the application service.
+  app_service_url: http://127.0.0.1:8020
+  # URL used by the application service to access the homeserver.
+  homeserver_url: http://127.0.0.1:8008
+
+# Configuration for the webhook service.
+webhooks:
+  # Address and port used to listen for incoming webhooks.
+  listen_host: '0.0.0.0'
+  listen_port: 8023
+
+# Configures the database where the webhook details are stored.
+database:
+  # The database driver to use. Should be one of the following:
+  # pg, mysql, sqlite3, oracledb, mssql
+  driver: sqlite3
+  connection:
+    filename: webhook-db.sqlite
+    # Uncomment these when using a non-SQLite database.
+    # host:
+    # user:
+    # password:
+    # database:
