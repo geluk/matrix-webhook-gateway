@@ -9,3 +9,6 @@
 /webhook-db.sqlite
 /webhook-appservice.yaml
 /appservice.yaml
+
+# Editor settings
+.vscode
