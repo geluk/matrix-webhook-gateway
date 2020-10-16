@@ -22,7 +22,7 @@ export default class WebHookListener {
     this.app = Express.default();
     this.app.use(Express.json());
 
-    this.app.get('*', async (rq, rs) => {
+    this.app.get('/hook/*', async (rq, rs) => {
       logger.debug(`${rq.method} ${rq.url}`);
       if (!this.match(rq)) {
         rs.status(404).send('Not Found');
@@ -31,7 +31,7 @@ export default class WebHookListener {
       }
     });
 
-    this.app.post('*', async (rq, rs) => {
+    this.app.post('/hook/*', async (rq, rs) => {
       logger.debug(`${rq.method} ${rq.url}`);
       if (!await this.match(rq)) {
         rs.status(404).send('Not Found');
@@ -55,6 +55,7 @@ export default class WebHookListener {
   private async match(rq: Request): Promise<boolean> {
     const hook = await this.webhookRepository.getByPath(rq.path);
     if (!hook) {
+      logger.debug('Webhook not found.');
       return false;
     }
     if (!('text' in rq.body)) {
