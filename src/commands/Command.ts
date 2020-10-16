@@ -11,7 +11,7 @@ export default class Command {
 
   public constructor(command: string, context: MessageContext) {
     this.args = command.split(' ');
-    this.command = this.args.shift()!.toLowerCase();
+    this.command = this.args.shift()?.toLowerCase() ?? '';
     this._message = context;
   }
 
