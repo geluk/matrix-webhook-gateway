@@ -1,10 +1,10 @@
 # Modify this file to configure the webhook-appservice.
+
+# Homeserver appservice configuration.
 # These settings will be used to generate an appservice.yaml file,
 # which should be moved to a place where it's accessible from Synapse,
 # and added to the app_service_config_files configuration field in your 
 # homeserver.yaml file.
-
-# Matrix appservice configuration.
 app_service:
   # The ID of this application service. Must be unique on your homeserver.
   id: webhook-appservice
@@ -18,10 +18,17 @@ app_service:
   sender_localpart: webhook
   # Should server rate limits be enforced on the application service?
   rate_limited: true
-  # The URL through which Synapse accesses the application service.
+  # URL used by the homeserver to access the application service.
   url: http://127.0.0.1:8020
 
-# The database to use for storing webhook details.
+# Configuration for the webhook service.
+webhooks:
+  # Address and port used to listen for incoming webhooks.
+  webhook_url: http://0.0.0.0:8023
+  # URL used by the application service to access the homeserver.
+  homeserver_url: http://127.0.0.1:8008
+
+# Configures the database where the webhook details are stored.
 database:
   # The database driver to use. Should be one of the following:
   # pg, mysql, sqlite3, oracledb, mssql
@@ -33,8 +40,3 @@ database:
     # user:
     # password:
     # database:
-
-# Configuration for the webhook service.
-webhooks:
-  # Address and port on which the webhook service should listen.
-  url: http://0.0.0.0:8023
