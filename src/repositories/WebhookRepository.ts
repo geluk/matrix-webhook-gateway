@@ -35,7 +35,7 @@ export default class WebhookRepository {
   }
 
   public async count(): Promise<number> {
-    logger.debug('Counting total number of webhook');
+    logger.debug('Counting total number of webhooks');
     return this.database.knex<WebHook>('webhook')
       .count();
   }
