@@ -29,6 +29,9 @@ export default class Command {
 
   public execute(): void {
     switch (this.command) {
+      case 'help':
+        this._message.reply('Valid commands: help|hook|ping');
+        break;
       case 'hook':
         this.handleWebHook();
         break;
