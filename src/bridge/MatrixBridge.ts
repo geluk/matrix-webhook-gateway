@@ -81,7 +81,7 @@ export default class MatrixBridge {
 
   private handleLog(text: string, isError: boolean) {
     if (isError) {
-      bridgeLog.error(text);
+      bridgeLog.warn(text);
     } else {
       bridgeLog.silly(text);
     }
