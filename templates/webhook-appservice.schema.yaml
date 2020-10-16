@@ -39,6 +39,9 @@ properties:
             type: string
           host:
             type: string
+          port:
+            type: integer
+            minimum: 1
           user:
             type: string
           password:

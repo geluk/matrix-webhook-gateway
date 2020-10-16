@@ -37,10 +37,12 @@ database:
   # The database driver to use. Should be one of the following:
   # pg, mysql, sqlite3, oracledb, mssql
   driver: sqlite3
+  # When using SQLite, only a filename is required. For all other databases,
+  # set the host, port, user, password, and database fields.
   connection:
     filename: webhook-db.sqlite
-    # Uncomment these when using a non-SQLite database.
     # host:
+    # port:
     # user:
     # password:
     # database:

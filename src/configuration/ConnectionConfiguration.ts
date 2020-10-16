@@ -3,6 +3,8 @@ export default class ConnectionConfiguration {
 
   host: string;
 
+  port: number;
+
   user: string;
 
   password: string;
@@ -18,6 +20,7 @@ export default class ConnectionConfiguration {
   public constructor(config: any) {
     this.filename = config.filename ?? 'webhook-db.sqlite';
     this.host = config.host ?? '';
+    this.port = config.port ?? '';
     this.user = config.user ?? '';
     this.password = config.password ?? '';
     this.database = config.database ?? '';
