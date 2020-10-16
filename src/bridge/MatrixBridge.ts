@@ -52,7 +52,9 @@ export default class MatrixBridge {
     if (userId === undefined) {
       return this.bridge.getIntent();
     }
-    return this.bridge.getIntent(`@${userId}:${this.config.homeserver_name}`);
+    const fullId = `${userId}`;
+    logger.debug(`Looking up intent for '${fullId}'`);
+    return this.bridge.getIntentFromLocalpart(fullId);
   }
 
   public registerHandler(eventHandler: MatrixEventHandler): void {

@@ -12,8 +12,8 @@ app_service:
   # homeserver. Keep these secret! Randomly generated on first startup.
   hs_token: {{ hs_token }}
   as_token: {{ as_token }}
-  # All webhook users IDs will be namespaced to this regex.
-  user_namespace_regex: '@_hook_.*'
+  # All webhook user IDs will be generated from this pattern.
+  user_pattern: '@_hook_{name}_{room}'
   # The user ID of the webhook configuration bot.
   sender_localpart: webhook
   # Should server rate limits be enforced on the application service?

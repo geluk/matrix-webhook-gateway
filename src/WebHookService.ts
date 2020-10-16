@@ -8,6 +8,7 @@ import Command, { CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand
 import randomString from './util/randomString';
 import WebHookListener, { HookCall } from './WebHookListener';
 import Configuration from './configuration/Configuration';
+import { generateLocalPart } from './util/matrixUtilities';
 
 const HOOK_SECRET_LENGTH = 48;
 
@@ -62,7 +63,14 @@ export default class WebHookService {
       room_id: context.message.event.room_id,
     };
     await this.webhookRepository.add(webhook);
-    await this.bridge.getIntent(command.webhook_user_id).join(webhook.room_id);
+
+    const userId = generateLocalPart(
+      this.config.app_service.user_pattern,
+      command.webhook_user_id,
+      webhook.room_id,
+    );
+
+    await this.bridge.getIntent(userId).join(webhook.room_id);
     logger.info(context.message.message.msgtype);
     context.reply(`Your webhook for ${command.webhook_user_id} in ${context.message.event.room_id} was created.\n `
       + `URL: ${this.config.webhooks.public_url}${webhook.path}`);
@@ -72,7 +80,7 @@ export default class WebHookService {
     const removed = await this.webhookRepository
       .deleteFromRoom(command.webhook_id, context.message.event.room_id);
     if (removed) {
-      context.reply('Webhook removed.');
+      context.reply('Webhook deleted.');
     } else {
       context.reply(`Webhook #${command.webhook_id} not found in this room.`);
     }

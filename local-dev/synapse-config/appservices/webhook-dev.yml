@@ -4,7 +4,7 @@ as_token: LOCAL_DEV_as_eRUxytaEISYK47kgBjGo
 namespaces:
   users:
     - exclusive: true
-      regex: '@hook_.*'
+      regex: '@_hook_.*'
   aliases: []
   rooms: []
 url: 'http://172.31.0.1:8023'

@@ -12,7 +12,7 @@ properties:
         minLength: 1
       id:
         type: string
-      user_namespace_regex:
+      user_pattern:
         type: string
       sender_localpart:
         type: string

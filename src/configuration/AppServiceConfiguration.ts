@@ -1,5 +1,6 @@
 import { AppServiceRegistration } from 'matrix-appservice-bridge';
 import logger from '../util/logger';
+import { generateLocalPart } from '../util/matrixUtilities';
 
 export default class AppServiceConfiguration {
   id: string;
@@ -8,7 +9,7 @@ export default class AppServiceConfiguration {
 
   as_token: string;
 
-  user_namespace_regex: string;
+  user_pattern: string;
 
   sender_localpart: string;
 
@@ -34,7 +35,7 @@ export default class AppServiceConfiguration {
     this.id = config.id ?? 'matrix-appservice';
     this.hs_token = config.hs_token;
     this.as_token = config.as_token;
-    this.user_namespace_regex = config.user_namespace_regex ?? '_hook_.*';
+    this.user_pattern = config.user_pattern ?? '@_hook_{name}_{room}';
     this.sender_localpart = config.sender_localpart ?? 'webhook';
     this.rate_limited = config.rate_limited ?? true;
     this.homeserver_name = config.homeserver_name;
@@ -42,6 +43,10 @@ export default class AppServiceConfiguration {
     this.homeserver_url = config.homeserver_url ?? 'http://127.0.0.1:8008';
     this.listen_host = config.listen_host ?? '0.0.0.0';
     this.listen_port = config.listen_port ?? 8023;
+  }
+
+  public get user_namespace_regex() {
+    return generateLocalPart(this.user_pattern, '.*', '.*');
   }
 
   public toAppServiceRegistration(): AppServiceRegistration {
