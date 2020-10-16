@@ -69,7 +69,11 @@ export default class WebHookService {
       room_id: context.message.event.room_id,
     };
 
-    await this.bridge.tryJoinRoom(webhook.user_id, webhook.room_id);
+    if (!await this.bridge.tryJoinRoom(webhook.user_id, webhook.room_id)) {
+      context.reply('I am unable to invite a webhook user to this room.\n'
+        + 'Please make sure I am allowed to invite users, then try again.');
+      return;
+    }
 
     await this.webhookRepository.add(webhook);
 
