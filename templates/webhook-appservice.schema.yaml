@@ -53,7 +53,7 @@ properties:
             type: string
           database:
             type: string
-  webhook:
+  webhooks:
     type: object
     properties:
       listen_host:
@@ -61,4 +61,7 @@ properties:
       listen_port:
         type: integer
         minimum: 1
-required: [ app_service ]
+      public_url:
+        type: string
+    required: [ public_url ]
+required: [ app_service, webhooks ]

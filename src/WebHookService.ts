@@ -64,7 +64,8 @@ export default class WebHookService {
     await this.webhookRepository.add(webhook);
     context.message.bridge.getIntent(webhook.user_id).join(webhook.room_id);
     logger.info(context.message.message.msgtype);
-    context.reply(webhook.path);
+    context.reply(`Your webhook for ${command.webhook_user_id} in ${context.message.event.room_id} was created.\n `
+      + `URL: ${this.config.webhooks.public_url}${webhook.path}`);
   }
 
   private async deleteWebHook(command: DeleteWebhookCommand, context: Command) {
