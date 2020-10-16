@@ -89,7 +89,7 @@ export default class WebHookService {
   }
 
   public async start(): Promise<void> {
-    await this.assertDatabaseConnection();
+    await this.database.assertConnection();
 
     this.bridge.start();
 
@@ -105,16 +105,5 @@ export default class WebHookService {
     }));
 
     this.webhookListener.start();
-  }
-
-  private async assertDatabaseConnection() {
-    try {
-      await this.webhookRepository.count();
-    } catch (error) {
-      logger.error('Database connection error: ');
-      logger.prettyError(error);
-      logger.fatal('Failed to connect to database, application will now exit');
-      process.exit(1);
-    }
   }
 }

@@ -33,4 +33,15 @@ export default class Database {
   public get knex(): Knex<Model, unknown[]> {
     return this._knex;
   }
+
+  public async assertConnection(): Promise<void> {
+    try {
+      await this._knex<WebHook>('webhook').count();
+    } catch (error) {
+      logger.error('Database connection error: ');
+      logger.prettyError(error);
+      logger.fatal('Failed to connect to database, application will now exit');
+      process.exit(1);
+    }
+  }
 }
