@@ -62,15 +62,6 @@ export default class MatrixBridge {
     }
   }
 
-  private generateRegistration(reg: AppServiceRegistration, callback: RegistrationCallback) {
-    reg.setId(AppServiceRegistration.generateToken());
-    reg.setHomeserverToken(AppServiceRegistration.generateToken());
-    reg.setAppServiceToken(AppServiceRegistration.generateToken());
-    reg.setSenderLocalpart('webhook');
-    reg.addRegexPattern('users', '@hook_.*', true);
-    callback(reg);
-  }
-
   private handleEvent(request: Request<WeakEvent>) {
     const event = request.getData();
     const context = new EventContext(event, this.bridge);
