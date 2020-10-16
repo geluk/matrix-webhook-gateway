@@ -1,6 +1,6 @@
 /node_modules
 
-/synapse-dev/synapse-data/homeserver.db
+/local-dev/synapse-data
 
 /webhook-db.sqlite
 /webhook-appservice.yaml

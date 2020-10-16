@@ -5,12 +5,12 @@ Alternatively, it is possible to install a release directly.
 
 # Development setup
 
-Run `start-matrix.sh` in `./synapse-dev` to set up a local appservice 
+Run `start-matrix.sh` in `./local-dev` to set up a local appservice
 development environment with Docker. This will start up a Synapse and an Element
 instance, which you can use for testing the appservice.
 
 ```bash
-cd synapse-dev
+cd local-dev
 ./start-matrix.sh
 ```
 
