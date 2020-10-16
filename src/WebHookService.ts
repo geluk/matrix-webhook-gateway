@@ -87,11 +87,12 @@ export default class WebHookService {
     context.reply(message);
   }
 
-  public start(): void {
+  public async start(): Promise<void> {
+    await this.assertDatabaseConnection();
+
     this.bridge.start();
 
     this.bridge.registerHandler(this.commandHandler);
-
     this.bridge.registerHandler(MatrixEventHandlers.invite((context) => {
       logger.debug(`${context.event.state_key} was invited to ${context.event.room_id}`);
 
@@ -103,5 +104,16 @@ export default class WebHookService {
     }));
 
     this.webhookListener.start();
+  }
+
+  private async assertDatabaseConnection() {
+    try {
+      await this.webhookRepository.count();
+    } catch (error) {
+      logger.error('Database connection error: ');
+      logger.prettyError(error);
+      logger.fatal('Failed to connect to database, application will now exit');
+      process.exit(1);
+    }
   }
 }

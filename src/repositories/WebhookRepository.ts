@@ -30,4 +30,9 @@ export default class WebhookRepository {
       .where('path', '=', path.toLowerCase())
       .first();
   }
+
+  public async count(): Promise<number> {
+    return this.database.knex<WebHook>('webhook')
+      .count();
+  }
 }

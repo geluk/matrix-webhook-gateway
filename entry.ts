@@ -24,7 +24,7 @@ if (typeof config === 'undefined') {
 }
 
 const whs = new WebHookService(
-  new Database(),
+  new Database(config.database),
   config,
 );
 whs.start();
