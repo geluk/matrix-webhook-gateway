@@ -52,26 +52,24 @@ export default class WebHookService {
   }
 
   private async handleHookCall(call: HookCall) {
-    this.bridge.sendMessage(call.webhook.room_id, call.content.text);
+    await this.bridge.sendMessage(call.webhook.room_id, call.content.text, call.webhook.user_id);
   }
 
   private async createWebHook(command: CreateWebhookCommand, context: Command) {
+    const userId = generateLocalPart(
+      this.config.app_service.user_pattern,
+      command.webhook_user_id,
+      context.message.event.room_id,
+    );
+
     const webhook = {
       id: undefined,
       path: `/hook/${randomString(HOOK_SECRET_LENGTH)}`,
-      user_id: command.webhook_user_id,
+      user_id: userId,
       room_id: context.message.event.room_id,
     };
     await this.webhookRepository.add(webhook);
 
-    const userId = generateLocalPart(
-      this.config.app_service.user_pattern,
-      command.webhook_user_id,
-      webhook.room_id,
-    );
-
-    await this.bridge.getIntent(userId).join(webhook.room_id);
-    logger.info(context.message.message.msgtype);
     context.reply(`Your webhook for ${command.webhook_user_id} in ${context.message.event.room_id} was created.\n `
       + `URL: ${this.config.webhooks.public_url}${webhook.path}`);
   }
