@@ -1,7 +1,11 @@
+# Dependencies
 /node_modules
 
-/local-dev/synapse-data
+# Build artifacts
+/out
 
+# Development data
+/local-dev/synapse-data
 /webhook-db.sqlite
 /webhook-appservice.yaml
 /appservice.yaml
