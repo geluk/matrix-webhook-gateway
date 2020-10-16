@@ -24,7 +24,7 @@ export default class WebHookListener {
 
     this.app.get('/hook/*', async (rq, rs) => {
       logger.debug(`${rq.method} ${rq.url}`);
-      if (!this.match(rq)) {
+      if (!await this.match(rq)) {
         rs.status(404).send('Not Found');
       } else {
         rs.send('');
@@ -62,12 +62,18 @@ export default class WebHookListener {
       logger.warn('Webhook body did not contain a "text" element.');
       return false;
     }
-    await this.onHookCalled.notify({
-      webhook: hook,
-      content: {
-        text: rq.body.text,
-      },
-    });
+    try {
+      await this.onHookCalled.notify({
+        webhook: hook,
+        content: {
+          text: rq.body.text,
+        },
+      });
+    } catch (error) {
+      logger.error('Failed to invoke webhook: ');
+      logger.prettyError(error);
+    }
+
     return true;
   }
 }

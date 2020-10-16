@@ -52,9 +52,17 @@ export default class MatrixBridge {
     if (userId === undefined) {
       return this.bridge.getIntent();
     }
-    const fullId = `${userId}`;
-    logger.debug(`Looking up intent for '${fullId}'`);
-    return this.bridge.getIntentFromLocalpart(fullId);
+    logger.debug(`Looking up intent for '${userId}'`);
+    return this.bridge.getIntentFromLocalpart(userId);
+  }
+
+  public async tryJoinRoom(userId: string, roomId: string): Promise<boolean> {
+    try {
+      await this.bridge.getIntentFromLocalpart(userId).join(roomId);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   public registerHandler(eventHandler: MatrixEventHandler): void {

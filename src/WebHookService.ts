@@ -51,7 +51,7 @@ export default class WebHookService {
     }
   }
 
-  private async handleHookCall(call: HookCall) {
+  private async handleHookCall(call: HookCall): Promise<void> {
     await this.bridge.sendMessage(call.webhook.room_id, call.content.text, call.webhook.user_id);
   }
 
@@ -68,6 +68,9 @@ export default class WebHookService {
       user_id: userId,
       room_id: context.message.event.room_id,
     };
+
+    await this.bridge.tryJoinRoom(webhook.user_id, webhook.room_id);
+
     await this.webhookRepository.add(webhook);
 
     context.reply(`Your webhook for ${command.webhook_user_id} in ${context.message.event.room_id} was created.\n `
