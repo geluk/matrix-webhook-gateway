@@ -14,7 +14,7 @@ namespaces:
       regex: '{{ app_service.user_namespace_regex }}'
   aliases: []
   rooms: []
-url: '{{ app_service.url }}'
+url: '{{ app_service.app_service_url }}'
 sender_localpart: '{{ app_service.sender_localpart }}'
 rate_limited: {{ app_service.rate_limited }}
 protocols: null

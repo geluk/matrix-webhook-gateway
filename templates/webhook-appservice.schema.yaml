@@ -6,8 +6,10 @@ properties:
     properties:
       hs_token:
         type: string
+        minLength: 1
       as_token:
         type: string
+        minLength: 1
       id:
         type: string
       user_namespace_regex:
@@ -16,9 +18,15 @@ properties:
         type: string
       rate_limited:
         type: boolean
-      url:
+      homeserver_name:
         type: string
-    required: [ hs_token, as_token, url ]
+        minLength: 1
+      app_service_url:
+        type: string
+        minLength: 1
+      homeserver_url:
+        type: string
+    required: [ hs_token, as_token, homeserver_name, app_service_url ]
   database:
     type: object
     properties:
@@ -40,8 +48,9 @@ properties:
   webhook:
     type: object
     properties:
-      webhook_url:
+      listen_host:
         type: string
-      homeserver_url:
-        type: string
+      listen_port:
+        type: integer
+        minimum: 1
 required: [ app_service ]

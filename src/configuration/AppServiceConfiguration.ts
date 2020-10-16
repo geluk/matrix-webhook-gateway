@@ -1,3 +1,6 @@
+import { AppServiceRegistration } from 'matrix-appservice-bridge';
+import logger from '../util/logger';
+
 export default class AppServiceConfiguration {
   id: string;
 
@@ -11,7 +14,11 @@ export default class AppServiceConfiguration {
 
   rate_limited: boolean;
 
-  url: string;
+  homeserver_name: string;
+
+  app_service_url: string;
+
+  homeserver_url: string;
 
   // We rely on schema validation to ensure that all properties are of the
   // correct type, so we can safely assert the types of property values here.
@@ -26,6 +33,20 @@ export default class AppServiceConfiguration {
     this.user_namespace_regex = config.user_namespace_regex ?? '_hook_.*';
     this.sender_localpart = config.sender_localpart ?? 'webhook';
     this.rate_limited = config.rate_limited ?? true;
-    this.url = config.url;
+    this.homeserver_name = config.homeserver_name;
+    this.app_service_url = config.app_service_url;
+    this.homeserver_url = config.homeserver_url ?? 'http://127.0.0.1:8008';
+  }
+
+  public toAppServiceRegistration(): AppServiceRegistration {
+    const registration = new AppServiceRegistration(this.app_service_url);
+    registration.setId(this.id);
+    registration.setHomeserverToken(this.hs_token);
+    registration.setAppServiceToken(this.as_token);
+    registration.addRegexPattern('users', this.sender_localpart, true);
+    registration.setSenderLocalpart(this.sender_localpart);
+    registration.setRateLimited(this.rate_limited);
+    logger.silly('Sending configuration ', registration);
+    return registration;
   }
 }

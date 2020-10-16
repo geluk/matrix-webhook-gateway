@@ -24,8 +24,8 @@ export default class WebHookService {
 
   config: Configuration;
 
-  public constructor(bridge: MatrixBridge, database: Database, config: Configuration) {
-    this.bridge = bridge;
+  public constructor(database: Database, config: Configuration) {
+    this.bridge = new MatrixBridge(config.app_service);
     this.commandHandler.onCommand.observe(this.handleCommand.bind(this));
     this.database = database;
     this.webhookRepository = new WebhookRepository(this.database);

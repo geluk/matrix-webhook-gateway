@@ -18,15 +18,19 @@ app_service:
   sender_localpart: webhook
   # Should server rate limits be enforced on the application service?
   rate_limited: true
+  # The name of your homeserver. This should match the value of the server_name
+  # configuration key in Synapse's homeserver.yaml file.
+  homeserver_name: matrix.local
   # URL used by the homeserver to access the application service.
-  url: http://127.0.0.1:8020
+  app_service_url: http://127.0.0.1:8020
+  # URL used by the application service to access the homeserver.
+  homeserver_url: http://127.0.0.1:8008
 
 # Configuration for the webhook service.
 webhooks:
   # Address and port used to listen for incoming webhooks.
-  webhook_url: http://0.0.0.0:8023
-  # URL used by the application service to access the homeserver.
-  homeserver_url: http://127.0.0.1:8008
+  listen_host: '0.0.0.0'
+  listen_port: 8023
 
 # Configures the database where the webhook details are stored.
 database:

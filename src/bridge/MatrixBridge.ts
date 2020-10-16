@@ -1,12 +1,11 @@
 import {
-  Bridge, AppServiceRegistration, MatrixUser, WeakEvent, Request,
+  Bridge, MatrixUser, WeakEvent, Request,
 } from 'matrix-appservice-bridge';
 
 import MatrixEventHandler from './MatrixEventHandler';
 import EventContext from './EventContext';
 import logger from '../util/logger';
-
-type RegistrationCallback = (r: AppServiceRegistration) => void;
+import AppServiceConfiguration from '../configuration/AppServiceConfiguration';
 
 const bridgeLog = logger.getChildLogger({
   name: 'bridge',
@@ -19,16 +18,20 @@ export default class MatrixBridge {
 
   private eventHandlers: MatrixEventHandler[] = [];
 
-  public constructor() {
+  public constructor(config: AppServiceConfiguration) {
     this.bridge = new Bridge({
-      homeserverUrl: 'http://127.0.0.1:8008',
-      domain: 'matrix.local',
-      registration: 'appservice.yaml',
+      homeserverUrl: config.homeserver_url,
+      domain: config.homeserver_name,
+      registration: config.toAppServiceRegistration(),
       disableStores: true,
+      logRequestOutcome: false,
       controller: {
         onUserQuery: this.handleUserQuery.bind(this),
         onLog: this.handleLog.bind(this),
         onEvent: this.handleEvent.bind(this),
+        // thirdPartyLookup: {
+        //   getUser: async (proto, fields) => PossiblePromise,
+        // }
       },
     });
   }

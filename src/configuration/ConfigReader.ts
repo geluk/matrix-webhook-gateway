@@ -78,7 +78,7 @@ export default class ConfigReader {
   }
 
   private static generateConfig(path: string): boolean {
-    logger.info(`Configuration file '${path}' not found, it will now be generated.`);
+    logger.info(`Configuration file '${path}' not found, a new one will be generated.`);
     let configTemplate: string;
     try {
       configTemplate = fs.readFileSync(CONFIG_TEMPLATE, 'utf8');
@@ -120,7 +120,7 @@ export default class ConfigReader {
     if (!res) {
       val.errors.forEach((error) => {
         const field = error.field.substr('data.'.length);
-        logger.error(`The field ${field} is ${error.message}`);
+        logger.error(`The field ${field} ${error.message}`);
         logger.silly('Error value: ', error);
       });
       return undefined;
