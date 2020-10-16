@@ -1,10 +1,10 @@
-import CommandHandler from './CommandHandler';
+import CommandHandler from './commands/CommandHandler';
 import MatrixBridge from './bridge/MatrixBridge';
 import MatrixEventHandlers from './bridge/MatrixEventHandlers';
 import logger from './util/logger';
 import Database from './repositories/Database';
 import WebhookRepository from './repositories/WebhookRepository';
-import Command, { CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand } from './Command';
+import Command, { CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand } from './commands/Command';
 import randomString from './util/randomString';
 import WebHookListener, { HookCall } from './WebHookListener';
 import Configuration from './configuration/Configuration';

@@ -1,4 +1,4 @@
-import MessageContext from './bridge/MessageContext';
+import MessageContext from '../bridge/MessageContext';
 
 export default class Command {
   private args: string[];
