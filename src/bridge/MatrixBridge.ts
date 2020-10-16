@@ -1,5 +1,5 @@
 import {
-  Bridge, MatrixUser, WeakEvent, Request,
+  Bridge, MatrixUser, WeakEvent, Request, Intent,
 } from 'matrix-appservice-bridge';
 
 import MatrixEventHandler from './MatrixEventHandler';
@@ -37,11 +37,22 @@ export default class MatrixBridge {
     this.config = config;
   }
 
-  public async sendMessage(target: string, message: string): Promise<unknown> {
-    return this.bridge.getIntent().sendMessage(target, {
+  public async sendMessage(
+    target: string,
+    message: string,
+    sender?: string | undefined,
+  ): Promise<unknown> {
+    return this.getIntent(sender).sendMessage(target, {
       body: message,
       msgtype: 'm.text',
     });
+  }
+
+  public getIntent(userId: string | undefined): Intent {
+    if (userId === undefined) {
+      return this.bridge.getIntent();
+    }
+    return this.bridge.getIntent(`@${userId}:${this.config.homeserver_name}`);
   }
 
   public registerHandler(eventHandler: MatrixEventHandler): void {
@@ -69,10 +80,17 @@ export default class MatrixBridge {
   private handleEvent(request: Request<WeakEvent>) {
     const event = request.getData();
     const context = new EventContext(event, this.bridge);
-    const handled = this.eventHandlers.some((h) => h.handleEvent(context));
 
-    if (!handled) {
-      logger.info(`Event ignored: ${event.type}`);
-    }
+    Promise.all(this.eventHandlers.map(async (h) => h.handleEvent(context)))
+      .then((results) => {
+        const handled = results.reduce((p, c) => p || c);
+        if (!handled) {
+          logger.info(`Event ignored: ${event.type}`);
+        }
+      })
+      .catch((error) => {
+        logger.error('An error occurred while processing a Matrix event:');
+        logger.prettyError(error, true, false, true, 0);
+      });
   }
 }

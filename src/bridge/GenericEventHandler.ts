@@ -11,7 +11,7 @@ export default class GenericEventHandler implements MatrixEventHandler {
     this.handler = handler;
   }
 
-  handleEvent(context: EventContext): boolean {
+  public async handleEvent(context: EventContext): Promise<boolean> {
     if (this.typeMatch(context)) {
       return this.handler(context);
     }

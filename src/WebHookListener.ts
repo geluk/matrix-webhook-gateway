@@ -62,7 +62,7 @@ export default class WebHookListener {
       logger.warn('Webhook body did not contain a "text" element.');
       return false;
     }
-    this.onHookCalled.notify({
+    await this.onHookCalled.notify({
       webhook: hook,
       content: {
         text: rq.body.text,

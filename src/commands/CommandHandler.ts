@@ -13,7 +13,7 @@ export default class CommandHandler extends MessageHandler {
     super();
   }
 
-  public handleMessage(context: MessageContext): boolean {
+  public async handleMessage(context: MessageContext): Promise<boolean> {
     if (context.event.sender === context.bridge.getBot().getUserId()) {
       return true;
     }
@@ -22,7 +22,7 @@ export default class CommandHandler extends MessageHandler {
     if (message.body.match(COMMAND_MATCH)) {
       const command = new Command(message.body.substr(1), context);
       command.execute();
-      this.onCommand.notify(command);
+      await this.onCommand.notify(command);
     }
     return true;
   }

@@ -1,15 +1,15 @@
 export default class Observable<TMessage> {
-  handlers: ((message: TMessage) => void)[];
+  handlers: ((message: TMessage) => Promise<void>)[];
 
   public constructor() {
     this.handlers = [];
   }
 
-  public observe(handler: (message: TMessage) => void): void {
+  public observe(handler: (message: TMessage) => Promise<void>): void {
     this.handlers.push(handler);
   }
 
-  public notify(message: TMessage): void {
-    this.handlers.forEach((h) => h(message));
+  public async notify(message: TMessage): Promise<void> {
+    await Promise.all(this.handlers.map((h) => h(message)));
   }
 }

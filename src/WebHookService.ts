@@ -37,13 +37,13 @@ export default class WebHookService {
   private async handleCommand(command: Command) {
     switch (command.commandParameters?.type) {
       case 'createWebHook':
-        this.createWebHook(command.commandParameters, command);
+        await this.createWebHook(command.commandParameters, command);
         break;
       case 'listWebHook':
-        this.listWebHook(command.commandParameters, command);
+        await this.listWebHook(command.commandParameters, command);
         break;
       case 'deleteWebHook':
-        this.deleteWebHook(command.commandParameters, command);
+        await this.deleteWebHook(command.commandParameters, command);
         break;
       default:
         break;
@@ -62,7 +62,7 @@ export default class WebHookService {
       room_id: context.message.event.room_id,
     };
     await this.webhookRepository.add(webhook);
-    context.message.bridge.getIntent(webhook.user_id).join(webhook.room_id);
+    await this.bridge.getIntent(command.webhook_user_id).join(webhook.room_id);
     logger.info(context.message.message.msgtype);
     context.reply(`Your webhook for ${command.webhook_user_id} in ${context.message.event.room_id} was created.\n `
       + `URL: ${this.config.webhooks.public_url}${webhook.path}`);
@@ -94,7 +94,7 @@ export default class WebHookService {
     this.bridge.start();
 
     this.bridge.registerHandler(this.commandHandler);
-    this.bridge.registerHandler(MatrixEventHandlers.invite((context) => {
+    this.bridge.registerHandler(MatrixEventHandlers.invite(async (context) => {
       logger.debug(`${context.event.state_key} was invited to ${context.event.room_id}`);
 
       if (context.event.state_key === context.bridge.getBot().getUserId()) {
