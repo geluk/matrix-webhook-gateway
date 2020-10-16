@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "ts-node --compiler ttypescript entry.ts",
-    "lint": "npx eslint . --ext .ts || exit 0",
+    "lint": "npx eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
