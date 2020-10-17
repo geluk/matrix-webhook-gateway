@@ -23,7 +23,40 @@ jobs:
     - store_artifacts:
         path: ./out/webhook-appservice.tar.gz
         destination: webhook-appservice.tar.gz
+  docker_build:
+    environment:
+      IMAGE_NAME: geluk/webhook-appservice
+    docker:
+    - image: circleci/buildpack-deps:stretch
+    steps:
+    - checkout
+    - setup_remote_docker
+    - run:
+        name: Build docker image
+        command: |
+          docker build -t $IMAGE_NAME:latest \
+          -t $IMAGE_NAME:$(./ci/tag.sh --major) \
+          -t $IMAGE_NAME:$(./ci/tag.sh --minor) \
+          -t $IMAGE_NAME:$(./ci/tag.sh --patch) .
+  docker_publish:
+    environment:
+      IMAGE_NAME: geluk/webhook-appservice
+    docker:
+    - image: circleci/buildpack-deps:stretch
+    steps:
+    - setup_remote_docker
+    - run:
+        name: Publish docker image
+        command: |
+          echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+          docker push $IMAGE_NAME:latest \
+          $IMAGE_NAME:$(./ci/tag.sh --major) \
+          $IMAGE_NAME:$(./ci/tag.sh --minor) \
+          $IMAGE_NAME:$(./ci/tag.sh --patch)
 workflows:
   node-tests:
     jobs:
     - build
+  build:
+    jobs:
+    - docker_build

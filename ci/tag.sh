@@ -5,9 +5,9 @@ version="$1"
 
 function print_version {
     if [[ -z "$1" ]]; then
-        echo 0
+        echo -n 0
     else
-        echo $1
+        echo -n $1
     fi
 }
 
@@ -22,11 +22,17 @@ if [[ $tag =~ $tag_regex ]]; then
     esac
     case $version in
     "--minor")
+        print_version "${BASH_REMATCH[1]}"
+        echo -n '.'
         print_version "${BASH_REMATCH[3]}"
         ;;
     esac
     case $version in
-    "--bugfix")
+    "--patch")
+        print_version "${BASH_REMATCH[1]}"
+        echo -n '.'
+        print_version "${BASH_REMATCH[3]}"
+        echo -n '.'
         print_version "${BASH_REMATCH[5]}"
         ;;
     esac

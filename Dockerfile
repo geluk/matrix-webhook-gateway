@@ -6,4 +6,4 @@ COPY . .
 
 EXPOSE 8020
 
-CMD npx ts-node entry.ts
+CMD npx ts-node --compiler ttypescript entry.ts
