@@ -4,7 +4,7 @@
         "target": "ES2020",
         // Allows line number references from logging code.
         "sourceMap": true,
-        "outDir": "out",
+        "outDir": "out/webhook-appservice",
         "strictNullChecks": true,
         "plugins": [
             { "transform": "typescript-is/lib/transform-inline/transformer" },
