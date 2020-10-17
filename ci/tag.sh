@@ -19,15 +19,11 @@ if [[ $tag =~ $tag_regex ]]; then
     "--major")
         print_version "${BASH_REMATCH[1]}"
         ;;
-    esac
-    case $version in
     "--minor")
         print_version "${BASH_REMATCH[1]}"
         echo -n '.'
         print_version "${BASH_REMATCH[3]}"
         ;;
-    esac
-    case $version in
     "--patch")
         print_version "${BASH_REMATCH[1]}"
         echo -n '.'
