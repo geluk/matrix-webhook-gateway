@@ -17,7 +17,11 @@
     "js-yaml": "^3.14.0",
     "knex": "^0.21.6",
     "matrix-appservice-bridge": "^2.1.0",
+    "mssql": "^6.2.3",
     "mustache": "^4.0.1",
+    "mysql": "^2.18.1",
+    "oracledb": "^5.0.0",
+    "pg": "^8.4.1",
     "sqlite3": "^5.0.0",
     "tslog": "^2.9.0",
     "typescript-is": "^0.16.3"
