@@ -102,8 +102,6 @@ export default class WebHookService {
   }
 
   public async start(): Promise<void> {
-    await this.database.assertConnection();
-
     this.bridge.start();
 
     this.bridge.registerHandler(this.commandHandler);

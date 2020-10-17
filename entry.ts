@@ -23,8 +23,16 @@ if (typeof config === 'undefined') {
   process.exit(1);
 }
 
-const whs = new WebHookService(
-  new Database(config.database),
-  config,
-);
-whs.start();
+const database = new Database(config.database);
+database.migrate()
+  .then(() => {
+    const whs = new WebHookService(
+      database,
+      config,
+    );
+    whs.start();
+  })
+  .catch((error) => {
+    logger.prettyError(error);
+    logger.fatal('Could not run migrations, application will now exit');
+  });

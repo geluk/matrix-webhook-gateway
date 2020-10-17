@@ -34,14 +34,18 @@ export default class Database {
     return this._knex;
   }
 
-  public async assertConnection(): Promise<void> {
-    try {
-      await this._knex<WebHook>('webhook').count();
-    } catch (error) {
-      logger.error('Database connection error: ');
-      logger.prettyError(error);
-      logger.fatal('Failed to connect to database, application will now exit');
-      process.exit(1);
+  public async migrate(): Promise<void> {
+    const migrations = await this._knex.migrate.status();
+    if (migrations === 0) {
+      logger.debug('There are no pending migrations');
+      return;
     }
+    if (migrations === 1) {
+      logger.info('There is one pending migration');
+    } else {
+      logger.info(`There are ${migrations} pending migrations`);
+    }
+    await this._knex.migrate.latest();
+    logger.debug('Migration finished');
   }
 }
