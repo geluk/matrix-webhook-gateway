@@ -56,6 +56,8 @@ export default class WebHookService {
   }
 
   private async createWebHook(command: CreateWebhookCommand, context: Command) {
+    logger.debug('Creating a new webhook');
+    logger.silly(command);
     const userId = generateLocalPart(
       this.config.app_service.user_pattern,
       command.webhook_user_id,
@@ -68,14 +70,17 @@ export default class WebHookService {
       user_id: userId,
       room_id: context.message.event.room_id,
     };
+    logger.silly('Webhook:', webhook);
 
     if (!await this.bridge.tryJoinRoom(webhook.user_id, webhook.room_id)) {
+      logger.debug(`${webhook.user_id} was unable to join ${webhook.room_id}`);
       context.reply('I am unable to invite a webhook user to this room.\n'
         + 'Please make sure I am allowed to invite users, then try again.');
       return;
     }
 
     await this.webhookRepository.add(webhook);
+    logger.debug('Webhook created successfully');
 
     context.reply(`Your webhook for ${command.webhook_user_id} in ${context.message.event.room_id} was created.\n `
       + `URL: ${this.config.webhooks.public_url}${webhook.path}`);

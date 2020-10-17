@@ -13,7 +13,7 @@ export default class Database {
   private _knex: Knex<Model, unknown[]>;
 
   public constructor(config: DatabaseConfiguration) {
-    logger.debug(`Opening DB connection with ${config.driver}`);
+    logger.debug(`Creating DB connection with ${config.driver}`);
     const knexConfig: Knex.Config = {
       client: config.driver,
       connection: config.connection,
@@ -30,6 +30,7 @@ export default class Database {
   public async migrate(): Promise<void> {
     let migrations: number;
     try {
+      logger.silly('Retrieving migration status');
       migrations = await this._knex.migrate.status();
     } catch {
       // This may have failed if we haven't executed the initial migration yet.

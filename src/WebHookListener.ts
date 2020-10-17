@@ -47,6 +47,7 @@ export default class WebHookListener {
   }
 
   public start(): void {
+    logger.silly('Starting webhook listener');
     this.app.listen(this.config.listen_port, this.config.listen_host, () => {
       logger.info(`Web server running on ${this.config.listen_host}:${this.config.listen_port}`);
     });
@@ -63,6 +64,7 @@ export default class WebHookListener {
       return false;
     }
     try {
+      logger.silly('Invoking webhook');
       await this.onHookCalled.notify({
         webhook: hook,
         content: {

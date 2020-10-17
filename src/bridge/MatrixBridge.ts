@@ -70,6 +70,7 @@ export default class MatrixBridge {
   }
 
   public start(): void {
+    logger.silly('Starting Matrix bridge');
     this.bridge.run(this.config.listen_port, undefined, undefined, this.config.listen_host);
     logger.info(`Matrix bridge running on ${this.config.listen_host}:${this.config.listen_port}`);
   }

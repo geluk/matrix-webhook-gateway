@@ -57,7 +57,7 @@ export default class AppServiceConfiguration {
     registration.addRegexPattern('users', this.sender_localpart, true);
     registration.setSenderLocalpart(this.sender_localpart);
     registration.setRateLimited(this.rate_limited);
-    logger.silly('Sending configuration ', registration);
+    logger.silly('Bridge configuration ', registration);
     return registration;
   }
 }
