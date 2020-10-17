@@ -3,11 +3,11 @@ import DatabaseConfiguration from './DatabaseConfiguration';
 import WebhooksConfiguration from './WebhooksConfiguration';
 
 export default class Configuration {
-  public app_service: AppServiceConfiguration;
-
-  public database: DatabaseConfiguration;
-
-  public webhooks: WebhooksConfiguration;
+  private constructor(
+    public app_service: AppServiceConfiguration,
+    public database: DatabaseConfiguration,
+    public webhooks: WebhooksConfiguration,
+  ) {}
 
   // We rely on schema validation ensure that all properties are of the
   // correct type, so we can safely assert the types of all properties here.
@@ -15,9 +15,11 @@ export default class Configuration {
   // checks, and replace those values with their defaults.
   /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  public constructor(config: any) {
-    this.app_service = new AppServiceConfiguration(config.app_service);
-    this.database = new DatabaseConfiguration(config.database);
-    this.webhooks = new WebhooksConfiguration(config.webhooks);
+  public static from(config: any) {
+    const appService = new AppServiceConfiguration(config.app_service);
+    const database = DatabaseConfiguration.from(config.database);
+    const webhooks = new WebhooksConfiguration(config.webhooks);
+
+    return new Configuration(appService, database, webhooks);
   }
 }

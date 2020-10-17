@@ -118,14 +118,25 @@ export default class ConfigReader {
     });
     const res = val(config, schema);
     if (!res) {
+      logger.error('Configuration file validation failed');
       val.errors.forEach((error) => {
+        logger.debug(error);
         const field = error.field.substr('data.'.length);
-        logger.error(`The field ${field} ${error.message}`);
+        if (error.message === 'must be an enum value') {
+          logger.error(`The field ${field} has an invalid value: '${error.value}'`);
+        } else if (
+          field === 'database.connection'
+           && error.message.startsWith('no (or more than one) schemas match')
+        ) {
+          logger.error(`The field ${field} has invalid properties`);
+        } else {
+          logger.error(`The field ${field} ${error.message}`);
+        }
         logger.silly('Error value: ', error);
       });
       return undefined;
     }
-    return new Configuration(config);
+    return Configuration.from(config);
   }
 
   private static generateAppServiceConfig(config: Configuration): void {

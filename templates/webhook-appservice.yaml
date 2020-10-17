@@ -43,12 +43,23 @@ database:
   # The database driver to use. Should be one of the following:
   # pg, mysql, sqlite3, oracledb, mssql
   driver: sqlite3
-  # When using SQLite, only a filename is required. For all other databases,
-  # set the host, port, user, password, and database fields.
+  # How to connect to the database. Can either be a connection string,
+  # or a connection object, containing either a filename (for sqlite3),
+  # or a host, user, password, database, and, optionally, a port and tls
+  # configuration.
+
+  # Example 1: sqlite3 (default)
   connection:
     filename: webhook-db.sqlite
-    # host:
-    # port:
-    # user:
-    # password:
-    # database:
+
+  # # Example 2: PostgreSQL
+  # connection:
+  #   host: localhost
+  #   port: 5432
+  #   user: webhook
+  #   password: password
+  #   database: webhook
+  #   tls: require
+
+  # # Example 3: Connection string for MariaDB/MySQL
+  # connection: 'Server=localhost;Database=webhook;Uid=webhook;Pwd=password;'

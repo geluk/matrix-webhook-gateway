@@ -31,28 +31,41 @@ properties:
       listen_port:
         type: integer
         minimum: 1
+    additionalProperties: false
     required: [ hs_token, as_token, homeserver_name, app_service_url ]
   database:
     type: object
     properties:
       driver:
         type: string
+        enum: [ sqlite3, pg, mysql, oracledb, mssql ]
       connection:
-        type: object
-        properties:
-          filename:
-            type: string
-          host:
-            type: string
-          port:
-            type: integer
-            minimum: 1
-          user:
-            type: string
-          password:
-            type: string
-          database:
-            type: string
+        oneOf:
+        - type: string
+        - type: object
+          properties:
+            filename:
+              type: string
+          required: [ filename ]
+          additionalProperties: false
+        - type: object
+          properties:
+            host:
+              type: string
+            port:
+              type: integer
+              minimum: 1
+            user:
+              type: string
+            password:
+              type: string
+            database:
+              type: string
+            tls:
+              type: [ object, string, boolean ]
+          required: [ host, user, password, database ]
+          additionalProperties: false
+    required: [ connection ]
   webhooks:
     type: object
     properties:

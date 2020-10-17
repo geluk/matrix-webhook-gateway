@@ -16,14 +16,7 @@ export default class Database {
     logger.debug(`Opening DB connection with ${config.driver}`);
     const knexConfig: Knex.Config = {
       client: config.driver,
-      connection: {
-        filename: config.connection.filename,
-        host: config.connection.host,
-        port: config.connection.port,
-        user: config.connection.user,
-        password: config.connection.password,
-        database: config.connection.database,
-      },
+      connection: config.connection,
       wrapIdentifier: (value, origImpl) => origImpl(toSnakeCase(value)),
       useNullAsDefault: true, // Required for SQLite support
     };
