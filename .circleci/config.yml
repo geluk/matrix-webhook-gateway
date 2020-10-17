@@ -1,6 +1,12 @@
 version: 2.1
 orbs:
   node: circleci/node@4.1.0
+executors:
+  docker_exec:
+    environment:
+      IMAGE_NAME: geluk/webhook-appservice
+    docker:
+    - image: circleci/buildpack-deps:stretch
 jobs:
   build:
     executor: node/default
@@ -24,35 +30,42 @@ jobs:
         path: ./out/webhook-appservice.tar.gz
         destination: webhook-appservice.tar.gz
   docker_build:
-    environment:
-      IMAGE_NAME: geluk/webhook-appservice
-    docker:
-    - image: circleci/buildpack-deps:stretch
+    executor: docker_exec
     steps:
     - checkout
     - setup_remote_docker
     - run:
-        name: Build docker image
+        name: Build Docker image
         command: |
           docker build -t $IMAGE_NAME:latest \
           -t $IMAGE_NAME:$(./ci/tag.sh --major) \
           -t $IMAGE_NAME:$(./ci/tag.sh --minor) \
           -t $IMAGE_NAME:$(./ci/tag.sh --patch) .
-  docker_publish:
-    environment:
-      IMAGE_NAME: geluk/webhook-appservice
-    docker:
-    - image: circleci/buildpack-deps:stretch
-    steps:
-    - setup_remote_docker
     - run:
-        name: Publish docker image
+        name: Archive Docker image
+        command: docker save -o image.tar $IMAGE_NAME
+    - persist_to_workspace:
+        root: .
+        paths:
+        - ./image.tar
+  docker_publish:
+    executor: docker_exec
+    steps:
+    - checkout
+    - setup_remote_docker
+    - attach_workspace:
+        at: /tmp/workspace
+    - run:
+        name: List workspace
+        command: ls -hal /tmp/workspace
+    - run:
+        name: Load Docker image
+        command: docker load -i /tmp/workspace/image.tar
+    - run:
+        name: Publish Docker image
         command: |
           echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
-          docker push $IMAGE_NAME:latest \
-          $IMAGE_NAME:$(./ci/tag.sh --major) \
-          $IMAGE_NAME:$(./ci/tag.sh --minor) \
-          $IMAGE_NAME:$(./ci/tag.sh --patch)
+          docker push $IMAGE_NAME
 workflows:
   node-tests:
     jobs:
@@ -60,3 +73,9 @@ workflows:
   build:
     jobs:
     - docker_build
+    - docker_publish:
+        requires:
+        - docker_build
+        # filters:
+        #   tags:
+        #     only: /^[0-9.]+$/
