@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "ts-node --compiler ttypescript entry.ts",
-    "build": "npx tsc --build",
+    "build": "npx ttsc --build",
     "package": "cp -r templates migrations node_modules out/webhook-appservice",
     "lint": "npx eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
