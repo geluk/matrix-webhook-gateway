@@ -13,18 +13,18 @@ export default class WebhookRepository {
     return this.database.knex('webhook').insert(entity);
   }
 
-  public async deleteFromRoom(webhook_id: number, room_id: string): Promise<boolean> {
-    logger.debug(`Attempting to delete webhook #${webhook_id} from room ${room_id}`);
+  public async deleteFromRoom(webhookId: number, roomId: string): Promise<boolean> {
+    logger.debug(`Attempting to delete webhook #${webhookId} from room ${roomId}`);
     return this.database.knex<Webhook>('webhook')
-      .where('id', '=', webhook_id)
-      .andWhere('room_id', '=', room_id)
+      .where('id', '=', webhookId)
+      .andWhere('room_id', '=', roomId)
       .delete();
   }
 
-  public async findByRoom(room_id: string): Promise<Webhook[]> {
-    logger.debug(`Looking up webhooks for room ${room_id}`);
+  public async findByRoom(roomId: string): Promise<Webhook[]> {
+    logger.debug(`Looking up webhooks for room ${roomId}`);
     return this.database.knex<Webhook>('webhook')
-      .where('room_id', '=', room_id);
+      .where('room_id', '=', roomId);
   }
 
   public async getByPath(path: string): Promise<Webhook | undefined> {
