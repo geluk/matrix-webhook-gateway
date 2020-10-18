@@ -1,9 +1,9 @@
 import { Bridge, WeakEvent } from 'matrix-appservice-bridge';
-import Message from './Message';
+import MessageContent from './Message';
 import EventContext from './EventContext';
 
 export default class MessageContext extends EventContext {
-  private _message: Message;
+  private _message: MessageContent;
 
   public constructor(event: WeakEvent, bridge: Bridge) {
     super(event, bridge);
@@ -13,7 +13,7 @@ export default class MessageContext extends EventContext {
     };
   }
 
-  get message(): Message {
+  get message(): MessageContent {
     return this._message;
   }
 

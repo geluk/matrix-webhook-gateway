@@ -1,5 +1,5 @@
 import CommandParser, { Command } from './CommandParser';
-import Message from '../bridge/Message';
+import MessageContent from '../bridge/Message';
 import MessageContext from '../bridge/MessageContext';
 import MessageHandler from '../bridge/MessageHandler';
 import Observable from '../util/Observable';
@@ -17,7 +17,7 @@ export default class CommandHandler extends MessageHandler {
     if (context.event.sender === context.bridge.getBot().getUserId()) {
       return true;
     }
-    const message = context.event.content as unknown as Message;
+    const message = context.event.content as unknown as MessageContent;
 
     if (message.body.match(COMMAND_MATCH)) {
       const parser = new CommandParser(message.body.substr(1), context);
