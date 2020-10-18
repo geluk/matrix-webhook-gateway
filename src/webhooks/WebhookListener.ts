@@ -1,10 +1,12 @@
 import * as Express from 'express';
 import { Request, Response, NextFunction } from 'express';
-import WebhooksConfiguration from './configuration/WebhooksConfiguration';
-import Webhook from './models/Webhook';
-import WebhookRepository from './repositories/WebhookRepository';
-import logger from './util/logger';
-import Observable from './util/Observable';
+import { is } from 'typescript-is';
+import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
+import WebhookRepository from '../repositories/WebhookRepository';
+import logger from '../util/logger';
+import Observable from '../util/Observable';
+import { HookCall, WebhookContent } from './formats';
+import transformWebhook from './transformWebhook';
 
 export default class WebhookListener {
   app: Express.Express;
@@ -54,22 +56,23 @@ export default class WebhookListener {
   }
 
   private async match(rq: Request): Promise<boolean> {
-    const hook = await this.webhookRepository.getByPath(rq.path);
-    if (!hook) {
+    const webhook = await this.webhookRepository.getByPath(rq.path);
+    if (!webhook) {
       logger.debug('Webhook not found.');
       return false;
     }
-    if (!('text' in rq.body)) {
-      logger.warn('Webhook body did not contain a "text" element.');
+    if (!is<WebhookContent>(rq.body)) {
+      logger.warn('Received an unrecognised webhook: ', rq.body);
       return false;
     }
     try {
+      logger.silly('Transforming webhook');
+      const content = transformWebhook(rq.body);
+
       logger.silly('Invoking webhook');
       await this.onHookCalled.notify({
-        webhook: hook,
-        content: {
-          text: rq.body.text,
-        },
+        webhook,
+        content,
       });
     } catch (error) {
       logger.error('Failed to invoke webhook: ');
@@ -78,13 +81,4 @@ export default class WebhookListener {
 
     return true;
   }
-}
-
-export interface HookCall {
-  webhook: Webhook;
-  content: SlackWebhook;
-}
-
-interface SlackWebhook {
-  text: string;
 }

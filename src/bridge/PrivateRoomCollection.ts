@@ -22,12 +22,14 @@ export default class PrivateRoomCollection {
           + 'but I am not a member of it. A new private room will be created.',
         );
       }
-      if (members && !members[userId]) {
-        logger.debug(
-          `User ${user.id} is not a member of their private room anymore/yet, `
-          + 'resending invite.',
-        );
-        this.bridge.getIntent().invite(user.private_room_id, userId);
+      if (members) {
+        if (!members[userId]) {
+          logger.debug(
+            `User ${user.id} is not a member of their private room anymore/yet, `
+            + 'resending invite.',
+          );
+          this.bridge.getIntent().invite(user.private_room_id, userId);
+        }
         return user.private_room_id;
       }
     }

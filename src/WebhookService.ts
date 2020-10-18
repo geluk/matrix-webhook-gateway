@@ -8,10 +8,11 @@ import {
   Command, CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand,
 } from './commands/CommandParser';
 import randomString from './util/randomString';
-import WebhookListener, { HookCall } from './WebhookListener';
+import WebhookListener from './webhooks/WebhookListener';
 import Configuration from './configuration/Configuration';
 import { generateLocalPart } from './util/matrixUtilities';
 import UserRepository from './repositories/UserRepository';
+import { HookCall } from './webhooks/formats';
 
 const HOOK_SECRET_LENGTH = 48;
 
