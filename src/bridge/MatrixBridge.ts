@@ -6,15 +6,20 @@ import MatrixEventHandler from './MatrixEventHandler';
 import EventContext from './EventContext';
 import logger, { forwardMatrixLog } from '../util/logger';
 import AppServiceConfiguration from '../configuration/AppServiceConfiguration';
+import UserRepository from '../repositories/UserRepository';
+import PrivateRoomCollection from './PrivateRoomCollection';
 
 export default class MatrixBridge {
   private bridge: Bridge;
 
   private eventHandlers: MatrixEventHandler[] = [];
 
-  private config: AppServiceConfiguration;
+  private privateRoomCollection: PrivateRoomCollection;
 
-  public constructor(config: AppServiceConfiguration) {
+  public constructor(
+    private config: AppServiceConfiguration,
+    private userRepository: UserRepository,
+  ) {
     this.bridge = new Bridge({
       homeserverUrl: config.homeserver_url,
       domain: config.homeserver_name,
@@ -27,7 +32,7 @@ export default class MatrixBridge {
         onEvent: this.handleEvent.bind(this),
       },
     });
-    this.config = config;
+    this.privateRoomCollection = new PrivateRoomCollection(userRepository, this.bridge);
   }
 
   public async sendMessage(
@@ -65,37 +70,8 @@ export default class MatrixBridge {
   }
 
   public async sendSecret(target: string, message: string): Promise<unknown> {
-    const room = await this.getPrivateRoom(target);
+    const room = await this.privateRoomCollection.getPrivateRoom(target);
     return this.sendMessage(room, message);
-  }
-
-  public async getPrivateRoom(userId: string): Promise<string> {
-    const result = await this.getIntent(undefined).createRoom({
-      // Use the bot user to create the room
-      createAsClient: false,
-      options: {
-        invite: [userId],
-        // Allow clients to consider the room as a direct message
-        is_direct: true,
-        // This creates the room without an initial power_levels state event
-        preset: 'private_chat',
-        // Exclude the room from the public room list
-        visibility: 'private',
-        initial_state: [{
-          type: 'm.room.power_levels',
-          content: {
-            users: {
-              // Grant the bot user power level 100. All other users will have
-              // a power level of 0, so they won't be able to invite other users
-              // to this room.
-              [this.bridge.getBot().getUserId()]: 100,
-            },
-          },
-          state_key: '',
-        }],
-      },
-    });
-    return result.room_id;
   }
 
   public registerHandler(eventHandler: MatrixEventHandler): void {

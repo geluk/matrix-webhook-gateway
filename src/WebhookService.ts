@@ -11,30 +11,36 @@ import randomString from './util/randomString';
 import WebhookListener, { HookCall } from './WebhookListener';
 import Configuration from './configuration/Configuration';
 import { generateLocalPart } from './util/matrixUtilities';
+import UserRepository from './repositories/UserRepository';
 
 const HOOK_SECRET_LENGTH = 48;
 
 export default class WebhookService {
+  database: Database;
+
+  config: Configuration;
+
+  webhookRepository: WebhookRepository;
+
+  userRepository: UserRepository;
+
   bridge: MatrixBridge;
 
   commandHandler = new CommandHandler();
 
-  database: Database;
-
-  webhookRepository: WebhookRepository;
-
   webhookListener: WebhookListener;
 
-  config: Configuration;
-
   public constructor(database: Database, config: Configuration) {
-    this.bridge = new MatrixBridge(config.app_service);
-    this.commandHandler.onCommand.observe(this.handleCommand.bind(this));
     this.database = database;
+    this.config = config;
+
     this.webhookRepository = new WebhookRepository(this.database);
+    this.userRepository = new UserRepository(this.database);
+
+    this.bridge = new MatrixBridge(config.app_service, this.userRepository);
+    this.commandHandler.onCommand.observe(this.handleCommand.bind(this));
     this.webhookListener = new WebhookListener(this.webhookRepository, config.webhooks);
     this.webhookListener.onHookCalled.observe(this.handleHookCall.bind(this));
-    this.config = config;
   }
 
   private async handleCommand(command: Command) {
