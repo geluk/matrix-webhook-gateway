@@ -54,7 +54,7 @@ export default class CommandParser {
           type: 'listWebhook',
         });
       case 'delete':
-        if (this.args.length !== 2) {
+        if (this.args.length !== 2 || Number.isNaN(parseInt(this.args[1], 10))) {
           await this.message.reply('Usage: -hook delete <hook_number>');
           return undefined;
         }
