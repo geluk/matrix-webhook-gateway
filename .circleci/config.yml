@@ -76,6 +76,6 @@ workflows:
     - docker_publish:
         requires:
         - docker_build
-        # filters:
-        #   tags:
-        #     only: /^[0-9.]+$/
+        filters:
+          tags:
+            only: /^[0-9.]+$/
