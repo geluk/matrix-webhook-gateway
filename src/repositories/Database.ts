@@ -1,7 +1,7 @@
 import * as Knex from 'knex';
 import DatabaseConfiguration from '../configuration/DatabaseConfiguration';
 import User from '../models/User';
-import WebHook from '../models/WebHook';
+import WebHook from '../models/Webhook';
 import logger from '../util/logger';
 import toSnakeCase from '../util/toSnakeCase';
 

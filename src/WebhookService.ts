@@ -6,7 +6,7 @@ import Database from './repositories/Database';
 import WebhookRepository from './repositories/WebhookRepository';
 import Command, { CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand } from './commands/Command';
 import randomString from './util/randomString';
-import WebHookListener, { HookCall } from './WebHookListener';
+import WebHookListener, { HookCall } from './WebhookListener';
 import Configuration from './configuration/Configuration';
 import { generateLocalPart } from './util/matrixUtilities';
 

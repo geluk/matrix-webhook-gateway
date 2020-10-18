@@ -3,7 +3,7 @@ import { Logging as MatrixLogger } from 'matrix-appservice-bridge';
 import ConfigReader from './src/configuration/ConfigReader';
 import Database from './src/repositories/Database';
 import logger, { configureLogger } from './src/util/logger';
-import WebHookService from './src/WebHookService';
+import WebHookService from './src/WebhookService';
 
 // eslint-disable-next-line import/order
 import yargs = require('yargs/yargs');

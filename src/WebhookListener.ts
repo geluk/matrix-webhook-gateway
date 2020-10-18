@@ -1,7 +1,7 @@
 import * as Express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import WebhooksConfiguration from './configuration/WebhooksConfiguration';
-import WebHook from './models/WebHook';
+import WebHook from './models/Webhook';
 import WebhookRepository from './repositories/WebhookRepository';
 import logger from './util/logger';
 import Observable from './util/Observable';

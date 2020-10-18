@@ -1,4 +1,4 @@
-import WebHook from '../models/WebHook';
+import WebHook from '../models/Webhook';
 import logger from '../util/logger';
 import Database from './Database';
 
