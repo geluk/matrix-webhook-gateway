@@ -71,7 +71,7 @@ export default class CommandParser {
     return {
       parameters: params,
       message: this.message,
-      reply: this.message.reply,
+      reply: this.message.reply.bind(this.message),
     };
   }
 }
