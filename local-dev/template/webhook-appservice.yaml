@@ -35,8 +35,8 @@ webhooks:
   listen_host: '0.0.0.0'
   listen_port: 8020
   # Public base URL to which the webhook path should be appended. If you run the
-  # service behind a reverse proxy, this could also be a subpath.
-  public_url: http://hook.example.com
+  # service at some subpath behind a reverse proxy, it should be included here.
+  public_url: http://127.0.0.1:8020
 
 # Configures the database where the webhook details are stored.
 database:
