@@ -72,7 +72,12 @@ workflows:
     - build
   build:
     jobs:
-    - docker_build
+    - docker_build:
+        filters:
+          tags:
+            only: /^.+/
+          branches:
+            ignore: /.*/
     - docker_publish:
         requires:
         - docker_build
