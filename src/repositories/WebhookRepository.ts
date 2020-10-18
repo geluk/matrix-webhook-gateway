@@ -21,16 +21,27 @@ export default class WebhookRepository {
       .delete();
   }
 
-  public async findByRoom(roomId: string): Promise<Webhook[]> {
+  public async findByRoom(roomId: string, userId?: string): Promise<Webhook[]> {
     logger.debug(`Looking up webhooks for room ${roomId}`);
-    return this.database.knex<Webhook>('webhook')
+    let query = this.database.knex<Webhook>('webhook')
       .where('room_id', '=', roomId);
+    if (userId) {
+      query = query.andWhere('user_id', '=', userId);
+    }
+    return query;
   }
 
   public async getByPath(path: string): Promise<Webhook | undefined> {
     logger.debug(`Looking up webhook for path '${path}'`);
     return this.database.knex<Webhook>('webhook')
       .where('path', '=', path.toLowerCase())
+      .first();
+  }
+
+  public async getById(id: number): Promise<Webhook | undefined> {
+    logger.debug(`Looking up webhook for id '${id}'`);
+    return this.database.knex<Webhook>('webhook')
+      .where('id', '=', id)
       .first();
   }
 }

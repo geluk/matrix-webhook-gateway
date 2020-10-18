@@ -69,6 +69,10 @@ export default class MatrixBridge {
     }
   }
 
+  public async leaveRoom(userId: string, roomId: string): Promise<unknown> {
+    return this.bridge.getIntentFromLocalpart(userId).leave(roomId);
+  }
+
   public async sendSecret(target: string, message: string): Promise<unknown> {
     const room = await this.privateRoomCollection.getPrivateRoom(target);
     return this.sendMessage(room, message);

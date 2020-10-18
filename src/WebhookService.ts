@@ -97,6 +97,14 @@ export default class WebhookService {
   }
 
   private async deleteWebhook(command: DeleteWebhookCommand, context: Command) {
+    const webhook = await this.webhookRepository.getById(command.webhook_id);
+    if (webhook) {
+      const allHooks = await this.webhookRepository.findByRoom(webhook.room_id, webhook.user_id);
+      if (allHooks.length === 1) {
+        logger.debug(`Last webhook for ${webhook.user_id} in ${webhook.room_id} deleted, leaving.`);
+        await this.bridge.leaveRoom(webhook.user_id, webhook.room_id);
+      }
+    }
     const removed = await this.webhookRepository
       .deleteFromRoom(command.webhook_id, context.message.event.room_id);
     if (removed) {
