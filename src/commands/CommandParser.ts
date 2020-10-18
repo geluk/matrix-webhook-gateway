@@ -1,6 +1,6 @@
 import MessageContext from '../bridge/MessageContext';
 
-export default class Command {
+export default class CommandParser {
   private args: string[];
 
   private command: string;
@@ -27,7 +27,7 @@ export default class Command {
     return this._message.reply(message);
   }
 
-  public execute(): void {
+  public parse(): void {
     switch (this.command) {
       case 'help':
         this._message.reply('Valid commands: help|hook|ping');
