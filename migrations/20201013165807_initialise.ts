@@ -5,6 +5,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('id')
       .primary()
       .notNullable();
+    table.string('private_room_id')
+      .nullable();
   })
     .createTable('webhook', (table) => {
       table.increments('id');
@@ -14,9 +16,7 @@ export async function up(knex: Knex): Promise<void> {
       table.string('room_id')
         .notNullable();
       table.string('user_id')
-        .references('id')
-        .inTable('user')
-        .onDelete('CASCADE');
+        .notNullable();
     });
 }
 

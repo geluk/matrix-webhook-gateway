@@ -19,6 +19,17 @@ export default class Database {
       connection: config.connection,
       wrapIdentifier: (value, origImpl) => origImpl(toSnakeCase(value)),
       useNullAsDefault: true, // Required for SQLite support
+      pool: {
+        // Type annotations are not available here.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        afterCreate: (conn: any, cb: any) => {
+          if (config.driver === 'sqlite3') {
+            // On SQLite, foreign keys are disabled by default.
+            // See https://github.com/knex/knex/issues/453
+            conn.run('PRAGMA foreign_keys = ON;', cb);
+          }
+        },
+      },
     };
     this._knex = Knex.default(knexConfig);
   }
