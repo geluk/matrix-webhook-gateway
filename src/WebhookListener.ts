@@ -1,12 +1,12 @@
 import * as Express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import WebhooksConfiguration from './configuration/WebhooksConfiguration';
-import WebHook from './models/Webhook';
+import Webhook from './models/Webhook';
 import WebhookRepository from './repositories/WebhookRepository';
 import logger from './util/logger';
 import Observable from './util/Observable';
 
-export default class WebHookListener {
+export default class WebhookListener {
   app: Express.Express;
 
   webhookRepository: WebhookRepository;
@@ -81,7 +81,7 @@ export default class WebHookListener {
 }
 
 export interface HookCall {
-  webhook: WebHook;
+  webhook: Webhook;
   content: SlackWebhook;
 }
 

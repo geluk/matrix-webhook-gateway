@@ -1,4 +1,4 @@
-export default interface WebHook {
+export default interface Webhook {
   id: number | undefined;
   path: string;
   room_id: string;

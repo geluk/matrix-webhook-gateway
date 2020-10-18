@@ -33,7 +33,7 @@ export default class Command {
         this._message.reply('Valid commands: help|hook|ping');
         break;
       case 'hook':
-        this.handleWebHook();
+        this.handleWebhook();
         break;
       case 'ping':
         this._message.reply('Pong!');
@@ -44,7 +44,7 @@ export default class Command {
     }
   }
 
-  private handleWebHook(): void {
+  private handleWebhook(): void {
     const replyUsage = () => {
       this._message.reply('Usage: -hook create|list|delete');
     };
@@ -56,7 +56,7 @@ export default class Command {
           break;
         }
         this._parameters = {
-          type: 'createWebHook',
+          type: 'createWebhook',
           webhook_user_id: this.args[1],
         };
         break;
@@ -66,7 +66,7 @@ export default class Command {
           break;
         }
         this._parameters = {
-          type: 'listWebHook',
+          type: 'listWebhook',
         };
         break;
       case 'delete':
@@ -76,7 +76,7 @@ export default class Command {
           break;
         }
         this._parameters = {
-          type: 'deleteWebHook',
+          type: 'deleteWebhook',
           webhook_id: parseInt(this.args[1], 10),
         };
         break;
@@ -87,16 +87,16 @@ export default class Command {
 }
 
 export type CreateWebhookCommand = {
-  type: 'createWebHook',
+  type: 'createWebhook',
   webhook_user_id: string,
 };
 
 export type ListWebhookCommand = {
-  type: 'listWebHook'
+  type: 'listWebhook'
 };
 
 export type DeleteWebhookCommand = {
-  type: 'deleteWebHook'
+  type: 'deleteWebhook'
   webhook_id: number,
 };
 

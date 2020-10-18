@@ -1,13 +1,13 @@
 import * as Knex from 'knex';
 import DatabaseConfiguration from '../configuration/DatabaseConfiguration';
 import User from '../models/User';
-import WebHook from '../models/Webhook';
+import Webhook from '../models/Webhook';
 import logger from '../util/logger';
 import toSnakeCase from '../util/toSnakeCase';
 
 export type Model =
   | User
-  | WebHook;
+  | Webhook;
 
 export default class Database {
   private _knex: Knex<Model, unknown[]>;
