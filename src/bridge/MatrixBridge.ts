@@ -4,12 +4,8 @@ import {
 
 import MatrixEventHandler from './MatrixEventHandler';
 import EventContext from './EventContext';
-import logger from '../util/logger';
+import logger, { forwardMatrixLog } from '../util/logger';
 import AppServiceConfiguration from '../configuration/AppServiceConfiguration';
-
-const bridgeLog = logger.getChildLogger({
-  name: 'bridge',
-});
 
 export default class MatrixBridge {
   private bridge: Bridge;
@@ -27,11 +23,8 @@ export default class MatrixBridge {
       logRequestOutcome: false,
       controller: {
         onUserQuery: this.handleUserQuery.bind(this),
-        onLog: this.handleLog.bind(this),
+        onLog: forwardMatrixLog,
         onEvent: this.handleEvent.bind(this),
-        // thirdPartyLookup: {
-        //   getUser: async (proto, fields) => PossiblePromise,
-        // }
       },
     });
     this.config = config;
@@ -78,14 +71,6 @@ export default class MatrixBridge {
   private handleUserQuery(user: MatrixUser): Record<string, unknown> {
     logger.info(`User provision requested: ${user.localpart}:${user.host}`);
     return {};
-  }
-
-  private handleLog(text: string, isError: boolean) {
-    if (isError) {
-      bridgeLog.warn(text);
-    } else {
-      bridgeLog.silly(text);
-    }
   }
 
   private handleEvent(request: Request<WeakEvent>) {
