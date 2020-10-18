@@ -4,7 +4,9 @@ import MatrixEventHandlers from './bridge/MatrixEventHandlers';
 import logger from './util/logger';
 import Database from './repositories/Database';
 import WebhookRepository from './repositories/WebhookRepository';
-import CommandParser, { CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand } from './commands/CommandParser';
+import {
+  Command, CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand,
+} from './commands/CommandParser';
 import randomString from './util/randomString';
 import WebhookListener, { HookCall } from './WebhookListener';
 import Configuration from './configuration/Configuration';
@@ -35,16 +37,16 @@ export default class WebhookService {
     this.config = config;
   }
 
-  private async handleCommand(command: CommandParser) {
-    switch (command.commandParameters?.type) {
+  private async handleCommand(command: Command) {
+    switch (command.parameters.type) {
       case 'createWebhook':
-        await this.createWebhook(command.commandParameters, command);
+        await this.createWebhook(command.parameters, command);
         break;
       case 'listWebhook':
-        await this.listWebhook(command.commandParameters, command);
+        await this.listWebhook(command.parameters, command);
         break;
       case 'deleteWebhook':
-        await this.deleteWebhook(command.commandParameters, command);
+        await this.deleteWebhook(command.parameters, command);
         break;
       default:
         break;
@@ -55,7 +57,7 @@ export default class WebhookService {
     await this.bridge.sendMessage(call.webhook.room_id, call.content.text, call.webhook.user_id);
   }
 
-  private async createWebhook(command: CreateWebhookCommand, context: CommandParser) {
+  private async createWebhook(command: CreateWebhookCommand, context: Command) {
     logger.debug('Creating a new webhook');
     logger.silly(command);
     const userId = generateLocalPart(
@@ -86,7 +88,7 @@ export default class WebhookService {
       + `URL: ${this.config.webhooks.public_url}${webhook.path}`);
   }
 
-  private async deleteWebhook(command: DeleteWebhookCommand, context: CommandParser) {
+  private async deleteWebhook(command: DeleteWebhookCommand, context: Command) {
     const removed = await this.webhookRepository
       .deleteFromRoom(command.webhook_id, context.message.event.room_id);
     if (removed) {
@@ -96,7 +98,7 @@ export default class WebhookService {
     }
   }
 
-  private async listWebhook(command: ListWebhookCommand, context: CommandParser) {
+  private async listWebhook(command: ListWebhookCommand, context: Command) {
     const hooks = await this.webhookRepository.findByRoom(context.message.event.room_id);
     if (hooks.length === 0) {
       context.reply('No hooks active in this room.');

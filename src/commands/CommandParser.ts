@@ -5,86 +5,82 @@ export default class CommandParser {
 
   private command: string;
 
-  private _message: MessageContext;
-
-  private _parameters: CommandParameters = null;
+  private message: MessageContext;
 
   public constructor(command: string, context: MessageContext) {
     this.args = command.split(' ');
     this.command = this.args.shift()?.toLowerCase() ?? '';
-    this._message = context;
+    this.message = context;
   }
 
-  public get commandParameters(): CommandParameters {
-    return this._parameters;
-  }
-
-  public get message(): MessageContext {
-    return this._message;
-  }
-
-  public async reply(message: string): Promise<unknown> {
-    return this._message.reply(message);
-  }
-
-  public parse(): void {
+  public async parse(): Promise<Command | undefined> {
     switch (this.command) {
       case 'help':
-        this._message.reply('Valid commands: help|hook|ping');
-        break;
+        await this.message.reply('Valid commands: help|hook|ping');
+        return undefined;
       case 'hook':
-        this.handleWebhook();
-        break;
+        return this.handleWebhook();
       case 'ping':
-        this._message.reply('Pong!');
-        break;
+        this.message.reply('Pong!');
+        return undefined;
       default:
-        this._message.reply('Unknown command.');
-        break;
+        this.message.reply('Unknown command.');
+        return undefined;
     }
   }
 
-  private handleWebhook(): void {
-    const replyUsage = () => {
-      this._message.reply('Usage: -hook create|list|delete');
+  private async handleWebhook(): Promise<Command | undefined> {
+    const replyUsage = async () => {
+      await this.message.reply('Usage: -hook create|list|delete');
+      return undefined;
     };
 
     switch (this.args[0]?.toLowerCase()) {
       case 'create':
         if (this.args.length !== 2) {
-          this._message.reply('Usage: -hook create <webhook_username>');
-          break;
+          await this.message.reply('Usage: -hook create <webhook_username>');
+          return undefined;
         }
-        this._parameters = {
+        return this.createCommand({
           type: 'createWebhook',
           webhook_user_id: this.args[1],
-        };
-        break;
+        });
       case 'list':
         if (this.args.length !== 1) {
-          this._message.reply('Usage: -hook list');
-          break;
+          await this.message.reply('Usage: -hook list');
+          return undefined;
         }
-        this._parameters = {
+        return this.createCommand({
           type: 'listWebhook',
-        };
-        break;
+        });
       case 'delete':
-
         if (this.args.length !== 2) {
-          this._message.reply('Usage: -hook delete <hook_number>');
-          break;
+          await this.message.reply('Usage: -hook delete <hook_number>');
+          return undefined;
         }
-        this._parameters = {
+        return this.createCommand({
           type: 'deleteWebhook',
           webhook_id: parseInt(this.args[1], 10),
-        };
-        break;
+        });
       default:
-        replyUsage();
+        return replyUsage();
     }
   }
+
+  private createCommand(params: CommandParameters): Command {
+    return {
+      parameters: params,
+      message: this.message,
+      reply: this.message.reply,
+    };
+  }
 }
+
+export type Command = {
+  parameters: CommandParameters,
+  message: MessageContext,
+  reply: (message: string) => Promise<unknown>,
+};
 
 export type CreateWebhookCommand = {
   type: 'createWebhook',
@@ -103,5 +99,4 @@ export type DeleteWebhookCommand = {
 type CommandParameters =
   | CreateWebhookCommand
   | ListWebhookCommand
-  | DeleteWebhookCommand
-  | null;
+  | DeleteWebhookCommand;

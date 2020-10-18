@@ -1,4 +1,4 @@
-import CommandParser from './CommandParser';
+import CommandParser, { Command } from './CommandParser';
 import Message from '../bridge/Message';
 import MessageContext from '../bridge/MessageContext';
 import MessageHandler from '../bridge/MessageHandler';
@@ -7,7 +7,7 @@ import Observable from '../util/Observable';
 const COMMAND_MATCH = /^-[A-z]/;
 
 export default class CommandHandler extends MessageHandler {
-  onCommand = new Observable<CommandParser>();
+  onCommand = new Observable<Command>();
 
   public constructor() {
     super();
@@ -20,9 +20,12 @@ export default class CommandHandler extends MessageHandler {
     const message = context.event.content as unknown as Message;
 
     if (message.body.match(COMMAND_MATCH)) {
-      const command = new CommandParser(message.body.substr(1), context);
-      command.parse();
-      await this.onCommand.notify(command);
+      const parser = new CommandParser(message.body.substr(1), context);
+
+      const invocation = await parser.parse();
+      if (invocation) {
+        await this.onCommand.notify(invocation);
+      }
     }
     return true;
   }
