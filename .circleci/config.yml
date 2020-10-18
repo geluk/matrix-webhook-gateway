@@ -78,6 +78,6 @@ workflows:
         - docker_build
         filters:
           tags:
-            only: /^[0-9.]+$/
+            only: /^.+/
           branches:
             ignore: /.*/
