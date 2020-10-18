@@ -84,8 +84,10 @@ export default class WebhookService {
     await this.webhookRepository.add(webhook);
     logger.debug('Webhook created successfully');
 
-    context.reply(`Your webhook for ${command.webhook_user_id} in ${context.message.event.room_id} was created.\n `
-      + `URL: ${this.config.webhooks.public_url}${webhook.path}`);
+    await this.bridge.sendSecret(context.message.event.sender, `Your webhook for ${command.webhook_user_id} in ${context.message.event.room_id} was created.\n `
+    + `URL: ${this.config.webhooks.public_url}${webhook.path}`);
+
+    await context.reply('I\'ve sent you a message with your webhook details.');
   }
 
   private async deleteWebhook(command: DeleteWebhookCommand, context: Command) {

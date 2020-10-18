@@ -50,12 +50,52 @@ export default class MatrixBridge {
   }
 
   public async tryJoinRoom(userId: string, roomId: string): Promise<boolean> {
+    logger.debug(`Adding ${userId} to room ${roomId}`);
     try {
+      // We could be smarter about this, by checking the room permissions
+      // ourselves, and then taking the appropriate action (direct join if
+      // anyone is allowed to join, invite if the bot user may send invites,
+      // fail when neither are true).
       await this.bridge.getIntentFromLocalpart(userId).join(roomId);
       return true;
     } catch {
+      logger.debug(`Unable to add ${userId} to room ${roomId}`);
       return false;
     }
+  }
+
+  public async sendSecret(target: string, message: string): Promise<unknown> {
+    const room = await this.getPrivateRoom(target);
+    return this.sendMessage(room, message);
+  }
+
+  public async getPrivateRoom(userId: string): Promise<string> {
+    const result = await this.getIntent(undefined).createRoom({
+      // Use the bot user to create the room
+      createAsClient: false,
+      options: {
+        invite: [userId],
+        // Allow clients to consider the room as a direct message
+        is_direct: true,
+        // This creates the room without an initial power_levels state event
+        preset: 'private_chat',
+        // Exclude the room from the public room list
+        visibility: 'private',
+        initial_state: [{
+          type: 'm.room.power_levels',
+          content: {
+            users: {
+              // Grant the bot user power level 100. All other users will have
+              // a power level of 0, so they won't be able to invite other users
+              // to this room.
+              [this.bridge.getBot().getUserId()]: 100,
+            },
+          },
+          state_key: '',
+        }],
+      },
+    });
+    return result.room_id;
   }
 
   public registerHandler(eventHandler: MatrixEventHandler): void {
