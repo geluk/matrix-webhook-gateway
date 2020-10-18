@@ -11,17 +11,25 @@ export default class PrivateRoomCollection {
 
   public async getPrivateRoom(userId: string): Promise<string> {
     const user = await this.userRepository.find(userId);
-    if (user && user.private_room_id) {
-      const members = await this.bridge.getBot().getJoinedMembers(user.private_room_id);
 
-      if (members[userId]) {
+    if (user && user.private_room_id) {
+      let members: Record<string, unknown> | undefined;
+      try {
+        members = await this.bridge.getBot().getJoinedMembers(user.private_room_id);
+      } catch (error) {
+        logger.warn(
+          `User ${user.id} has ${user.private_room_id} as their private room, `
+          + 'but I am not a member of it. A new private room will be created.',
+        );
+      }
+      if (members && !members[userId]) {
+        logger.debug(
+          `User ${user.id} is not a member of their private room anymore/yet, `
+          + 'resending invite.',
+        );
+        this.bridge.getIntent().invite(user.private_room_id, userId);
         return user.private_room_id;
       }
-
-      logger.debug(`User ${user.id} is not a member of their private room anymore/yet, `
-      + 'resending invite.');
-      this.bridge.getIntent().invite(user.private_room_id, userId);
-      return user.private_room_id;
     }
 
     const privateRoom = await this.createPrivateRoom(userId);
@@ -29,6 +37,7 @@ export default class PrivateRoomCollection {
       id: userId,
       private_room_id: privateRoom,
     });
+
     logger.debug(`Created private room ${privateRoom} for ${userId}`);
     return privateRoom;
   }
