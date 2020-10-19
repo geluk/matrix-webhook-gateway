@@ -38,6 +38,7 @@ export function configureLogger(verbosity: number): void {
 const bridgeLog = logger.getChildLogger({
   name: 'bridge',
 });
+
 export function forwardMatrixLog(text: string, isError: boolean): void {
   if (isError) {
     bridgeLog.warn(text);

@@ -35,7 +35,7 @@ export interface SlackWebhook {
   text: string;
   username?: string;
   icon_emoji?: string;
-  mrkdwn: boolean;
+  mrkdwn?: boolean;
 }
 
 export interface Turt2liveWebhook {

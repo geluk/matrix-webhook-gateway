@@ -1,6 +1,7 @@
 import { is } from 'typescript-is';
 import {
-  DiscordWebhook, NormalisedWebhookContent, SlackWebhook, Turt2liveWebhook, WebhookContent,
+  DiscordWebhook, NormalisedWebhookContent, SlackWebhook,
+  Turt2liveWebhook, WebhookContent,
 } from './formats';
 
 export default function transformWebhook(webhook: WebhookContent): NormalisedWebhookContent {

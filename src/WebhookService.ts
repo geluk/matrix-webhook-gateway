@@ -13,6 +13,7 @@ import Configuration from './configuration/Configuration';
 import { generateLocalPart } from './util/matrixUtilities';
 import UserRepository from './repositories/UserRepository';
 import { HookCall } from './webhooks/formats';
+import Matcher from './webhooks/Matcher';
 
 const HOOK_SECRET_LENGTH = 48;
 
@@ -40,8 +41,11 @@ export default class WebhookService {
 
     this.bridge = new MatrixBridge(config.app_service, this.userRepository);
     this.commandHandler.onCommand.observe(this.handleCommand.bind(this));
-    this.webhookListener = new WebhookListener(this.webhookRepository, config.webhooks);
-    this.webhookListener.onHookCalled.observe(this.handleHookCall.bind(this));
+    this.webhookListener = new WebhookListener(
+      config.webhooks,
+      new Matcher(this.webhookRepository),
+    );
+    this.webhookListener.onHookCall.observe(this.handleHookCall.bind(this));
   }
 
   private async handleCommand(command: Command) {
