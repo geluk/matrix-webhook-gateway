@@ -81,6 +81,10 @@ export default class WebhookService {
     };
     logger.silly('Webhook:', webhook);
 
+    // Setting up a new webhook generates quite a sequence of events, which can
+    // take a moment to be processed. Sending a typing notification provides
+    // immediate feedback that we're working on it.
+    this.bridge.sendTyping(webhook.room_id, true);
     if (!await this.bridge.tryJoinRoom(webhook.user_id, webhook.room_id)) {
       logger.debug(`${webhook.user_id} was unable to join ${webhook.room_id}`);
       context.reply('I am unable to invite a webhook user to this room.\n'
@@ -91,10 +95,12 @@ export default class WebhookService {
     await this.webhookRepository.add(webhook);
     logger.debug('Webhook created successfully');
 
-    await this.bridge.sendSecret(context.message.event.sender, `Your webhook for ${command.webhook_user_id} in ${context.message.event.room_id} was created.\n `
+    const secret = this.bridge.sendSecret(context.message.event.sender, `Your webhook for ${command.webhook_user_id} in ${context.message.event.room_id} was created.\n `
     + `URL: ${this.config.webhooks.public_url}${webhook.path}`);
 
-    await context.reply('I\'ve sent you a message with your webhook details.');
+    this.bridge.sendTyping(webhook.room_id, false);
+    const reply = context.reply('I\'ve sent you a message with your webhook details.');
+    await Promise.all([secret, reply]);
   }
 
   private async deleteWebhook(command: DeleteWebhookCommand, context: Command) {

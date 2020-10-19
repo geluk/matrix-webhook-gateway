@@ -69,8 +69,26 @@ export default class MatrixBridge {
     }
   }
 
+  // This method is not async because it makes more sense to handle errors
+  // in here, as failure to send a typing event is not a failure condition
+  // any of our callers are interested about. Instead, we just log it.
+  public sendTyping(roomId: string, typing: boolean): void {
+    this.bridge.getIntent().sendTyping(roomId, typing)
+      .catch((error) => {
+        logger.warn('Unable to send typing event:', error);
+      });
+  }
+
   public async leaveRoom(userId: string, roomId: string): Promise<unknown> {
-    return this.bridge.getIntentFromLocalpart(userId).leave(roomId);
+    try {
+      return await this.bridge.getIntentFromLocalpart(userId).leave(roomId);
+    } catch (error) {
+      if ((error.message as string).indexOf('not in room') < 0) {
+        throw error;
+      }
+      logger.debug(`User ${userId} already left ${roomId}, leave not necessary`);
+      return undefined;
+    }
   }
 
   public async sendSecret(target: string, message: string): Promise<unknown> {
