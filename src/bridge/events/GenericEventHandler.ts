@@ -15,6 +15,6 @@ export default class GenericEventHandler implements MatrixEventHandler {
     if (this.typeMatch(context)) {
       return this.handler(context);
     }
-    return true;
+    return false;
   }
 }
