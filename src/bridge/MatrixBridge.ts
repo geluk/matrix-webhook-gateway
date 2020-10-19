@@ -91,8 +91,8 @@ export default class MatrixBridge {
     }
   }
 
-  public async sendSecret(target: string, message: string): Promise<unknown> {
-    const room = await this.privateRoomCollection.getPrivateRoom(target);
+  public async sendSecret(userId: string, message: string): Promise<unknown> {
+    const room = await this.privateRoomCollection.getPrivateRoom(userId);
     return this.sendMessage(room, message);
   }
 
