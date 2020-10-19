@@ -12,6 +12,9 @@ module.exports = {
         "plugin:@typescript-eslint/recommended",
         "airbnb-typescript/base",
     ],
+    env: {
+        "jest": true,
+    },
     rules: {
         "class-methods-use-this": ["off"],
         "no-underscore-dangle": ["error", {
