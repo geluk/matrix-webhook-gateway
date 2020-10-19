@@ -1,7 +1,7 @@
 import CommandParser, { Command } from './CommandParser';
-import MessageContent from '../bridge/Message';
+import MessageContent from '../bridge/MessageContent';
 import MessageContext from '../bridge/MessageContext';
-import MessageHandler from '../bridge/MessageHandler';
+import MessageHandler from '../bridge/events/MessageHandler';
 import Observable from '../util/Observable';
 
 const COMMAND_MATCH = /^-[A-z]/;

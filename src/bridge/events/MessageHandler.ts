@@ -1,6 +1,6 @@
 import MatrixEventHandler from './MatrixEventHandler';
 import EventContext from './EventContext';
-import MessageContext from './MessageContext';
+import MessageContext from '../MessageContext';
 
 export default abstract class MessageHandler implements MatrixEventHandler {
   abstract async handleMessage(context: MessageContext): Promise<boolean>;

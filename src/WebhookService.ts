@@ -1,6 +1,6 @@
 import CommandHandler from './commands/CommandHandler';
 import MatrixBridge from './bridge/MatrixBridge';
-import MatrixEventHandlers from './bridge/MatrixEventHandlers';
+import MatrixEventHandlers from './bridge/events/MatrixEventHandlers';
 import logger from './util/logger';
 import Database from './repositories/Database';
 import WebhookRepository from './repositories/WebhookRepository';

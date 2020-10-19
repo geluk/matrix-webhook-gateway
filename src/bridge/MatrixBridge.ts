@@ -2,8 +2,8 @@ import {
   Bridge, MatrixUser, WeakEvent, Request, Intent,
 } from 'matrix-appservice-bridge';
 
-import MatrixEventHandler from './MatrixEventHandler';
-import EventContext from './EventContext';
+import MatrixEventHandler from './events/MatrixEventHandler';
+import EventContext from './events/EventContext';
 import logger, { forwardMatrixLog } from '../util/logger';
 import AppServiceConfiguration from '../configuration/AppServiceConfiguration';
 import UserRepository from '../repositories/UserRepository';

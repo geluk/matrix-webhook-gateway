@@ -1,6 +1,6 @@
 import { Bridge, WeakEvent } from 'matrix-appservice-bridge';
-import MessageContent from './Message';
-import EventContext from './EventContext';
+import MessageContent from './MessageContent';
+import EventContext from './events/EventContext';
 
 export default class MessageContext extends EventContext {
   private _message: MessageContent;
