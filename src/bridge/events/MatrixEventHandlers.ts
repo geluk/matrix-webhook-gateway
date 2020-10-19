@@ -7,10 +7,6 @@ export default class MatrixEventHandlers {
     return new GenericEventHandler(typeMatch, handler);
   }
 
-  static message(handler: EventHandler): MatrixEventHandler {
-    return this.eventType('m.room.message', handler);
-  }
-
   static invite(handler: EventHandler): MatrixEventHandler {
     const typeMatch: EventMatcher = (ctx) => ctx.event.type === 'm.room.member'
       && ctx.event.content.membership === 'invite';
