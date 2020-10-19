@@ -16,15 +16,11 @@ export default class CommandParser {
   public async parse(): Promise<Command | undefined> {
     switch (this.command) {
       case 'help':
-        await this.message.reply('Valid commands: help|hook|ping');
+        await this.message.reply('Valid commands: help|hook');
         return undefined;
       case 'hook':
         return this.handleWebhook();
-      case 'ping':
-        this.message.reply('Pong!');
-        return undefined;
       default:
-        this.message.reply('Unknown command.');
         return undefined;
     }
   }
