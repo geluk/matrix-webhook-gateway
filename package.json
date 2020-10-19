@@ -8,7 +8,7 @@
     "build": "npx ttsc --build",
     "package": "cp -r templates migrations node_modules out/webhook-gateway",
     "lint": "npx eslint . --ext .ts",
-    "test": "jest"
+    "test": "npx jest"
   },
   "author": "",
   "license": "MIT",
