@@ -1,4 +1,4 @@
-# Modify this file to configure the webhook-appservice.
+# Modify this file to configure the webhook gateway.
 
 # Homeserver appservice configuration.
 # These settings will be used to generate an appservice.yaml file,
@@ -7,7 +7,7 @@
 # homeserver.yaml file.
 app_service:
   # The ID of this application service. Must be unique on your homeserver.
-  id: webhook-appservice
+  id: webhook-gateway
   # Tokens used to facilitate communication between the appservice and the
   # homeserver. Keep these secret! Randomly generated on first startup.
   hs_token: {{ hs_token }}

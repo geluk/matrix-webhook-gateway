@@ -4,7 +4,7 @@ orbs:
 executors:
   docker_exec:
     environment:
-      IMAGE_NAME: geluk/webhook-appservice
+      IMAGE_NAME: geluk/webhook-gateway
     docker:
     - image: circleci/buildpack-deps:stretch
 jobs:
@@ -27,11 +27,11 @@ jobs:
         command: npm run package
     - run:
         name: Compress artifacts
-        command: tar -czf webhook-appservice.tar.gz ./webhook-appservice
+        command: tar -czf webhook-gateway.tar.gz ./webhook-gateway
         working_directory: ./out
     - store_artifacts:
-        path: ./out/webhook-appservice.tar.gz
-        destination: webhook-appservice.tar.gz
+        path: ./out/webhook-gateway.tar.gz
+        destination: webhook-gateway.tar.gz
   docker_build:
     executor: docker_exec
     steps:

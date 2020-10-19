@@ -7,7 +7,7 @@
 # Development data
 /local-dev/synapse-data
 /webhook-db.sqlite
-/webhook-appservice.yaml
+/gateway-config.yaml
 /appservice.yaml
 
 # Editor settings

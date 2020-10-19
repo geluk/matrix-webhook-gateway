@@ -1,12 +1,12 @@
 {
-  "name": "webhook-appservice",
+  "name": "webhook-gateway",
   "version": "0.0.0",
   "description": "Matrix.org webhook appservice",
   "private": true,
   "scripts": {
     "start": "ts-node --compiler ttypescript entry.ts -v",
     "build": "npx ttsc --build",
-    "package": "cp -r templates migrations node_modules out/webhook-appservice",
+    "package": "cp -r templates migrations node_modules out/webhook-gateway",
     "lint": "npx eslint . --ext .ts",
     "test": "jest"
   },

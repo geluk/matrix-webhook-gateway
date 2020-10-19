@@ -9,8 +9,8 @@ import randomString from '../util/randomString';
 
 const TEMPLATES_DIR = './templates';
 const APPSERVICE_TEMPLATE = `${TEMPLATES_DIR}/appservice.yaml`;
-const CONFIG_TEMPLATE = `${TEMPLATES_DIR}/webhook-appservice.yaml`;
-const CONFIG_SCHEMA = `${TEMPLATES_DIR}/webhook-appservice.schema.yaml`;
+const CONFIG_TEMPLATE = `${TEMPLATES_DIR}/gateway-config.yaml`;
+const CONFIG_SCHEMA = `${TEMPLATES_DIR}/gateway-config.schema.yaml`;
 const APPSERVICE_OUTPUT = './appservice.yaml';
 
 // Required to prevent Mustache from HTML-escaping template values.
