@@ -101,7 +101,8 @@ export default class MatrixBridge {
       .then((results) => {
         const handled = results.reduce((p, c) => p || c);
         if (!handled) {
-          logger.info(`Event ignored: ${event.type}`);
+          logger.debug(`Event ignored: ${event.type} from ${event.sender} in ${event.room_id}, state: ${event.state_key} content:`);
+          logger.silly(event.content);
         }
       })
       .catch((error) => {
