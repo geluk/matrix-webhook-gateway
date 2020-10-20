@@ -65,6 +65,11 @@ export default class WebhookService {
   }
 
   private async handleHookCall(call: HookCall): Promise<void> {
+    await this.bridge.setProfileDetails(
+      call.webhook.user_id,
+      call.content.username,
+      call.content.icon,
+    );
     await this.bridge.sendMessage(call.webhook.room_id, call.content.text, call.webhook.user_id);
   }
 

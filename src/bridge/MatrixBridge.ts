@@ -1,6 +1,9 @@
 import {
   Bridge, MatrixUser, WeakEvent, Request, Intent,
 } from 'matrix-appservice-bridge';
+import { is } from 'typescript-is';
+import fetch from 'node-fetch';
+import mime from 'mime';
 
 import MatrixEventHandler from './events/MatrixEventHandler';
 import EventContext from './events/EventContext';
@@ -8,6 +11,8 @@ import logger, { forwardMatrixLog } from '../util/logger';
 import AppServiceConfiguration from '../configuration/AppServiceConfiguration';
 import UserRepository from '../repositories/UserRepository';
 import PrivateRoomCollection from './PrivateRoomCollection';
+import { EmojiIcon, UrlIcon } from '../webhooks/formats';
+import randomString from '../util/randomString';
 
 export default class MatrixBridge {
   private bridge: Bridge;
@@ -88,6 +93,51 @@ export default class MatrixBridge {
       }
       logger.debug(`User ${userId} already left ${roomId}, leave not necessary`);
       return undefined;
+    }
+  }
+
+  public async uploadImage(userId: string, url: string): Promise<undefined | string> {
+    const intent = this.getIntent(userId);
+
+    const response = await fetch(url);
+    let contentType = response.headers.get('content-type');
+    if (!contentType) {
+      contentType = mime.getType(url);
+    }
+    if (!contentType) {
+      logger.warn(`Unable to upload: ${url} to Matrix: could not determine content type.`);
+      return undefined;
+    }
+
+    const uploadResponse = await intent.getClient().uploadContent({
+      name: randomString(40),
+      stream: await response.buffer(),
+      type: contentType,
+    });
+    const result: {
+      content_uri: string,
+    } | undefined = JSON.parse(uploadResponse);
+
+    return result?.content_uri;
+  }
+
+  public async setProfileDetails(
+    userId: string,
+    username: string | undefined,
+    icon: EmojiIcon | UrlIcon | undefined,
+  ): Promise<void> {
+    const intent = this.getIntent(userId);
+
+    if (username) {
+      await intent.setDisplayName(username);
+    }
+    if (is<UrlIcon>(icon)) {
+      if (!icon.url.startsWith('mxc://')) {
+        const result = await this.uploadImage(userId, icon.url);
+        if (result) {
+          await intent.setAvatarUrl(result);
+        }
+      }
     }
   }
 
