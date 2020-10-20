@@ -9,9 +9,14 @@ executors:
     - image: circleci/buildpack-deps:stretch
 jobs:
   build:
-    executor: node/default
+    docker:
+    - image: 'cimg/base:stable'
     steps:
     - checkout
+    - node/install
+    - run:
+        name: Check Node version
+        command: node --version
     - node/install-packages
     - run:
         name: Run linter
