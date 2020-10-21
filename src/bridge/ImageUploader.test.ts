@@ -1,5 +1,5 @@
 import { Headers } from 'node-fetch';
-import UploadedImageRepository from '../repositories/UploadedImageRepository';
+import { UploadedImageRepository } from '../repositories/UploadedImageRepository';
 import ImageUploader, { DownloadResponse, UploadClient } from './ImageUploader';
 
 type UploadResponse =
@@ -26,16 +26,52 @@ function getDownloader(contentType?: string | undefined):
   });
 }
 
-function getRepository(): UploadedImageRepository {
-  return undefined as unknown as UploadedImageRepository;
-}
-
 test('Returns correct content URL', async () => {
+  const repository: UploadedImageRepository = {
+    add: async (_image) => undefined,
+    find: async (_hash) => undefined,
+  };
+
   const uploader = new ImageUploader(getClient({
     content_uri: 'mxc://example',
-  }), getDownloader(), getRepository());
+  }), getDownloader(), repository);
 
   const result = await uploader.uploadImage('test', 'http://example.com');
 
   expect(result).toBe('mxc://example');
+});
+
+test('Returns URL from repository if the image already exists', async () => {
+  const repository: UploadedImageRepository = {
+    add: async (_image) => undefined,
+    find: async (_hash) => ({
+      hash: '',
+      matrix_url: 'mxc://existing',
+      original_url: '',
+    }),
+  };
+
+  const uploader = new ImageUploader(getClient({
+    content_uri: 'mxc://new',
+  }), getDownloader(), repository);
+
+  const result = await uploader.uploadImage('test', 'http://example.com');
+
+  expect(result).toBe('mxc://existing');
+});
+
+test('Stores the hash of the downloaded image in the repository', async () => {
+  const add = jest.fn();
+  const repository: UploadedImageRepository = {
+    add,
+    find: async (_hash) => undefined,
+  };
+
+  const uploader = new ImageUploader(getClient({
+    content_uri: 'mxc://new',
+  }), getDownloader(), repository);
+
+  await uploader.uploadImage('test', 'http://example.com');
+
+  expect(add).toBeCalled();
 });

@@ -1,7 +1,7 @@
 import mime from 'mime';
 import hasha from 'hasha';
 import { Headers } from 'node-fetch';
-import UploadedImageRepository from '../repositories/UploadedImageRepository';
+import { UploadedImageRepository } from '../repositories/UploadedImageRepository';
 import logger from '../util/logger';
 import randomString from '../util/randomString';
 

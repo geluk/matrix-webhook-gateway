@@ -12,7 +12,7 @@ import UserRepository from '../repositories/UserRepository';
 import PrivateRoomCollection from './PrivateRoomCollection';
 import { EmojiIcon, UrlIcon } from '../webhooks/formats';
 import ImageUploader from './ImageUploader';
-import UploadedImageRepository from '../repositories/UploadedImageRepository';
+import { UploadedImageRepository } from '../repositories/UploadedImageRepository';
 
 export default class MatrixBridge {
   private bridge: Bridge;

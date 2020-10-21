@@ -2,7 +2,12 @@ import UploadedImage from '../models/UploadedImage';
 import logger from '../util/logger';
 import Database from './Database';
 
-export default class UploadedImageRepository {
+export interface UploadedImageRepository {
+  add(entity: UploadedImage): Promise<void>;
+  find(hash: string): Promise<UploadedImage | undefined>;
+}
+
+export default class UploadedImageFromDatabase implements UploadedImageRepository {
   database: Database;
 
   public constructor(database: Database) {
