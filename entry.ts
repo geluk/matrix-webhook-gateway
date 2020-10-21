@@ -10,8 +10,9 @@ import yargs = require('yargs/yargs');
 
 const { argv } = yargs(process.argv.slice(2))
   .version(false)
+  .strict(true)
   .usage('$0 [options]')
-  .alias('c', 'config-file')
+  .alias('c', 'config')
   .string('c')
   .nargs('c', 1)
   .default('c', './gateway-config.yaml')
