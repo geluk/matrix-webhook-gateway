@@ -1,1 +1,11 @@
+# VCS
+.git
+.gitignore
+
+# Development configuration/data
+/appservice.yaml
+/gateway-config.yaml
+/local-dev
+/webhook-db.sqlite
+
 /node_modules
