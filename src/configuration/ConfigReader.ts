@@ -96,7 +96,7 @@ export default class ConfigReader {
     try {
       fs.writeFileSync(path, config);
     } catch (error) {
-      logger.error(`Could not write generated configuration file to '${config}'`);
+      logger.error(`Could not write generated configuration file to '${path}'`);
       logger.error(error.message);
       return false;
     }
