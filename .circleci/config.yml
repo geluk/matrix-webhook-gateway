@@ -80,6 +80,12 @@ workflows:
     - build
   build:
     jobs:
+    - build:
+        filters:
+          tags:
+            only: /^.+/
+          branches:
+            ignore: /.*/
     - docker_build:
         filters:
           tags:
