@@ -87,6 +87,8 @@ workflows:
           branches:
             ignore: /.*/
     - docker_build:
+        requires:
+        - build
         filters:
           tags:
             only: /^.+/
