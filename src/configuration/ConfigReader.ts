@@ -11,21 +11,20 @@ const TEMPLATES_DIR = './templates';
 const APPSERVICE_TEMPLATE = `${TEMPLATES_DIR}/appservice.yaml`;
 const CONFIG_TEMPLATE = `${TEMPLATES_DIR}/gateway-config.yaml`;
 const CONFIG_SCHEMA = `${TEMPLATES_DIR}/gateway-config.schema.yaml`;
-const APPSERVICE_OUTPUT = './appservice.yaml';
 
 // Required to prevent Mustache from HTML-escaping template values.
 Mustache.escape = (text) => text;
 
 export default class ConfigReader {
-  public static loadConfig(path: string): Configuration | undefined {
-    if (!fs.existsSync(path)) {
-      if (!this.generateConfig(path)) {
+  public static loadConfig(configPath: string, appservicePath: string): Configuration | undefined {
+    if (!fs.existsSync(configPath)) {
+      if (!this.generateConfig(configPath)) {
         logger.error('Could not generate configuration file');
         return undefined;
       }
     }
 
-    const config = this.readConfig(path);
+    const config = this.readConfig(configPath);
     if (config === undefined) {
       return undefined;
     }
@@ -43,7 +42,7 @@ export default class ConfigReader {
       return undefined;
     }
 
-    this.generateAppServiceConfig(validatedConfig);
+    this.generateAppServiceConfig(validatedConfig, appservicePath);
     return validatedConfig;
   }
 
@@ -139,7 +138,7 @@ export default class ConfigReader {
     return Configuration.from(config);
   }
 
-  private static generateAppServiceConfig(config: Configuration): void {
+  private static generateAppServiceConfig(config: Configuration, path: string): void {
     logger.debug('Generating appservice.yaml');
 
     let appserviceTemplate: string;
@@ -154,9 +153,9 @@ export default class ConfigReader {
     const rendered = Mustache.render(appserviceTemplate, config);
 
     try {
-      fs.writeFileSync(APPSERVICE_OUTPUT, rendered);
+      fs.writeFileSync(path, rendered);
     } catch (error) {
-      logger.error(`Could not write generated appservice configuration to '${APPSERVICE_OUTPUT}'`);
+      logger.error(`Could not write generated appservice configuration to '${path}'`);
       logger.error(error.message);
     }
   }

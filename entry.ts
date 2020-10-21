@@ -12,11 +12,16 @@ const { argv } = yargs(process.argv.slice(2))
   .version(false)
   .strict(true)
   .usage('$0 [options]')
-  .alias('c', 'config')
   .string('c')
+  .alias('c', 'config')
   .nargs('c', 1)
   .default('c', './gateway-config.yaml')
   .describe('c', 'Path to the configuration file')
+  .string('a')
+  .alias('a', 'appservice-config')
+  .nargs('a', 1)
+  .default('a', './appservice.yaml')
+  .describe('a', 'Where the generated appservice.yaml should be placed')
   .count('v')
   .alias('v', 'verbose')
   .describe('v', 'Log verbosity, repeat multiple times to raise')
@@ -37,7 +42,7 @@ process.on('unhandledRejection', (error) => {
   process.exit(1);
 });
 
-const config = ConfigReader.loadConfig(argv.c);
+const config = ConfigReader.loadConfig(argv.c, argv.a);
 if (typeof config === 'undefined') {
   logger.fatal('Could not load configuration file, application will now exit');
   process.exit(1);
