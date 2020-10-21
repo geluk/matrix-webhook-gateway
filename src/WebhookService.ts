@@ -14,6 +14,7 @@ import { generateLocalPart } from './util/matrixUtilities';
 import UserRepository from './repositories/UserRepository';
 import { HookCall } from './webhooks/formats';
 import Matcher from './webhooks/Matcher';
+import UploadedImageRepository from './repositories/UploadedImageRepository';
 
 const HOOK_SECRET_LENGTH = 48;
 
@@ -38,8 +39,9 @@ export default class WebhookService {
 
     this.webhookRepository = new WebhookRepository(this.database);
     this.userRepository = new UserRepository(this.database);
+    const imageRepository = new UploadedImageRepository(this.database);
 
-    this.bridge = new MatrixBridge(config.app_service, this.userRepository);
+    this.bridge = new MatrixBridge(config.app_service, imageRepository, this.userRepository);
     this.commandHandler.onCommand.observe(this.handleCommand.bind(this));
     this.webhookListener = new WebhookListener(
       config.webhooks,

@@ -42,7 +42,7 @@ export default class Database {
     let migrations: number;
     try {
       logger.silly('Retrieving migration status');
-      migrations = await this._knex.migrate.status();
+      migrations = Math.abs(await this._knex.migrate.status());
     } catch {
       // This may have failed if we haven't executed the initial migration yet.
       // Let's try that first. If something else is wrong, this will also throw
@@ -50,7 +50,7 @@ export default class Database {
       await this._knex.migrate.up();
       logger.info('Created initial database structure');
       // If it succeeded, we should now be able to request the migration status.
-      migrations = await this._knex.migrate.status();
+      migrations = Math.abs(await this._knex.migrate.status());
     }
     if (migrations === 0) {
       logger.debug('There are no pending migrations');
@@ -61,7 +61,13 @@ export default class Database {
     } else {
       logger.info(`There are ${migrations} pending migrations`);
     }
-    await this._knex.migrate.latest();
-    logger.debug('Migration finished');
+    const result = await this._knex.migrate.latest();
+    if (result[1]) {
+      const migrationResults = result[1] as string[];
+      migrationResults.forEach((mres) => {
+        logger.info(` - ${mres}`);
+      });
+    }
+    logger.info('Migration finished');
   }
 }

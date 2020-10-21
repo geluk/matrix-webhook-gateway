@@ -3,7 +3,6 @@ import {
 } from 'matrix-appservice-bridge';
 import { is } from 'typescript-is';
 import fetch from 'node-fetch';
-import mime from 'mime';
 
 import MatrixEventHandler from './events/MatrixEventHandler';
 import EventContext from './events/EventContext';
@@ -12,7 +11,8 @@ import AppServiceConfiguration from '../configuration/AppServiceConfiguration';
 import UserRepository from '../repositories/UserRepository';
 import PrivateRoomCollection from './PrivateRoomCollection';
 import { EmojiIcon, UrlIcon } from '../webhooks/formats';
-import randomString from '../util/randomString';
+import ImageUploader from './ImageUploader';
+import UploadedImageRepository from '../repositories/UploadedImageRepository';
 
 export default class MatrixBridge {
   private bridge: Bridge;
@@ -23,7 +23,8 @@ export default class MatrixBridge {
 
   public constructor(
     private config: AppServiceConfiguration,
-    private userRepository: UserRepository,
+    private imageRepository: UploadedImageRepository,
+    userRepository: UserRepository,
   ) {
     this.bridge = new Bridge({
       homeserverUrl: config.homeserver_url,
@@ -96,31 +97,6 @@ export default class MatrixBridge {
     }
   }
 
-  public async uploadImage(userId: string, url: string): Promise<undefined | string> {
-    const intent = this.getIntent(userId);
-
-    const response = await fetch(url);
-    let contentType = response.headers.get('content-type');
-    if (!contentType) {
-      contentType = mime.getType(url);
-    }
-    if (!contentType) {
-      logger.warn(`Unable to upload: ${url} to Matrix: could not determine content type.`);
-      return undefined;
-    }
-
-    const uploadResponse = await intent.getClient().uploadContent({
-      name: randomString(40),
-      stream: await response.buffer(),
-      type: contentType,
-    });
-    const result: {
-      content_uri: string,
-    } | undefined = JSON.parse(uploadResponse);
-
-    return result?.content_uri;
-  }
-
   public async setProfileDetails(
     userId: string,
     username: string | undefined,
@@ -132,8 +108,11 @@ export default class MatrixBridge {
       await intent.setDisplayName(username);
     }
     if (is<UrlIcon>(icon)) {
-      if (!icon.url.startsWith('mxc://')) {
-        const result = await this.uploadImage(userId, icon.url);
+      if (icon.url.startsWith('mxc://')) {
+        await intent.setAvatarUrl(icon.url);
+      } else {
+        const client = new ImageUploader(intent.getClient(), fetch, this.imageRepository);
+        const result = await client.uploadImage(userId, icon.url);
         if (result) {
           await intent.setAvatarUrl(result);
         }
