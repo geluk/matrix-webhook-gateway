@@ -69,6 +69,6 @@ workflows:
     - docker_publish:
         filters:
           tags:
-            only: /^.+/
+            only: /^[0-9.]+$/
           branches:
             ignore: /.*/
