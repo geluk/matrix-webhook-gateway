@@ -1,3 +1,4 @@
+import Knex from 'knex';
 import { Logger } from 'tslog';
 
 const logger = new Logger({
@@ -45,4 +46,17 @@ export function forwardMatrixLog(text: string, isError: boolean): void {
   } else {
     bridgeLog.silly(text);
   }
+}
+
+export function getKnexLogger(): Knex.Logger {
+  const knexLog = logger.getChildLogger({
+    name: 'knex',
+  });
+  return {
+    warn: (msg: string) => knexLog.warn(msg),
+    error: (msg: string) => knexLog.error(msg),
+    debug: (msg: string) => knexLog.silly(msg),
+    inspectionDepth: 10,
+    enableColors: true,
+  };
 }

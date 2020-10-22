@@ -2,7 +2,7 @@ import * as Knex from 'knex';
 import DatabaseConfiguration from '../configuration/DatabaseConfiguration';
 import User from '../models/User';
 import Webhook from '../models/Webhook';
-import logger from '../util/logger';
+import logger, { getKnexLogger } from '../util/logger';
 import toSnakeCase from '../util/toSnakeCase';
 
 export type Model =
@@ -15,6 +15,7 @@ export default class Database {
   public constructor(config: DatabaseConfiguration) {
     logger.debug(`Creating DB connection with ${config.driver}`);
     const knexConfig: Knex.Config = {
+      log: getKnexLogger(),
       client: config.driver,
       connection: config.connection,
       wrapIdentifier: (value, origImpl) => origImpl(toSnakeCase(value)),
