@@ -151,7 +151,7 @@ export default class WebhookService {
 
       if (context.event.state_key === context.bridge.getBot().getUserId()) {
         logger.info(`Accepting invite to ${context.event.room_id}.`);
-        context.bridge.getIntent(context.event.state_key).join(context.event.room_id);
+        await context.bridge.getIntent(context.event.state_key).join(context.event.room_id);
       }
       return true;
     }));
