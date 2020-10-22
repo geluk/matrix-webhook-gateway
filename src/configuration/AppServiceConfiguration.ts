@@ -1,6 +1,6 @@
 import { AppServiceRegistration } from 'matrix-appservice-bridge';
 import logger from '../util/logger';
-import { generateLocalPart } from '../util/matrixUtilities';
+import { templateLocalPart } from '../util/matrixUtilities';
 
 export default class AppServiceConfiguration {
   id: string;
@@ -46,7 +46,7 @@ export default class AppServiceConfiguration {
   }
 
   public get user_namespace_regex() {
-    return generateLocalPart(this.user_pattern, '.*', '.*');
+    return templateLocalPart(this.user_pattern, '.*', '.*');
   }
 
   public toAppServiceRegistration(): AppServiceRegistration {
