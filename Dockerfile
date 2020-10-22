@@ -12,5 +12,14 @@ EXPOSE 8023
 
 USER 953:953
 
-ENTRYPOINT [ "/usr/local/bin/npx", "ts-node", "--compiler", "ttypescript", "entry.ts" ]
-CMD [ "--config", "/config/gateway-config.yaml", "--appservice-config", "/data/appservice-webhook-gateway.yaml" ]
+ENTRYPOINT ["/usr/local/bin/npx", \
+    "ts-node", \
+    "--compiler", \
+    "ttypescript", \
+    "entry.ts", \
+    "--config", \
+    "/config/gateway-config.yaml", \
+    "--appservice-config", \
+    "/data/appservice-webhook-gateway.yaml" \
+]
+CMD []
