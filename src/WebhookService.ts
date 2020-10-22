@@ -85,7 +85,6 @@ export default class WebhookService {
     );
 
     const webhook = {
-      id: undefined,
       path: `/hook/${randomString(HOOK_SECRET_LENGTH)}`,
       user_id: userId,
       room_id: context.message.event.room_id,
