@@ -35,9 +35,9 @@ export default class WebhookListener {
 
   private async handleRequest(rq: Request, rs: Response) {
     logger.debug(`${rq.method} ${rq.url}`);
-    logger.silly(`${rq.body}`);
     const match = await this.webhookMatcher.matchRequest(rq);
     if (match) {
+      logger.silly('Request body: ', rq.body);
       rs.send('Ok');
       this.onHookCall.notify(match).catch((error) => {
         logger.error('Failed to handle webhook invocation: ', error);
