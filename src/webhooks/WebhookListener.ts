@@ -35,6 +35,7 @@ export default class WebhookListener {
 
   private async handleRequest(rq: Request, rs: Response) {
     logger.debug(`${rq.method} ${rq.url}`);
+    logger.silly(`${rq.body}`);
     const match = await this.webhookMatcher.matchRequest(rq);
     if (match) {
       rs.send('Ok');
