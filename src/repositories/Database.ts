@@ -15,6 +15,7 @@ export default class Database {
   public constructor(config: DatabaseConfiguration) {
     logger.debug(`Creating DB connection with ${config.driver}`);
     const knexConfig: Knex.Config = {
+      debug: false, // Set to true to enable query debugging
       log: getKnexLogger(),
       client: config.driver,
       connection: config.connection,
@@ -23,11 +24,13 @@ export default class Database {
       pool: {
         // Type annotations are not available here.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        afterCreate: (conn: any, cb: any) => {
+        afterCreate: (conn: any, done: any) => {
           if (config.driver === 'sqlite3') {
             // On SQLite, foreign keys are disabled by default.
             // See https://github.com/knex/knex/issues/453
-            conn.run('PRAGMA foreign_keys = ON;', cb);
+            conn.run('PRAGMA foreign_keys = ON;', done);
+          } else {
+            done(false, conn);
           }
         },
       },
