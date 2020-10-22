@@ -30,7 +30,11 @@ export default function transformWebhook(webhook: WebhookContent): NormalisedWeb
       content.format = 'markdown';
     }
     content.username = webhook.username;
-    if (webhook.icon_emoji) {
+    if (webhook.icon_url) {
+      content.icon = {
+        url: webhook.icon_url,
+      };
+    } else if (webhook.icon_emoji) {
       content.icon = {
         emoji: webhook.icon_emoji,
       };

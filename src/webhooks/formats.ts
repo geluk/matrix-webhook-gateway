@@ -35,6 +35,7 @@ export interface SlackWebhook {
   text: string;
   username?: string;
   icon_emoji?: string;
+  icon_url?: string;
   mrkdwn?: boolean;
 }
 
