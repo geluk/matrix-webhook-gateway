@@ -45,11 +45,17 @@ export default class MatrixBridge {
     target: string,
     message: string,
     sender?: string | undefined,
+    format: 'html' | 'plain' | 'markdown' = 'plain',
   ): Promise<unknown> {
-    return this.getIntent(sender).sendMessage(target, {
+    const content: Record<string, unknown> = {
       body: message,
       msgtype: 'm.text',
-    });
+    };
+    if (format === 'html') {
+      content.format = 'org.matrix.custom.html';
+      content.formatted_body = message;
+    }
+    return this.getIntent(sender).sendMessage(target, content);
   }
 
   public getIntent(userId: string | undefined): Intent {

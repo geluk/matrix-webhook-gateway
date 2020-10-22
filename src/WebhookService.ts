@@ -72,7 +72,12 @@ export default class WebhookService {
       call.content.username,
       call.content.icon,
     );
-    await this.bridge.sendMessage(call.webhook.room_id, call.content.text, call.webhook.user_id);
+    await this.bridge.sendMessage(
+      call.webhook.room_id,
+      call.content.text,
+      call.webhook.user_id,
+      call.content.format,
+    );
   }
 
   private async createWebhook(command: CreateWebhookCommand, context: Command) {
