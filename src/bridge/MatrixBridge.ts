@@ -129,10 +129,12 @@ export default class MatrixBridge {
     this.eventHandlers.push(eventHandler);
   }
 
-  public start(): void {
+  public async start(): Promise<void> {
     logger.silly('Starting Matrix bridge');
-    this.bridge.run(this.config.listen_port, undefined, undefined, this.config.listen_host);
+    await this.bridge.run(this.config.listen_port, undefined, undefined, this.config.listen_host);
     logger.info(`Matrix bridge running on ${this.config.listen_host}:${this.config.listen_port}`);
+    await this.getIntent(undefined).ensureRegistered(true);
+    await this.getIntent(undefined).setDisplayName(this.config.bot_user_name);
   }
 
   private handleUserQuery(user: MatrixUser): Record<string, unknown> {

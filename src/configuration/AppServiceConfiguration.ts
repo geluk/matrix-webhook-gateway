@@ -25,6 +25,8 @@ export default class AppServiceConfiguration {
 
   listen_port: number;
 
+  bot_user_name: string;
+
   // We rely on schema validation to ensure that all properties are of the
   // correct type, so we can safely assert the types of property values here.
   // In the case of optional properties, we only need to perform null/undefined
@@ -43,6 +45,7 @@ export default class AppServiceConfiguration {
     this.homeserver_url = config.homeserver_url ?? 'http://127.0.0.1:8008';
     this.listen_host = config.listen_host ?? '0.0.0.0';
     this.listen_port = config.listen_port ?? 8023;
+    this.bot_user_name = config.bot_user_name ?? 'Webhook';
   }
 
   public get user_namespace_regex() {

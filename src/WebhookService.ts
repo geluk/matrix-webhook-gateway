@@ -142,7 +142,7 @@ export default class WebhookService {
   }
 
   public async start(): Promise<void> {
-    this.bridge.start();
+    await this.bridge.start();
 
     this.bridge.registerHandler(this.commandHandler);
     this.bridge.registerHandler(MatrixEventHandlers.invite(async (context) => {

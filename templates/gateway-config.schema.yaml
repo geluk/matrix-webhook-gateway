@@ -31,6 +31,8 @@ properties:
       listen_port:
         type: integer
         minimum: 1
+      bot_user_name:
+        type: string
     additionalProperties: false
     required: [ hs_token, as_token, homeserver_name, app_service_url ]
   database:

@@ -28,6 +28,8 @@ app_service:
   # Address and port used to listen for incoming events from the homeserver.
   listen_host: '0.0.0.0'
   listen_port: 8023
+  # Display name of the bot user.
+  bot_user_name: 'Webhook'
 
 # Configuration for the webhook service.
 webhooks:
