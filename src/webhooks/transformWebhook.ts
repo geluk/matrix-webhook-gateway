@@ -32,7 +32,7 @@ export default function transformWebhook(webhook: WebhookContent): NormalisedWeb
 
   if (is<AppriseJsonWebhook_1_0>(webhook)) {
     content.format = 'html';
-    content.text = `<strong>${webhook.title}</strong>\n${webhook.message}`;
+    content.text = `<strong>${webhook.title}</strong><br />\n${webhook.message}`;
   } else if (is<AppriseJsonWebhook_Unknown>(webhook)) {
     content.text = webhook.message;
   }
