@@ -70,12 +70,10 @@ export default class PluginCollection {
     if (!fs.existsSync(cacheFile)) {
       this.compilePlugin(pluginPath, cacheFile);
     }
-    const requirePath = `${cacheFile}`;
-
-    logger.debug(`Loading plugin from ${requirePath}`);
+    logger.debug(`Loading plugin from ${cacheFile}`);
 
     // eslint-disable-next-line
-    const pluginContainer = require(requirePath).default;
+    const pluginContainer = require(cacheFile).default;
 
     if (is<EvaluatedPlugin>(pluginContainer)) {
       if (pluginContainer.format.match(/[a-z0-9]+/)) {
