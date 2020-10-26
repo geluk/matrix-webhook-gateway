@@ -9,6 +9,7 @@
 /webhook-db.sqlite
 /gateway-config.yaml
 /appservice.yaml
+/plugins/__cache
 
 # Editor settings
 .vscode
