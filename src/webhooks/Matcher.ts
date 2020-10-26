@@ -1,10 +1,11 @@
 import { is } from 'typescript-is';
+import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 import WebhookRepository from '../repositories/WebhookRepository';
 import logger from '../util/logger';
 import {
   HookCall, WebhookMessage, WebhookContent,
 } from './formats';
-import PluginCollection from './plugins';
+import PluginCollection from './PluginCollection';
 import transformWebhook from './transformWebhook';
 
 export interface Request {
@@ -17,8 +18,9 @@ export default class Matcher {
 
   public constructor(
     private webhookRepository: WebhookRepository,
+    private config: WebhooksConfiguration,
   ) {
-    this.plugins = new PluginCollection('plugins');
+    this.plugins = new PluginCollection(config);
   }
 
   public async matchRequest(rq: Request): Promise<HookCall | undefined> {

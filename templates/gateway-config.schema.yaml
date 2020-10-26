@@ -78,5 +78,9 @@ properties:
         minimum: 1
       public_url:
         type: string
+      plugin_directory:
+        type: string
+      plugin_cache_directory:
+        type: string
     required: [ public_url ]
 required: [ app_service, webhooks ]

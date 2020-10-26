@@ -39,6 +39,11 @@ webhooks:
   # Public base URL to which the webhook path should be appended. If you run the
   # service at some subpath behind a reverse proxy, it should be included here.
   public_url: http://127.0.0.1:8020
+  # Path to the plugin directory. Any Typescript files in this directory will be
+  # loaded as webhook plugins.
+  plugin_directory: ./plugins
+  # Path to the directory where the plugin compiler may store cached plugins.
+  plugin_cache_directory: ./plugins/__cache
 
 # Configures the database where the webhook details are stored.
 database:

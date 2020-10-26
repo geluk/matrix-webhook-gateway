@@ -7,6 +7,7 @@ import isTransformer from 'typescript-is/lib/transform-inline/transformer';
 
 import logger from '../util/logger';
 import { WebhookMessage } from './formats';
+import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 
 interface WebhookPlugin {
   version: '1',
@@ -28,12 +29,15 @@ export default class PluginCollection {
 
   private loaded = false;
 
+  private pluginDirectory: string;
+
   private cacheDirectory: string;
 
   public constructor(
-    private pluginDirectory: string,
+    private config: WebhooksConfiguration,
   ) {
-    this.cacheDirectory = path.resolve(`${this.pluginDirectory}/__cache`);
+    this.pluginDirectory = path.resolve(this.config.plugin_directory);
+    this.cacheDirectory = path.resolve(this.config.plugin_cache_directory);
   }
 
   public load(): void {
