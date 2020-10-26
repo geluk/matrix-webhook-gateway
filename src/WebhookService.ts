@@ -124,7 +124,11 @@ export default class WebhookService {
       const allHooks = await this.webhookRepository.findByRoom(webhook.room_id, webhook.user_id);
       if (allHooks.length === 1) {
         logger.debug(`Last webhook for ${webhook.user_id} in ${webhook.room_id} deleted, leaving.`);
-        await this.bridge.leaveRoom(webhook.user_id, webhook.room_id);
+        try {
+          await this.bridge.leaveRoom(webhook.user_id, webhook.room_id);
+        } catch (error) {
+          logger.error(`Failed to leave room: ${error}`);
+        }
       }
     }
     const removed = await this.webhookRepository
