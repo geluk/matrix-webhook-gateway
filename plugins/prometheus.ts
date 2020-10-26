@@ -52,9 +52,12 @@ const plugin: WebhookPlugin = {
     if (!is<PrometheusWebhook>(body)) {
       return undefined;
     }
+    const details = body.alerts.map((a) => ` - ${a.annotations.summary}`);
+
     return {
-      text: 'Hello',
-      format: 'plain',
+      text: `${body.alerts.length} alert(s) ${body.status}.<br />
+      ${details.join('<br />')}`,
+      format: 'html',
     };
   },
 };
