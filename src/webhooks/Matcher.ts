@@ -23,6 +23,10 @@ export default class Matcher {
     this.plugins = new PluginCollection(config);
   }
 
+  public load(): void {
+    this.plugins.load();
+  }
+
   public async matchRequest(rq: Request): Promise<HookCall | undefined> {
     const fullPath = rq.path;
 
@@ -52,7 +56,6 @@ export default class Matcher {
     }
 
     logger.debug(`Received typed webhook (type: '${type}')`);
-    this.plugins.load();
     if (!this.plugins.acceptsType(type)) {
       logger.warn(`Received an unrecognised webhook type: ${type}`);
       return undefined;
