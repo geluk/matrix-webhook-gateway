@@ -24,6 +24,8 @@ interface EvaluatedPlugin {
   transform: unknown,
 }
 
+const WORK_DIR = './plugins/__workdir';
+
 export default class PluginCollection {
   private plugins: Record<string, WebhookPlugin> = {};
 
@@ -44,12 +46,22 @@ export default class PluginCollection {
     if (this.loaded) {
       return;
     }
+    if (!fs.existsSync(this.pluginDirectory)) {
+      logger.warn(`Plugin directory '${this.pluginDirectory}' does not exist. `
+      + 'No plugins will be loaded.');
+      return;
+    }
     fs.readdirSync(this.pluginDirectory).forEach((file) => {
       if (file.endsWith('.ts')) {
         this.loadPlugin(`${this.pluginDirectory}/${file}`);
       }
     });
-    logger.info(`Loaded plugins: ${Object.keys(this.plugins)}`);
+    const plugins = Object.keys(this.plugins);
+    if (plugins.length > 0) {
+      logger.info(`Loaded plugins: ${plugins.join(', ')}`);
+    } else {
+      logger.info('No plugins were loaded');
+    }
     this.loaded = true;
   }
 
@@ -72,12 +84,24 @@ export default class PluginCollection {
     }
 
     if (!fs.existsSync(cacheFile)) {
-      this.compilePlugin(pluginPath, cacheFile);
+      logger.debug(`Compiling plugin: ${pluginPath}`);
+      this.compilePlugin(source, hash, cacheFile);
     }
     logger.debug(`Loading plugin from ${cacheFile}`);
 
+    // If this looks a bit like a hack, that's because it very much is. In order
+    //  for 'typescript-is' imports to work, the source file must be in a child
+    // directory of our application when we load it, so we temporarily copy
+    // it there, load it, then remove it again.
+    this.ensureWorkDirExists();
+    const importFile = path.resolve(`${WORK_DIR}/${hash}.js`);
+    fs.copyFileSync(cacheFile, importFile);
+
+    // There's no getting around using require() here, as we need to dynamically
+    // load the plugin.
     // eslint-disable-next-line
-    const pluginContainer = require(cacheFile).default;
+    const pluginContainer = require(importFile).default;
+    fs.unlinkSync(importFile);
 
     if (is<EvaluatedPlugin>(pluginContainer)) {
       if (pluginContainer.format.match(/[a-z0-9]+/)) {
@@ -91,9 +115,16 @@ export default class PluginCollection {
     return undefined;
   }
 
-  private compilePlugin(pluginPath: string, cachePath: string) {
-    logger.debug(`Compiling plugin: ${pluginPath}`);
-    const prog = tts.createProgram([pluginPath], {});
+  private compilePlugin(source: string, hash: string, cachePath: string) {
+    const sourcePath = `${WORK_DIR}/${hash}.ts`;
+
+    // Just as before, we need to place the file somewhere in a child directory
+    // of our application before we compile it, otherwise  `typescript-is`
+    // won't desugar any of its is<T>() calls in the plugin file.
+    this.ensureWorkDirExists();
+    fs.writeFileSync(sourcePath, source);
+    const prog = tts.createProgram([sourcePath], {});
+
     prog.emit(undefined, (_name, data) => {
       fs.writeFileSync(cachePath, data, {
         flag: 'w',
@@ -101,5 +132,13 @@ export default class PluginCollection {
     }, undefined, undefined, {
       before: [isTransformer(prog)],
     });
+
+    fs.unlinkSync(sourcePath);
+  }
+
+  private ensureWorkDirExists() {
+    if (!fs.existsSync(WORK_DIR)) {
+      fs.mkdirSync(WORK_DIR);
+    }
   }
 }
