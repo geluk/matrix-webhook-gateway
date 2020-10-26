@@ -50,14 +50,21 @@ if (typeof config === 'undefined') {
 
 const database = new Database(config.database);
 database.migrate()
-  .then(() => {
+  .then(async () => {
     const whs = new WebhookService(
       database,
       config,
     );
-    whs.start();
+    try {
+      await whs.start();
+    } catch (error) {
+      logger.prettyError(error);
+      logger.fatal('Could not start webhook-gateway');
+      process.exit(1);
+    }
   })
   .catch((error) => {
     logger.prettyError(error);
     logger.fatal('Could not run migrations, application will now exit');
+    process.exit(1);
   });
