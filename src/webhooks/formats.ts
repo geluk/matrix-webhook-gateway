@@ -2,10 +2,10 @@ import Webhook from '../models/Webhook';
 
 export interface HookCall {
   webhook: Webhook;
-  content: NormalisedWebhookContent;
+  content: WebhookMessage;
 }
 
-export interface NormalisedWebhookContent {
+export interface WebhookMessage {
   text: string;
   username?: string;
   icon?: EmojiIcon | UrlIcon;

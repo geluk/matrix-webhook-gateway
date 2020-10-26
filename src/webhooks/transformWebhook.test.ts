@@ -1,4 +1,4 @@
-import { DiscordWebhook, NormalisedWebhookContent, SlackWebhook } from './formats';
+import { DiscordWebhook, WebhookMessage, SlackWebhook } from './formats';
 import transformWebhook from './transformWebhook';
 
 test('transforms Slack-style webhooks', () => {
@@ -6,7 +6,7 @@ test('transforms Slack-style webhooks', () => {
     text: 'A new message',
   };
 
-  const expectedOutput: NormalisedWebhookContent = {
+  const expectedOutput: WebhookMessage = {
     text: 'A new message',
     format: 'plain',
   };
@@ -20,7 +20,7 @@ test('sets format to markdown if mrkdwn is true', () => {
     mrkdwn: true,
   };
 
-  const expectedOutput: NormalisedWebhookContent = {
+  const expectedOutput: WebhookMessage = {
     text: 'A new message',
     format: 'markdown',
   };
@@ -35,7 +35,7 @@ test('transforms Discord-style webhooks', () => {
     avatar_url: 'http://example.com',
   };
 
-  const expectedOutput: NormalisedWebhookContent = {
+  const expectedOutput: WebhookMessage = {
     text: 'A new message',
     format: 'plain',
     username: 'user',

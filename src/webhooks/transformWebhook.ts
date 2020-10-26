@@ -2,12 +2,14 @@ import { is } from 'typescript-is';
 import {
   AppriseJsonWebhook_1_0,
   AppriseJsonWebhook_Unknown,
-  DiscordWebhook, NormalisedWebhookContent, SlackWebhook,
+  DiscordWebhook, WebhookMessage, SlackWebhook,
   Turt2liveWebhook, WebhookContent,
 } from './formats';
 
-export default function transformWebhook(webhook: WebhookContent): NormalisedWebhookContent {
-  const content: NormalisedWebhookContent = {
+export default function transformWebhook(
+  webhook: WebhookContent,
+): WebhookMessage {
+  const content: WebhookMessage = {
     text: '',
     format: 'plain',
   };
