@@ -1,7 +1,26 @@
 # Installation
 
+## Docker
 The recommended way to run the application service is using Docker.
-Alternatively, it is possible to install a release directly.
+All releases are published as Docker images on https://hub.docker.com/r/geluk/matrix-webhook-gateway.
+
+To get started quickly, an example compose file is provided below:
+```yaml
+version: "3.6"
+services:
+  matrix-webhooks:
+    image: geluk/matrix-webhook-gateway:latest
+    volumes:
+      - ./data:/data
+      - ./config:/config
+    ports:
+      - {{ ports.matrix_webhook_geluk_web }}:8020
+      - {{ ports.matrix_webhook_geluk_bridge }}:8023
+    restart: unless-stopped
+```
+
+## Without Docker
+It is also possible to run the application directly. In the future, releases will be provided to simplify this, but for now, the best option is to clone the repository, and run the application (`npm ci && npm run start`).
 
 # Development setup
 
