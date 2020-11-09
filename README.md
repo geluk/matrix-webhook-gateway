@@ -14,8 +14,8 @@ services:
       - ./data:/data
       - ./config:/config
     ports:
-      - {{ ports.matrix_webhook_geluk_web }}:8020
-      - {{ ports.matrix_webhook_geluk_bridge }}:8023
+      - 8020:8020
+      - 8023:8023
     restart: unless-stopped
 ```
 
