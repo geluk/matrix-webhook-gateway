@@ -130,5 +130,5 @@ npm run start
 
 # References
 
-- [turt2live](https://github.com/turt2live/matrix-appservice-webhooks), for inspiring me to develop this application.
-
+- [apprise](https://github.com/caronc/apprise/), a platform-independent notification framework.
+- [turt2live](https://github.com/turt2live/matrix-appservice-webhooks), whose project inspired me to develop this application.
