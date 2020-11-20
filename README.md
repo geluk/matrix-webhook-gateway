@@ -100,7 +100,7 @@ To support arbitrary JSON POSTs, you can write a custom plugin to interpret the 
 
 A plugin is a Typescript file dropped into `/data/plugins`, which needs to conform to a specific format.
 
-An sample plugin can be found [here](https://github.com/geluk/matrix-webhook-gateway/blob/master/plugins/sample.ts).
+A sample plugin can be found [here](https://github.com/geluk/matrix-webhook-gateway/blob/master/plugins/sample.ts).
 
 [this plugin](https://github.com/geluk/matrix-webhook-gateway/blob/master/plugins/prometheus.ts) may also be interesting to look at. It generates a message from an alert notification as sent by Prometheus [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/).
 
