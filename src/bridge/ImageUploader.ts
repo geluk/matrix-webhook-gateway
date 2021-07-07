@@ -1,5 +1,5 @@
-import mime from 'mime';
-import hasha from 'hasha';
+import * as mime from 'mime';
+import * as hasha from 'hasha';
 import { Headers } from 'node-fetch';
 import { UploadedImageRepository } from '../repositories/UploadedImageRepository';
 import logger from '../util/logger';
@@ -43,7 +43,7 @@ export default class ImageUploader {
     let contentType = response.headers.get('content-type');
     if (!contentType) {
       logger.debug('Could not determine content type from response headers, trying URL');
-      contentType = mime.getType(url);
+      contentType = mime.lookup(url);
     }
     if (!contentType) {
       logger.warn(`Unable to upload: ${url} to Matrix: could not determine content type.`);
@@ -51,7 +51,7 @@ export default class ImageUploader {
     }
 
     const uploadResponse = await this.client.uploadContent({
-      name: `webhook-gateway-upload-${randomString(40)}.${mime.getExtension(contentType)}`,
+      name: `webhook-gateway-upload-${randomString(40)}.${mime.extension(contentType)}`,
       stream: buffer,
       type: contentType,
     });

@@ -19,7 +19,7 @@
     "js-yaml": "^3.14.1",
     "knex": "^0.21.16",
     "matrix-appservice-bridge": "^2.4.1",
-    "mime": "^2.5.0",
+    "mime": "^2.5.2",
     "mssql": "^6.3.1",
     "mustache": "^4.1.0",
     "mysql": "^2.18.1",
