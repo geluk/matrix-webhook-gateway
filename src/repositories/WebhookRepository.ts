@@ -13,6 +13,12 @@ export default class WebhookRepository {
     return this.database.knex('webhook').insert(entity);
   }
 
+  public async update(entity: Webhook): Promise<void> {
+    return this.database.knex<Webhook>('webhook')
+      .where('id', '=', entity.id).update(entity)
+      .update(entity);
+  }
+
   public async deleteFromRoom(webhookId: number, roomId: string): Promise<boolean> {
     logger.debug(`Attempting to delete webhook #${webhookId} from room ${roomId}`);
     return this.database.knex<Webhook>('webhook')
