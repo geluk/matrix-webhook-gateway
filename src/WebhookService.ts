@@ -61,6 +61,8 @@ export default class WebhookService {
       case 'deleteWebhook':
         await this.deleteWebhook(command.parameters, command);
         break;
+      case 'rotateWebhook':
+        await this.rotateWebhook(command.parameters, command);
       default:
         break;
     }
@@ -139,6 +141,25 @@ export default class WebhookService {
       context.reply(`Webhook #${command.webhook_id} not found in this room.`);
     }
   }
+
+  private async rotateWebhook(command: DeleteWebhookCommand, context: Command) {
+    const webhook = await this.webhookRepository.getById(command.webhook_id);
+    if (webhook) {
+      webhook.path = `/hook/${randomString(HOOK_SECRET_LENGTH)}`;
+      await this.webhookRepository.update(webhook);
+
+    const secret = this.bridge.sendSecret(context.message.event.sender, `Your webhook for ${webhook.user_id} in ${context.message.event.room_id} was rotated.\n `
+    + `URL: ${this.config.webhooks.public_url}${webhook.path}`);
+
+    this.bridge.sendTyping(webhook.room_id, false);
+    const reply = context.reply('I\'ve sent you a message with your webhook details.');
+    await Promise.all([secret, reply]);
+
+    } else {
+      context.reply(`That webhook does not exist.`);
+    }
+  }
+
 
   private async listWebhook(command: ListWebhookCommand, context: Command) {
     const hooks = await this.webhookRepository.findByRoom(context.message.event.room_id);

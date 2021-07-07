@@ -58,6 +58,15 @@ export default class CommandParser {
           type: 'deleteWebhook',
           webhook_id: parseInt(this.args[1], 10),
         });
+        case 'rotate':
+          if (this.args.length !== 2 || Number.isNaN(parseInt(this.args[1], 10))) {
+            await this.message.reply('Usage: -hook rotate <hook_number>');
+            return undefined;
+          }
+          return this.createCommand({
+            type: 'rotateWebhook',
+            webhook_id: parseInt(this.args[1], 10),
+          });
       default:
         return replyUsage();
     }
@@ -92,7 +101,13 @@ export type DeleteWebhookCommand = {
   webhook_id: number,
 };
 
+export type RotateWebhookCommand = {
+  type: 'rotateWebhook',
+  webhook_id: number,
+}
+
 type CommandParameters =
   | CreateWebhookCommand
   | ListWebhookCommand
-  | DeleteWebhookCommand;
+  | DeleteWebhookCommand
+  | RotateWebhookCommand;
