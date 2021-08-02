@@ -1,4 +1,3 @@
-import * as mime from 'mime';
 import { Headers } from 'node-fetch';
 import { UploadedImageRepository } from '../repositories/UploadedImageRepository';
 import logger from '../util/logger';
@@ -6,6 +5,7 @@ import randomString from '../util/randomString';
 
 // Can't get this to work with an import for whatever reason.
 const hasha = require('hasha'); // eslint-disable-line
+const mime = require('mime'); // eslint-disable-line
 
 export interface UploadRequest {
   name: string;
@@ -46,7 +46,7 @@ export default class ImageUploader {
     let contentType = response.headers.get('content-type');
     if (!contentType) {
       logger.debug('Could not determine content type from response headers, trying URL');
-      contentType = mime.lookup(url);
+      contentType = mime.getType(url);
     }
     if (!contentType) {
       logger.warn(`Unable to upload: ${url} to Matrix: could not determine content type.`);
@@ -54,7 +54,7 @@ export default class ImageUploader {
     }
 
     const uploadResponse = await this.client.uploadContent({
-      name: `webhook-gateway-upload-${randomString(40)}.${mime.extension(contentType)}`,
+      name: `webhook-gateway-upload-${randomString(40)}.${mime.getExtension(contentType)}`,
       stream: buffer,
       type: contentType,
     });
