@@ -3,9 +3,10 @@ import { UploadedImageRepository } from '../repositories/UploadedImageRepository
 import logger from '../util/logger';
 import randomString from '../util/randomString';
 
+import * as mime from 'mime';
+
 // Can't get this to work with an import for whatever reason.
 const hasha = require('hasha'); // eslint-disable-line
-const mime = require('mime'); // eslint-disable-line
 
 export interface UploadRequest {
   name: string;
