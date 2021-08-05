@@ -1,12 +1,11 @@
-import { Headers } from 'node-fetch';
-import { UploadedImageRepository } from '../repositories/UploadedImageRepository';
-import logger from '../util/logger';
-import randomString from '../util/randomString';
-
+import * as hasha from 'hasha';
 import * as mime from 'mime';
 
-// Can't get this to work with an import for whatever reason.
-const hasha = require('hasha'); // eslint-disable-line
+import { Headers } from 'node-fetch';
+import { UploadedImageRepository } from '../repositories/UploadedImageRepository';
+
+import logger from '../util/logger';
+import randomString from '../util/randomString';
 
 export interface UploadRequest {
   name: string;
@@ -34,7 +33,7 @@ export default class ImageUploader {
     const response = await this.downloader(url);
     const buffer = await response.buffer();
 
-    const hash = hasha(buffer, {
+    const hash = hasha.default(buffer, {
       algorithm: 'sha256',
     });
     const existing = await this.imageRepository.find(hash);
