@@ -20,15 +20,17 @@ services:
 ```
 
 ## Without Docker
-It is also possible to run the application directly. In the future, releases will be provided to simplify this, but for now, the best option is to clone the repository, and run the application (`npm ci && npm run start`).
+It is also possible to run the application directly. In the future, releases will be provided to simplify this, but for now, the best option is to clone the repository, and run the application (`npm ci && npm run start`). Commandline options can be used to alter the default configuration file location.
+Run `npm run start -- <options>` to add them. For a list of available options, try `npm run start -- --help`.
 
 # Configuration
-A new configuration file (`gateway-config.yaml`) is generated on first startup.
-The webhook gateway will use the settings in this file to automatically generate an appservice registration file (default location: `/data/appservice-webhook-gateway.yaml`). You should copy this file to your Matrix server, and add it to your Synapse configuration:
+A new configuration file (`/config/gateway-config.yaml` in Docker, or `./gateway-config.yaml` outside Docker) is generated on first startup.
+The webhook gateway will use the settings in this file to automatically generate an appservice registration file (default location: `/data/appservice-webhook-gateway.yaml` in Docker, `./appservice.yaml` outside). You should copy this file to your Matrix server, and add it to your Synapse configuration:
 ```yaml
  app_service_config_files:
  - "./appservices/appservice-webhook-gateway.yaml"
 ```
+If your webhook and Matrix server live on the same host, you can also choose to directly point Matrix to the generated appservice file.
 
 # Usage
 
