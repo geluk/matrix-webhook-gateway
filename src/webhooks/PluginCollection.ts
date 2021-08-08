@@ -104,7 +104,7 @@ export default class PluginCollection {
     fs.unlinkSync(importFile);
 
     if (is<EvaluatedPlugin>(pluginContainer)) {
-      if (pluginContainer.format.match(/[a-z0-9]+/)) {
+      if (pluginContainer.format.match(/^[a-z0-9_]+$/)) {
         this.plugins[pluginContainer.format] = pluginContainer as WebhookPlugin;
         return pluginContainer.format;
       }

@@ -42,9 +42,9 @@ export default class Matcher {
         content: transformWebhook(rq.body),
       };
     }
-    const match = fullPath.match(/^(.*)\/([a-z0-9]+)$/);
+    const match = fullPath.match(/^(.*)\/([a-z0-9_]+)$/);
     if (!match) {
-      logger.debug('Webhook not found.');
+      logger.debug('Path does not conform to the format <webhook>/<plugin_identifer>.');
       return undefined;
     }
 
