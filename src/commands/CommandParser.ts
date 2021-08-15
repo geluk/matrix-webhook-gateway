@@ -27,7 +27,7 @@ export default class CommandParser {
 
   private async handleWebhook(): Promise<Command | undefined> {
     const replyUsage = async () => {
-      await this.message.reply('Usage: -hook create|list|delete');
+      await this.message.reply('Usage: -hook create|list|delete|rotate|set');
       return undefined;
     };
 
@@ -42,15 +42,27 @@ export default class CommandParser {
           webhook_user_id: this.args[1],
         });
       case 'list':
-        if (this.args.length !== 1) {
-          await this.message.reply('Usage: -hook list');
+      {
+        let full = false;
+        if (this.args.length === 2) {
+          if (this.args[1] === 'full') {
+            full = true;
+          } else {
+            await this.message.reply('Usage: -hook list [full]');
+            return undefined;
+          }
+        }
+        if (this.args.length > 2) {
+          await this.message.reply('Usage: -hook list [full]');
           return undefined;
         }
         return this.createCommand({
           type: 'listWebhook',
+          full,
         });
+      }
       case 'delete':
-        if (this.args.length !== 2 || Number.isNaN(parseInt(this.args[1], 10))) {
+        if (this.args.length !== 2 || !this.validateNumber(1)) {
           await this.message.reply('Usage: -hook delete <hook_number>');
           return undefined;
         }
@@ -59,7 +71,7 @@ export default class CommandParser {
           webhook_id: parseInt(this.args[1], 10),
         });
       case 'rotate':
-        if (this.args.length !== 2 || Number.isNaN(parseInt(this.args[1], 10))) {
+        if (this.args.length !== 2 || !this.validateNumber(1)) {
           await this.message.reply('Usage: -hook rotate <hook_number>');
           return undefined;
         }
@@ -67,9 +79,29 @@ export default class CommandParser {
           type: 'rotateWebhook',
           webhook_id: parseInt(this.args[1], 10),
         });
+      case 'set':
+        if (
+          this.args.length !== 4
+          || (this.args[1] !== 'name'
+          && this.args[1] !== 'avatar')
+          || !this.validateNumber(2)
+        ) {
+          await this.message.reply('Usage: -hook set name|avatar <hook_number> <name|avatar_url>');
+          return undefined;
+        }
+        return this.createCommand({
+          type: 'setWebhookProperty',
+          webhook_id: parseInt(this.args[2], 10),
+          property: this.args[1],
+          value: this.args[3],
+        });
       default:
         return replyUsage();
     }
+  }
+
+  private validateNumber(argumentIndex: number): boolean {
+    return !Number.isNaN(parseInt(this.args[argumentIndex], 10));
   }
 
   private createCommand(params: CommandParameters): Command {
@@ -94,6 +126,7 @@ export type CreateWebhookCommand = {
 
 export type ListWebhookCommand = {
   type: 'listWebhook'
+  full: boolean,
 };
 
 export type DeleteWebhookCommand = {
@@ -106,8 +139,16 @@ export type RotateWebhookCommand = {
   webhook_id: number,
 };
 
+export type SetWebhookPropertyCommand = {
+  type: 'setWebhookProperty',
+  webhook_id: number,
+  property: 'name' | 'avatar',
+  value: string,
+};
+
 type CommandParameters =
   | CreateWebhookCommand
   | ListWebhookCommand
   | DeleteWebhookCommand
-  | RotateWebhookCommand;
+  | RotateWebhookCommand
+  | SetWebhookPropertyCommand;

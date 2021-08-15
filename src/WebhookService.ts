@@ -5,7 +5,8 @@ import logger from './util/logger';
 import Database from './repositories/Database';
 import WebhookRepository from './repositories/WebhookRepository';
 import {
-  Command, CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand, RotateWebhookCommand,
+  Command, CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand,
+  RotateWebhookCommand, SetWebhookPropertyCommand,
 } from './commands/CommandParser';
 import randomString from './util/randomString';
 import WebhookListener from './webhooks/WebhookListener';
@@ -63,6 +64,9 @@ export default class WebhookService {
         break;
       case 'rotateWebhook':
         await this.rotateWebhook(command.parameters, command);
+        break;
+      case 'setWebhookProperty':
+        await this.setWebhookProperty(command.parameters, command);
         break;
       default:
         break;
@@ -165,8 +169,36 @@ export default class WebhookService {
       context.reply('No hooks active in this room.');
       return;
     }
-    const message = hooks.map((h) => `${h.id}: ${h.user_id} (${h.path.substring(0, 10)}...)`).join('\n');
-    context.reply(message);
+    if (command.full) {
+      const message = hooks.map((h) => `${h.id}: ${h.user_id} -- ${this.config.webhooks.public_url}${h.path}`).join('\n');
+      const secret = this.bridge.sendSecret(context.message.event.sender, message);
+      const reply = context.reply('I\'ve sent you a message with your webhook details.');
+      await Promise.all([secret, reply]);
+    } else {
+      let message = hooks.map((h) => `${h.id}: ${h.user_id} (${h.path.substring(0, 10)}...)`).join('\n');
+      message += '\nTry \'-hook list full\' to receive a private message with the full URLs.';
+      context.reply(message);
+    }
+  }
+
+  private async setWebhookProperty(command: SetWebhookPropertyCommand, context: Command) {
+    const webhook = await this.webhookRepository.getById(command.webhook_id);
+    if (!webhook) {
+      context.reply('That webhook does not exist.');
+      return;
+    }
+    switch (command.property) {
+      case 'avatar':
+        await this.bridge.setProfileDetails(webhook.user_id, undefined, {
+          url: command.value,
+        });
+        break;
+      case 'name':
+        await this.bridge.setProfileDetails(webhook.user_id, command.value, undefined);
+        break;
+      default:
+        break;
+    }
   }
 
   public async start(): Promise<void> {
