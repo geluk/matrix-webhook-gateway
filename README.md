@@ -130,6 +130,12 @@ npm ci
 npm run start
 ```
 
+Invite the webhook management user using the following Matrix command:
+```
+/invite @webhook:matrix.local
+```
+
+
 # References
 
 - [apprise](https://github.com/caronc/apprise/), a platform-independent notification framework.
