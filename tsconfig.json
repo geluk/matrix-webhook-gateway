@@ -1,5 +1,8 @@
 {
     "extends": "@tsconfig/node12/tsconfig.json",
+    "ts-node": {
+        "compiler": "ttypescript"
+    },
     "compilerOptions": {
         "target": "ES2016",
         // Allows line number references from logging code.
@@ -7,7 +10,11 @@
         "outDir": "out/webhook-gateway",
         "strictNullChecks": true,
         "plugins": [
-            { "transform": "typescript-is/lib/transform-inline/transformer" },
+            { 
+                "transform": "typescript-is/lib/transform-inline/transformer",
+                "functionBehavior": "basic",
+                "ignoreMethods": "true"
+            },
         ]
     },
 }

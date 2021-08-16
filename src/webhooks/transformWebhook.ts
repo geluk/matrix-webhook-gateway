@@ -1,17 +1,19 @@
 import { is } from 'typescript-is';
+import { br, fmt, strong } from '../formatting/formatting';
+import logger from '../util/logger';
 import {
   AppriseJsonWebhook_1_0,
   AppriseJsonWebhook_Unknown,
-  DiscordWebhook, WebhookMessage, SlackWebhook,
+  DiscordWebhook, WebhookMessageV2, SlackWebhook,
   Turt2liveWebhook, WebhookContent,
 } from './formats';
 
 export default function transformWebhook(
   webhook: WebhookContent,
-): WebhookMessage {
-  const content: WebhookMessage = {
+): WebhookMessageV2 {
+  const content: WebhookMessageV2 = {
+    version: '2',
     text: '',
-    format: 'plain',
   };
 
   // Because these stages are processed sequentially, not all formats may be
@@ -19,7 +21,6 @@ export default function transformWebhook(
   // the webhook URL with that format, e.g. /hook/<id>/slack
   if (is<Turt2liveWebhook>(webhook)) {
     content.text = webhook.text;
-    content.format = webhook.format ?? 'plain';
     content.username = webhook.displayName;
   }
   if (is<DiscordWebhook>(webhook)) {
@@ -33,8 +34,7 @@ export default function transformWebhook(
   }
 
   if (is<AppriseJsonWebhook_1_0>(webhook)) {
-    content.format = 'html';
-    content.text = `<strong>${webhook.title}</strong><br />\n${webhook.message}`;
+    content.text = fmt(strong(`${webhook.title}`), br(), webhook.message);
   } else if (is<AppriseJsonWebhook_Unknown>(webhook)) {
     content.text = webhook.message;
   }
@@ -42,7 +42,7 @@ export default function transformWebhook(
   if (is<SlackWebhook>(webhook)) {
     content.text = webhook.text;
     if (webhook.mrkdwn) {
-      content.format = 'markdown';
+      logger.debug('Received a markdown-formatted webhook, but markdown is not supported.');
     }
     content.username = webhook.username;
     if (webhook.icon_url) {

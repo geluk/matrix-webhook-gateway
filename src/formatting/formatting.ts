@@ -38,6 +38,8 @@ export function fmt(...args: Text[]): Format {
   };
 }
 
+// HTML elements
+// -------------
 export function br(): Format {
   return {
     formatHtml(): string {
@@ -49,6 +51,17 @@ export function br(): Format {
   };
 }
 
+export function blockquote(inner: Text): Format {
+  return {
+    formatHtml(): string {
+      return `<blockquote>${toHtml(inner)}</blockquote>`;
+    },
+    formatPlain(): string {
+      return `\n> ${toPlain(inner)}`;
+    },
+  };
+}
+
 export function code(inner: Text): Format {
   return {
     formatHtml(): string {
@@ -56,6 +69,17 @@ export function code(inner: Text): Format {
     },
     formatPlain(): string {
       return toFormat(inner).formatPlain();
+    },
+  };
+}
+
+export function em(inner: Text): Format {
+  return {
+    formatHtml(): string {
+      return `<em>${toHtml(inner)}</em>`;
+    },
+    formatPlain(): string {
+      return `_${toPlain(inner)}_`;
     },
   };
 }
@@ -73,6 +97,32 @@ export function ol(entries: Text[]): Format {
   };
 }
 
+export function strong(inner: Text): Format {
+  return {
+    formatHtml(): string {
+      return `<strong>${toHtml(inner)}</strong>`;
+    },
+    formatPlain(): string {
+      return `**${toPlain(inner)}**`;
+    },
+  };
+}
+
+export function table(head: Text[], rows: Text[][]): Format {
+  return {
+    formatHtml(): string {
+      const fHead = head.map((h) => `<td>${toHtml(h)}</td>`).join('');
+      const fBody = rows.map((r) => `<tr>${r.map((c) => `<td>${toHtml(c)}</td>`).join('')}</tr>`).join('\n');
+
+      return `<table><thead><tr>${fHead}</tr></thead><tbody>${fBody}</tbody></table>`;
+    },
+    formatPlain(): string {
+      // (ง •̀_•́)ง one day I'll be a real table (ง •̀_•́)ง
+      return rows.map((r) => r.map(toPlain).join(' ')).join('\n');
+    },
+  };
+}
+
 export function ul(entries: Text[]): Format {
   return {
     formatHtml(): string {
@@ -86,6 +136,8 @@ export function ul(entries: Text[]): Format {
   };
 }
 
+// Matrix shortcuts
+// -------------
 export function user(profileInfo: ProfileInfo): Format {
   return {
     formatHtml(): string {
@@ -115,21 +167,6 @@ export function fg(color: string, inner: Text): Format {
     },
     formatPlain(): string {
       return toFormat(inner).formatPlain();
-    },
-  };
-}
-
-export function table(head: Text[], rows: Text[][]): Format {
-  return {
-    formatHtml(): string {
-      const fHead = head.map((h) => `<td>${toHtml(h)}</td>`).join('');
-      const fBody = rows.map((r) => `<tr>${r.map((c) => `<td>${toHtml(c)}</td>`).join('')}</tr>`).join('\n');
-
-      return `<table><thead><tr>${fHead}</tr></thead><tbody>${fBody}</tbody></table>`;
-    },
-    formatPlain(): string {
-      // (ง •̀_•́)ง one day I'll be a real table (ง •̀_•́)ง
-      return rows.map((r) => r.map(toPlain).join(' ')).join('\n');
     },
   };
 }

@@ -4,30 +4,38 @@ import hasha from 'hasha';
 import * as tts from 'ttypescript';
 import { is } from 'typescript-is';
 import isTransformer from 'typescript-is/lib/transform-inline/transformer';
-
+import { Logger } from 'tslog';
 import logger from '../util/logger';
-import { WebhookMessage } from './formats';
+import { WebhookMessageV2, WebhookMessageV1 } from './formats';
 import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 
-interface WebhookPlugin {
+export interface WebhookPluginV1 {
   version: '1',
   format: string,
-  init?: () => void,
-  transform: (body: unknown) => WebhookMessage | undefined,
-  sourceHash: string,
+  init?: () => unknown,
+  transform: (body: unknown) => WebhookMessageV1 | undefined,
 }
 
-interface EvaluatedPlugin {
-  version: '1',
+export interface WebhookPluginV2 {
+  version: '2',
   format: string,
-  init?: unknown,
-  transform: unknown,
+  init?: (logger: Logger) => unknown,
+  transform: (body: unknown) => WebhookMessageV2 | undefined,
 }
+
+interface PluginBase {
+  version: '1' | '2',
+  format: string,
+}
+
+type Plugin =
+  | WebhookPluginV1
+  | WebhookPluginV2;
 
 const WORK_DIR = './plugins/__workdir';
 
 export default class PluginCollection {
-  private plugins: Record<string, WebhookPlugin> = {};
+  private plugins: Record<string, Plugin> = {};
 
   private loaded = false;
 
@@ -42,7 +50,7 @@ export default class PluginCollection {
     this.cacheDirectory = path.resolve(this.config.plugin_cache_directory);
   }
 
-  public load(): void {
+  public async load(): Promise<void> {
     if (this.loaded) {
       return;
     }
@@ -51,11 +59,14 @@ export default class PluginCollection {
       + 'No plugins will be loaded.');
       return;
     }
-    fs.readdirSync(this.pluginDirectory).forEach((file) => {
+
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const file of this.walk(this.pluginDirectory)) {
       if (file.endsWith('.ts')) {
-        this.loadPlugin(`${this.pluginDirectory}/${file}`);
+        this.loadPlugin(`${file}`);
       }
-    });
+    }
+
     const plugins = Object.keys(this.plugins);
     if (plugins.length > 0) {
       logger.info(`Loaded plugins: ${plugins.join(', ')}`);
@@ -69,12 +80,31 @@ export default class PluginCollection {
     return !!this.plugins[type];
   }
 
-  public apply(body: unknown, type: string): WebhookMessage | undefined {
+  public apply(body: unknown, type: string): WebhookMessageV2 | WebhookMessageV1 | undefined {
     const plugin = this.plugins[type];
     return plugin.transform(body);
   }
 
-  private loadPlugin(pluginPath: string): string | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async* walk(dir: string): any {
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const d of await fs.promises.opendir(dir)) {
+      const entry = path.join(dir, d.name);
+      if (d.isDirectory()) {
+        if (entry === this.cacheDirectory) {
+          logger.silly('Plugin discovery - skipping cache directory: ', entry);
+        } else if (d.name === '__workdir') {
+          logger.silly('Plugin discovery - skipping working directory: ', entry);
+        } else {
+          yield* await this.walk(entry);
+        }
+      } else if (d.isFile()) {
+        yield entry;
+      }
+    }
+  }
+
+  private loadPlugin(pluginPath: string) {
     const source = fs.readFileSync(pluginPath, 'utf8');
     const hash = hasha(source, { algorithm: 'sha256' });
     const cacheFile = `${this.cacheDirectory}/${hash}.js`;
@@ -83,11 +113,13 @@ export default class PluginCollection {
       fs.mkdirSync(this.cacheDirectory);
     }
 
-    if (!fs.existsSync(cacheFile)) {
+    if (fs.existsSync(cacheFile)) {
+      logger.silly(`Cached plugin found for ${pluginPath}`);
+    } else {
       logger.debug(`Compiling plugin: ${pluginPath}`);
       this.compilePlugin(source, hash, cacheFile);
     }
-    logger.debug(`Loading plugin from ${cacheFile}`);
+    logger.debug(`Loading plugin ${path.basename(pluginPath)} from ${path.basename(cacheFile)}`);
 
     // If this looks a bit like a hack, that's because it very much is. In order
     //  for 'typescript-is' imports to work, the source file must be in a child
@@ -97,22 +129,50 @@ export default class PluginCollection {
     const importFile = path.resolve(`${WORK_DIR}/${hash}.js`);
     fs.copyFileSync(cacheFile, importFile);
 
-    // There's no getting around using require() here, as we need to dynamically
-    // load the plugin.
-    // eslint-disable-next-line
-    const pluginContainer = require(importFile).default;
+    let pluginContainer;
+    try {
+      // There's no getting around using require() here, as we need to dynamically
+      // load the plugin.
+      // eslint-disable-next-line
+      pluginContainer = require(importFile).default;
+    } catch (error) {
+      logger.error('Error loading plugin: ', error);
+      return;
+    }
     fs.unlinkSync(importFile);
 
-    if (is<EvaluatedPlugin>(pluginContainer)) {
-      if (pluginContainer.format.match(/^[a-z0-9_]+$/)) {
-        this.plugins[pluginContainer.format] = pluginContainer as WebhookPlugin;
-        return pluginContainer.format;
-      }
-      logger.warn(`Invalid plugin identifier: '${pluginContainer.format}'`);
+    if (!is<PluginBase>(pluginContainer)) {
+      logger.warn(`Not a valid plugin: ${pluginPath}`);
+      logger.debug('Plugin container:', pluginContainer);
+      return;
     }
-    logger.warn(`Not a valid plugin: ${pluginPath}`);
+
+    if (!pluginContainer.format.match(/^[a-z0-9_]+$/)) {
+      logger.warn(`Invalid plugin name: ${pluginContainer.format}`);
+      return;
+    }
+
+    if (is<WebhookPluginV1>(pluginContainer)) {
+      if (pluginContainer.init) {
+        pluginContainer.init();
+      }
+      this.plugins[pluginContainer.format] = pluginContainer;
+      return;
+    }
+
+    if (is<WebhookPluginV2>(pluginContainer)) {
+      if (pluginContainer.init) {
+        const pluginLogger = logger.getChildLogger({
+          name: `plg-${pluginContainer.format}`,
+        });
+        pluginContainer.init(pluginLogger);
+      }
+      this.plugins[pluginContainer.format] = pluginContainer;
+      return;
+    }
+
+    logger.warn(`Unknown plugin type: ${pluginPath}`);
     logger.debug('Plugin container:', pluginContainer);
-    return undefined;
   }
 
   private compilePlugin(source: string, hash: string, cachePath: string) {
@@ -130,7 +190,9 @@ export default class PluginCollection {
         flag: 'w',
       });
     }, undefined, undefined, {
-      before: [isTransformer(prog)],
+      before: [isTransformer(prog, {
+        functionBehavior: 'ignore',
+      })],
     });
 
     fs.unlinkSync(sourcePath);

@@ -57,7 +57,7 @@ export default class MatrixBridge {
       body: plain,
       msgtype: 'm.text',
     };
-    if (plain !== html) {
+    if (typeof message !== 'string' && plain !== html) {
       event.format = 'org.matrix.custom.html';
       event.formatted_body = html;
     }

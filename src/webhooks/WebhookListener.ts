@@ -16,9 +16,9 @@ export default class WebhookListener {
     private webhookMatcher: Matcher,
   ) { }
 
-  public start(): void {
+  public async start(): Promise<void> {
     logger.silly('Starting webhook listener');
-    this.webhookMatcher.load();
+    await this.webhookMatcher.load();
     this.app.use(Express.json());
 
     this.app.get('/hook/*', this.handleRequest.bind(this));

@@ -1,12 +1,20 @@
+import { Text } from '../formatting/formatting';
 import Webhook from '../models/Webhook';
 
 export interface HookCall {
   webhook: Webhook;
-  content: WebhookMessage;
+  content: WebhookMessageV1 | WebhookMessageV2;
 }
 
-export interface WebhookMessage {
-  text: string;
+export interface WebhookMessageV2 {
+  version: '2';
+  text: Text;
+  username?: string;
+  icon?: EmojiIcon | UrlIcon;
+}
+
+export interface WebhookMessageV1 {
+  text: Text;
   username?: string;
   icon?: EmojiIcon | UrlIcon;
   format: 'plain' | 'html' | 'markdown';

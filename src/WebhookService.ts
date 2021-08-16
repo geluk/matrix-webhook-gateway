@@ -83,15 +83,17 @@ export default class WebhookService {
       call.content.icon,
     );
 
-    const content: Record<string, unknown> = {
-      body: call.content.text,
-      msgtype: 'm.text',
-    };
-    if (call.content.format === 'html') {
+    if ('format' in call.content && call.content.format === 'html') {
+      const content: Record<string, unknown> = {
+        body: call.content.text,
+        msgtype: 'm.text',
+      };
       content.format = 'org.matrix.custom.html';
       content.formatted_body = call.content.text;
+      await this.bridge.getIntent(call.webhook.user_id).sendMessage(call.webhook.room_id, content);
+    } else {
+      await this.bridge.sendMessage(call.webhook.room_id, call.content.text);
     }
-    await this.bridge.getIntent(call.webhook.user_id).sendMessage(call.webhook.room_id, content);
   }
 
   private async createWebhook(command: CreateWebhookCommand, context: Command) {
@@ -263,6 +265,6 @@ export default class WebhookService {
       return true;
     }));
 
-    this.webhookListener.start();
+    await this.webhookListener.start();
   }
 }
