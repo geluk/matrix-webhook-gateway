@@ -4,7 +4,7 @@
   "description": "Matrix.org webhook appservice",
   "private": true,
   "scripts": {
-    "start": "ts-node --compiler ttypescript entry.ts -v",
+    "start": "ts-node entry.ts -v",
     "build": "npx ttsc --build",
     "package": "cp -r templates migrations node_modules out/webhook-gateway",
     "lint": "npx eslint . --ext .ts",
@@ -31,7 +31,7 @@
     "tslog": "^2.12.0",
     "ttypescript": "^1.5.12",
     "typescript": "^4.1.3",
-    "typescript-is": "^0.16.3",
+    "typescript-is": "^0.18.3",
     "yargs": "^16.2.0"
   },
   "devDependencies": {
