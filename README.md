@@ -108,6 +108,41 @@ A sample plugin can be found [here](https://github.com/geluk/matrix-webhook-gate
 
 To execute a plugin, you must append its name (as specified by the `format` key in your plugin definition) to the webhook URL. For instance, to execute the sample plugin, send a POST to `https://your-webhook-gateway-url/hook/your-webhook/sample`
 
+## Writing plugins
+
+If you're just looking to write a simple plugin, the easiest way to get started
+is by copying the sample plugin, adapting it to your needs, and installing it
+in the right directory.
+
+For more complicated plugins, I recommend cloning the repository and developing
+your plugin in the `./plugins/develop` directory.
+
+## Plugin loading process
+
+The loading process of plugins is a bit involved, and not necessarily optimal.
+In other words, I'm open to suggestions! If you know of a way to streamline it,
+please do create an issue or a pull request.
+
+Here's how it currently works:
+
+On startup, the directory specified in the configuration file
+(`webhooks.plugin_directory`) is scanned recursively, and the plugins in it are
+loaded one by one. The loading process of a plugin looks like this:
+
+1. The contents of the plugin file are hashed.
+2. `webhooks.plugin_cache_directory` is checked for a file with a matching hash.
+   If a file is found, the cached plugin is loaded immediately (see step 5).
+3. If no file is found, the plugin is copied to `./plugins/__workdir` and
+   compiled. This path needs to be within the working directory of the
+   application, otherwise type resolutions during compilation will fail.
+4. The compiled plugin is written to `webhooks.plugin_cache_directory`.
+5. The cached plugin is copied to `./plugins/__workdir` to ensure any imports
+   are resolved correctly during the loading process.
+6. The plugin is `require()`d and some basic integrity checks are performed
+   against the resulting object to validate that it is correctly formed.
+7. The `init()` function is executed, and the plugin is added to the list of
+   active plugins.
+
 # Development setup
 
 Run `start-matrix.sh` in `./local-dev` to set up a local appservice
