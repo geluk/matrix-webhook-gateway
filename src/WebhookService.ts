@@ -16,6 +16,9 @@ import UserRepository from './repositories/UserRepository';
 import { HookCall } from './webhooks/formats';
 import Matcher from './webhooks/Matcher';
 import UploadedImageFromDatabase from './repositories/UploadedImageRepository';
+import {
+  br, code, fmt, room, table, Text, user,
+} from './formatting/formatting';
 
 const HOOK_SECRET_LENGTH = 48;
 
@@ -79,12 +82,16 @@ export default class WebhookService {
       call.content.username,
       call.content.icon,
     );
-    await this.bridge.sendMessage(
-      call.webhook.room_id,
-      call.content.text,
-      call.webhook.user_id,
-      call.content.format,
-    );
+
+    const content: Record<string, unknown> = {
+      body: call.content.text,
+      msgtype: 'm.text',
+    };
+    if (call.content.format === 'html') {
+      content.format = 'org.matrix.custom.html';
+      content.formatted_body = call.content.text;
+    }
+    await this.bridge.getIntent(call.webhook.user_id).sendMessage(call.webhook.room_id, content);
   }
 
   private async createWebhook(command: CreateWebhookCommand, context: Command) {
@@ -117,11 +124,19 @@ export default class WebhookService {
     await this.webhookRepository.add(webhook);
     logger.debug('Webhook created successfully');
 
-    const secret = this.bridge.sendSecret(context.message.event.sender, `Your webhook for ${command.webhook_user_id} in ${context.message.event.room_id} was created.\n `
-    + `URL: ${this.config.webhooks.public_url}${webhook.path}`);
+    const profile = await this.bridge.getProfileInfo(webhook.user_id);
+
+    const secret = this.bridge.sendSecret(context.message.event.sender,
+      'Your webhook for ', user(profile), ' in ', room(context.message.event.room_id), ' was created.', br(),
+      'URL: ', code(`${this.config.webhooks.public_url}${webhook.path}`));
+    const reply = context.reply(
+      'I\'ve sent you a message with your webhook details.', br(),
+      'To set the avatar and displayname of the user, post a webhook or use the ',
+      code('-hook set'),
+      'command.',
+    );
 
     this.bridge.sendTyping(webhook.room_id, false);
-    const reply = context.reply('I\'ve sent you a message with your webhook details.');
     await Promise.all([secret, reply]);
   }
 
@@ -143,12 +158,12 @@ export default class WebhookService {
     if (removed) {
       context.reply('Webhook deleted.');
     } else {
-      context.reply(`Webhook #${command.webhook_id} not found in this room.`);
+      context.reply('Webhook ', code(`#${command.webhook_id}`), ' not found in this room.');
     }
   }
 
   private async rotateWebhook(command: RotateWebhookCommand, context: Command) {
-    const webhook = await this.webhookRepository.getById(command.webhook_id);
+    const webhook = await this.webhookRepository.getById(command.webhookId);
     if (webhook) {
       webhook.path = `/hook/${randomString(HOOK_SECRET_LENGTH)}`;
       await this.webhookRepository.update(webhook);
@@ -157,6 +172,7 @@ export default class WebhookService {
 
       this.bridge.sendTyping(webhook.room_id, false);
       const reply = context.reply('I\'ve sent you a message with your webhook details.');
+
       await Promise.all([secret, reply]);
     } else {
       context.reply('That webhook does not exist.');
@@ -164,20 +180,47 @@ export default class WebhookService {
   }
 
   private async listWebhook(command: ListWebhookCommand, context: Command) {
-    const hooks = await this.webhookRepository.findByRoom(context.message.event.room_id);
+    let roomId = context.message.event.room_id;
+    let roomDescription: Text = 'this room';
+    if (command.roomId) {
+      roomId = await this.bridge.getIntent().resolveRoom(command.roomId);
+      roomDescription = room(roomId);
+    }
+
+    const hooks = await this.webhookRepository.findByRoom(roomId);
     if (hooks.length === 0) {
-      context.reply('No hooks active in this room.');
+      context.reply('No hooks active in ', roomDescription, '.', br(),
+        'To view webhooks from a different room, try ', code('-hook list [full] <room_id>'));
       return;
     }
     if (command.full) {
-      const message = hooks.map((h) => `${h.id}: ${h.user_id} -- ${this.config.webhooks.public_url}${h.path}`).join('\n');
+      const rows: Text[][] = await Promise.all(hooks.map(async (h) => {
+        const profile = await this.bridge.getProfileInfo(h.user_id);
+        return [`#${h.id}`, fmt(user(profile)), code(`${this.config.webhooks.public_url}${h.path}...`)];
+      }));
+
+      const message = fmt(
+        'The following webhooks are active in ', roomDescription, '\n',
+        table(['Hook', 'User', 'URL'], rows),
+      );
+
       const secret = this.bridge.sendSecret(context.message.event.sender, message);
       const reply = context.reply('I\'ve sent you a message with your webhook details.');
       await Promise.all([secret, reply]);
     } else {
-      let message = hooks.map((h) => `${h.id}: ${h.user_id} (${h.path.substring(0, 10)}...)`).join('\n');
-      message += '\nTry \'-hook list full\' to receive a private message with the full URLs.';
-      context.reply(message);
+      const rows: Text[][] = await Promise.all(hooks.map(async (h) => {
+        const profile = await this.bridge.getProfileInfo(h.user_id);
+        return [`#${h.id}`, fmt(user(profile)), code(`${this.config.webhooks.public_url}${h.path.substring(0, 10)}...`)];
+      }));
+
+      const message = fmt(
+        'The following webhooks are active in ', roomDescription, '\n',
+        table(['Hook', 'User', 'URL'], rows),
+        '\nFor more details, try ',
+        code('-hook list full [<room_id>]'),
+      );
+
+      await context.reply(message);
     }
   }
 

@@ -21,6 +21,7 @@ module.exports = {
                 "allowAfterThis": true,
             }],
         "no-unused-vars": ["off"],
+        "prefer-destructuring": ["off"],
         "@typescript-eslint/no-unused-vars": ["warn", {
             "argsIgnorePattern": "^_",
         }],

@@ -13,6 +13,10 @@ import PrivateRoomCollection from './PrivateRoomCollection';
 import { EmojiIcon, UrlIcon } from '../webhooks/formats';
 import ImageUploader from './ImageUploader';
 import { UploadedImageRepository } from '../repositories/UploadedImageRepository';
+import {
+  fmt, Text, toHtml, toPlain,
+} from '../formatting/formatting';
+import ProfileInfo from './ProfileInfo';
 
 export default class MatrixBridge {
   private bridge: Bridge;
@@ -43,22 +47,24 @@ export default class MatrixBridge {
 
   public async sendMessage(
     target: string,
-    message: string,
+    message: Text,
     sender?: string | undefined,
-    format: 'html' | 'plain' | 'markdown' = 'plain',
   ): Promise<unknown> {
-    const content: Record<string, unknown> = {
-      body: message,
+    const plain = toPlain(message);
+    const html = toHtml(message);
+
+    const event: Record<string, unknown> = {
+      body: plain,
       msgtype: 'm.text',
     };
-    if (format === 'html') {
-      content.format = 'org.matrix.custom.html';
-      content.formatted_body = message;
+    if (plain !== html) {
+      event.format = 'org.matrix.custom.html';
+      event.formatted_body = html;
     }
-    return this.getIntent(sender).sendMessage(target, content);
+    return this.getIntent(sender).sendMessage(target, event);
   }
 
-  public getIntent(userId: string | undefined): Intent {
+  public getIntent(userId?: string): Intent {
     if (userId === undefined) {
       return this.bridge.getIntent();
     }
@@ -108,7 +114,7 @@ export default class MatrixBridge {
     username: string | undefined,
     icon: EmojiIcon | UrlIcon | undefined,
   ): Promise<void> {
-    const intent = this.getIntent(userId);
+    const intent = this.bridge.getIntentFromLocalpart(userId);
 
     if (username) {
       await intent.setDisplayName(username);
@@ -126,9 +132,22 @@ export default class MatrixBridge {
     }
   }
 
-  public async sendSecret(userId: string, message: string): Promise<unknown> {
+  async getProfileInfo(userId: string): Promise<ProfileInfo> {
+    const intent = this.bridge.getIntentFromLocalpart(userId);
+    const profile = await intent.getProfileInfo(intent.userId) as {
+      displayname: string,
+      avatar_url: string,
+    };
+    return {
+      id: intent.userId,
+      displayname: profile.displayname,
+      avatarUrl: profile.avatar_url,
+    };
+  }
+
+  public async sendSecret(userId: string, ...message: Text[]): Promise<unknown> {
     const room = await this.privateRoomCollection.getPrivateRoom(userId);
-    return this.sendMessage(room, message);
+    return this.sendMessage(room, fmt(...message));
   }
 
   public registerHandler(eventHandler: MatrixEventHandler): void {
@@ -139,8 +158,8 @@ export default class MatrixBridge {
     logger.silly('Starting Matrix bridge');
     await this.bridge.run(this.config.listen_port, undefined, undefined, this.config.listen_host);
     logger.info(`Matrix bridge running on ${this.config.listen_host}:${this.config.listen_port}`);
-    await this.getIntent(undefined).ensureRegistered(true);
-    await this.getIntent(undefined).setDisplayName(this.config.bot_user_name);
+    await this.getIntent().ensureRegistered(true);
+    await this.getIntent().setDisplayName(this.config.bot_user_name);
   }
 
   private handleUserQuery(user: MatrixUser): Record<string, unknown> {
