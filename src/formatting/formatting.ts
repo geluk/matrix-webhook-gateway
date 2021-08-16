@@ -40,6 +40,17 @@ export function fmt(...args: Text[]): Format {
 
 // HTML elements
 // -------------
+export function a(href: string, inner: Text): Format {
+  return {
+    formatHtml(): string {
+      return `<a href="${encode(href)}">${toHtml(inner)}</a>`;
+    },
+    formatPlain(): string {
+      return `${toPlain(inner)} (${href})`;
+    },
+  };
+}
+
 export function br(): Format {
   return {
     formatHtml(): string {
