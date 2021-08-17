@@ -149,6 +149,26 @@ export function ul(entries: Text[]): Format {
 
 // Control flow
 // -------------
+
+export function truncate(maxLength: number, content: string): Format {
+  const impl = () => {
+    if (content.length <= maxLength) {
+      return content;
+    }
+    return `${content.substring(0, maxLength)}...`;
+  };
+  return {
+    formatHtml(): string {
+      return encode(impl());
+    },
+    formatPlain(): string {
+      return impl();
+    },
+  };
+}
+
+// Control flow
+// -------------
 export function ifHtml(...args: Text[]): Format {
   return {
     formatHtml(): string {
