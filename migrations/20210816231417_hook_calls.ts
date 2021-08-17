@@ -12,7 +12,8 @@ export async function up(knex: Knex): Promise<void> {
         .inTable('webhook');
       table.timestamp('timestamp')
         .notNullable();
-      table.string('content')
+      // mediumtext is relevant to MySQL only.
+      table.text('content', 'mediumtext')
         .notNullable();
     });
 }
