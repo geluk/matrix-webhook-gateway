@@ -1,5 +1,7 @@
 import { is } from 'typescript-is';
-import { a, fmt, ul } from '../../src/formatting/formatting';
+import {
+  a, cond, fmt, ul,
+} from '../../src/formatting/formatting';
 import { WebhookMessageV2, WebhookPluginV2 } from '../../src/webhooks/pluginApi';
 
 type AlertStatus = 'resolved' | 'firing';
@@ -8,22 +10,23 @@ export interface PrometheusWebhook {
   version: '4',
   groupKey: string,
   truncatedAlerts: number,
-  status: AlertStatus,
   receiver: string,
-  groupLabels: Record<string, unknown>,
-  commonLabels: Record<string, unknown>,
-  commonAnnotations: Record<string, unknown>,
+  status: AlertStatus,
+  groupLabels: Record<string, string>,
+  commonLabels: Record<string, string>,
+  commonAnnotations: Record<string, string>,
   externalURL: string,
   alerts: Alert[],
 }
 
 interface Alert {
   status: AlertStatus,
-  labels: Record<string, unknown>,
-  annotations: Record<string, unknown>,
+  labels: Record<string, string>,
+  annotations: Record<string, string>,
   startsAt: string,
   endsAt: string,
   generatorURL: string,
+  fingerprint: string,
 }
 
 const alertStatusIcon: Record<AlertStatus, string> = {
@@ -55,6 +58,10 @@ const plugin: WebhookPluginV2 = {
       },
       text: fmt(
         icon,
+        ` ${body.alerts.length} alert`,
+        cond(body.alerts.length > 1, 's'),
+        ` ${body.status}`,
+        cond(body.truncatedAlerts > 0, ` (${body.truncatedAlerts} truncated)`),
         ul(
           body.alerts.map(makeAlert),
         ),
