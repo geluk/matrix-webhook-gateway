@@ -13,7 +13,7 @@ import WebhookListener from './webhooks/WebhookListener';
 import Configuration from './configuration/Configuration';
 import { generateLocalPart } from './util/matrixUtilities';
 import UserRepository from './repositories/UserRepository';
-import { WebhookResult } from './webhooks/formats';
+import { WebhookResult } from './webhooks/pluginApi';
 import Matcher from './webhooks/Matcher';
 import UploadedImageFromDatabase from './repositories/UploadedImageRepository';
 import {

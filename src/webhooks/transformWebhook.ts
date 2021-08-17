@@ -4,9 +4,10 @@ import logger from '../util/logger';
 import {
   AppriseJsonWebhook_1_0,
   AppriseJsonWebhook_Unknown,
-  DiscordWebhook, WebhookMessageV2, SlackWebhook,
+  DiscordWebhook, SlackWebhook,
   Turt2liveWebhook, WebhookContent,
 } from './formats';
+import { WebhookMessageV2 } from './pluginApi';
 
 export default function transformWebhook(
   webhook: WebhookContent,

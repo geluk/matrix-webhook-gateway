@@ -4,24 +4,11 @@ import hasha from 'hasha';
 import * as tts from 'ttypescript';
 import { is } from 'typescript-is';
 import isTransformer from 'typescript-is/lib/transform-inline/transformer';
-import { Logger } from 'tslog';
 import logger from '../util/logger';
-import { WebhookMessageV2, WebhookMessageV1 } from './formats';
+import {
+  WebhookMessageV2, WebhookMessageV1, WebhookPluginV1, WebhookPluginV2,
+} from './pluginApi';
 import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
-
-export interface WebhookPluginV1 {
-  version: '1',
-  format: string,
-  init?: () => unknown,
-  transform: (body: unknown) => WebhookMessageV1 | undefined,
-}
-
-export interface WebhookPluginV2 {
-  version: '2',
-  format: string,
-  init?: (logger: Logger) => unknown,
-  transform: (body: unknown) => WebhookMessageV2 | undefined,
-}
 
 interface PluginBase {
   version: '1' | '2',

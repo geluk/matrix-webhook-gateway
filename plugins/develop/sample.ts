@@ -2,7 +2,7 @@ import { is } from 'typescript-is';
 import {
   blockquote, fmt, strong,
 } from '../../src/formatting/formatting';
-import { WebhookMessageV2 } from '../../src/webhooks/formats';
+import { WebhookContextV2, WebhookMessageV2 } from '../../src/webhooks/pluginApi';
 
 type SampleContent = {
   message: string,
@@ -14,7 +14,7 @@ const plugin = {
   version: '2',
   init(context: WebhookContextV2): void {
     // This function will be executed once, on startup.
-    context.info('Sample plugin starting up');
+    context.logger.info('Sample plugin starting up');
   },
   transform(body: unknown, context: WebhookContextV2): WebhookMessageV2 | undefined {
     // This function will be executed every time a webhook with a matching
@@ -25,7 +25,7 @@ const plugin = {
     // You can make use of 'typescript-is' to perform runtime type checks on
     // input data. This makes it easy to reject invalid webhooks.
     if (!is<SampleContent>(body)) {
-      context.logger.warning('test');
+      context.logger.warn('Invalid webhook');
       return undefined;
     }
     // `body` is now guaranteed to be of the type `SampleContent`, so we can

@@ -3,9 +3,8 @@ import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 import Webhook from '../models/Webhook';
 import WebhookRepository from '../repositories/WebhookRepository';
 import logger from '../util/logger';
-import {
-  WebhookResult, WebhookMessageV2, WebhookContent, WebhookMessageV1,
-} from './formats';
+import { WebhookContent } from './formats';
+import { WebhookResult, WebhookMessageV2, WebhookMessageV1 } from './pluginApi';
 import PluginCollection from './PluginCollection';
 import transformWebhook from './transformWebhook';
 

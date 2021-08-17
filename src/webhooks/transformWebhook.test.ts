@@ -1,4 +1,5 @@
-import { DiscordWebhook, WebhookMessageV2, SlackWebhook } from './formats';
+import { DiscordWebhook, SlackWebhook } from './formats';
+import { WebhookMessageV2 } from './pluginApi';
 import transformWebhook from './transformWebhook';
 
 test('transforms Slack-style webhooks', () => {

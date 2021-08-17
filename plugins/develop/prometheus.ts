@@ -1,7 +1,6 @@
 import { is } from 'typescript-is';
 import { a, fmt, ul } from '../../src/formatting/formatting';
-import { WebhookMessageV2 } from '../../src/webhooks/formats';
-import { WebhookPluginV2 } from '../../src/webhooks/PluginCollection';
+import { WebhookMessageV2, WebhookPluginV2 } from '../../src/webhooks/pluginApi';
 
 type AlertStatus = 'resolved' | 'firing';
 
