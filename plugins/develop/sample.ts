@@ -1,5 +1,7 @@
 import { is } from 'typescript-is';
-import { blockquote, fmt, strong, toPlain } from '../../src/formatting/formatting';
+import {
+  blockquote, fmt, strong, toPlain,
+} from '../../src/formatting/formatting';
 import { WebhookMessageV2 } from '../../src/webhooks/formats';
 
 type SampleContent = {

@@ -30,10 +30,10 @@ export function fmt(...args: Text[]): Format {
   const formattableArgs = args.map(toFormat);
   return {
     formatHtml(): string {
-      return formattableArgs.map((a) => a.formatHtml()).join('');
+      return formattableArgs.map((arg) => arg.formatHtml()).join('');
     },
     formatPlain(): string {
-      return formattableArgs.map((a) => a.formatPlain()).join('');
+      return formattableArgs.map((arg) => arg.formatPlain()).join('');
     },
   };
 }
