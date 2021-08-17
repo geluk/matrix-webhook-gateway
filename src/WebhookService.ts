@@ -95,7 +95,7 @@ export default class WebhookService {
       content.formatted_body = call.content.text;
       await this.bridge.getIntent(call.webhook.user_id).sendMessage(call.webhook.room_id, content);
     } else {
-      await this.bridge.sendMessage(call.webhook.room_id, call.content.text);
+      await this.bridge.sendMessage(call.webhook.room_id, call.content.text, call.webhook.user_id);
     }
   }
 
