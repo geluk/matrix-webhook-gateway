@@ -175,3 +175,7 @@ Invite the webhook management user using the following Matrix command:
 
 - [apprise](https://github.com/caronc/apprise/), a platform-independent notification framework.
 - [turt2live](https://github.com/turt2live/matrix-appservice-webhooks), whose project inspired me to develop this application.
+
+## Useful documentation
+- https://matrix.org/docs/spec/client_server/r0.6.1
+- https://matrix.org/docs/spec/application_service/r0.1.2
