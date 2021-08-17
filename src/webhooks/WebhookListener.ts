@@ -50,11 +50,15 @@ export default class WebhookListener {
       return;
     }
 
-    this.hookCallRepository.add({
-      hook_id: match.webhook.id,
-      content: JSON.stringify(rq.body),
-      timestamp: new Date(),
-    });
+    try {
+      this.hookCallRepository.add({
+        hook_id: match.webhook.id,
+        content: JSON.stringify(rq.body),
+        timestamp: new Date(),
+      });
+    } catch (error) {
+      logger.error('Error inserting hook call details into database: ', error);
+    }
 
     const result = this.webhookMatcher.executeHook(match, rq);
     if (result) {
