@@ -1,5 +1,6 @@
 import { is } from 'typescript-is';
 import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
+import Webhook from '../models/Webhook';
 import WebhookRepository from '../repositories/WebhookRepository';
 import logger from '../util/logger';
 import {
@@ -11,6 +12,11 @@ import transformWebhook from './transformWebhook';
 export interface Request {
   path: string,
   body: unknown,
+}
+
+export interface Match {
+  webhook: Webhook,
+  pluginName?: string,
 }
 
 export default class Matcher {
@@ -27,19 +33,13 @@ export default class Matcher {
     return this.plugins.load();
   }
 
-  public async matchRequest(rq: Request): Promise<WebhookResult | undefined> {
+  public async matchRequest(rq: Request): Promise<Match | undefined> {
     const fullPath = rq.path;
 
     let webhook = await this.webhookRepository.getByPath(fullPath);
     if (webhook) {
-      if (!is<WebhookContent>(rq.body)) {
-        logger.warn('Received an unrecognised webhook: ', rq.body);
-        return undefined;
-      }
-      logger.silly('Transforming webhook');
       return {
         webhook,
-        content: transformWebhook(rq.body),
       };
     }
     const match = fullPath.match(/^(.*)\/([a-z0-9_]+)$/);
@@ -48,38 +48,56 @@ export default class Matcher {
       return undefined;
     }
 
-    const [path, type] = match.slice(1);
+    const [path, pluginName] = match.slice(1);
     webhook = await this.webhookRepository.getByPath(path);
     if (!webhook) {
       logger.debug('Webhook not found.');
       return undefined;
     }
 
-    logger.debug(`Received typed webhook (type: '${type}')`);
-    if (!this.plugins.acceptsType(type)) {
-      logger.warn(`Received an unrecognised webhook type: ${type}`);
+    logger.debug(`Received typed webhook for plugin '${pluginName}'`);
+    return {
+      webhook,
+      pluginName,
+    };
+  }
+
+  public executeHook(match: Match, request: Request): WebhookResult | undefined {
+    if (match.pluginName === undefined) {
+      if (is<WebhookContent>(request.body)) {
+        return {
+          webhook: match.webhook,
+          content: transformWebhook(request.body),
+        };
+      }
+      logger.warn('Received an unrecognised webhook: ', request.body);
       return undefined;
     }
 
-    logger.debug(`Invoking plugin: '${type}'`);
-    const content = this.plugins.apply(rq.body, type);
+    if (!this.plugins.acceptsType(match.pluginName)) {
+      logger.warn(`Received an unrecognised webhook type: ${match.pluginName}`);
+      return undefined;
+    }
+
+    logger.debug(`Invoking plugin: '${match.pluginName}'`);
+    const content = this.plugins.apply(request.body, match.pluginName);
     if (content === undefined) {
-      logger.debug(`Plugin '${type}' rejected the webhook.`);
+      logger.debug(`Plugin '${match.pluginName}' rejected the webhook.`);
       return undefined;
     }
     if (is<WebhookMessageV2>(content)) {
       return {
-        webhook,
+        webhook: match.webhook,
         content,
       };
     }
     if (is<WebhookMessageV1>(content)) {
       return {
-        webhook,
+        webhook: match.webhook,
         content,
       };
     }
-    logger.warn(`Plugin '${type}' returned invalid content:`, content);
+    logger.warn(`Plugin '${match.pluginName}' returned invalid content:`, content);
     return undefined;
   }
 }

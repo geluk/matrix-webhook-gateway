@@ -1,6 +1,7 @@
 import * as Express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
+import HookCallRepository from '../repositories/HookCallRepository';
 import logger from '../util/logger';
 import Observable from '../util/Observable';
 import { WebhookResult } from './formats';
@@ -14,6 +15,7 @@ export default class WebhookListener {
   public constructor(
     private config: WebhooksConfiguration,
     private webhookMatcher: Matcher,
+    private hookCallRepository: HookCallRepository,
   ) { }
 
   public async start(): Promise<void> {
@@ -43,14 +45,26 @@ export default class WebhookListener {
       logger.error('Failed to match webhook:');
       logger.prettyError(error);
     }
-    if (match) {
+    if (!match) {
+      rs.status(404).send('Not Found');
+      return;
+    }
+
+    this.hookCallRepository.add({
+      hook_id: match.webhook.id,
+      content: JSON.stringify(rq.body),
+      timestamp: new Date(),
+    });
+
+    const result = this.webhookMatcher.executeHook(match, rq);
+    if (result) {
       logger.silly('Request body: ', rq.body);
-      rs.send('Ok');
-      this.onWebhookResult.notify(match).catch((error) => {
+      this.onWebhookResult.notify(result).catch((error) => {
         logger.error('Failed to handle webhook invocation: ', error);
       });
-    } else {
-      rs.status(404).send('Not Found');
+      return;
     }
+    logger.info('Closing connection');
+    rs.status(200).send('Ok');
   }
 }

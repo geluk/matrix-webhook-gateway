@@ -147,6 +147,41 @@ export function ul(entries: Text[]): Format {
   };
 }
 
+// Control flow
+// -------------
+export function ifHtml(...args: Text[]): Format {
+  return {
+    formatHtml(): string {
+      return args.map(toHtml).join('');
+    },
+    formatPlain(): string {
+      return '';
+    },
+  };
+}
+
+export function ifPlain(...args: Text[]): Format {
+  return {
+    formatHtml(): string {
+      return '';
+    },
+    formatPlain(): string {
+      return args.map(toPlain).join('');
+    },
+  };
+}
+
+export function cond(condition: boolean, ...args: Text[]): Format {
+  return {
+    formatHtml(): string {
+      return condition ? args.map(toHtml).join('') : '';
+    },
+    formatPlain(): string {
+      return condition ? args.map(toPlain).join('') : '';
+    },
+  };
+}
+
 // Matrix shortcuts
 // -------------
 export function user(profileInfo: ProfileInfo): Format {

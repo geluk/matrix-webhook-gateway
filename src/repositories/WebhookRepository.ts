@@ -1,4 +1,4 @@
-import Webhook from '../models/Webhook';
+import Webhook, { CreateWebhook } from '../models/Webhook';
 import logger from '../util/logger';
 import Database from './Database';
 
@@ -9,7 +9,7 @@ export default class WebhookRepository {
     this.database = database;
   }
 
-  public async add(entity: Webhook): Promise<number> {
+  public async add(entity: CreateWebhook): Promise<number> {
     return this.database.knex('webhook').insert(entity);
   }
 

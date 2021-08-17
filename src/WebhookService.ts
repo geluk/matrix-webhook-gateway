@@ -19,6 +19,7 @@ import UploadedImageFromDatabase from './repositories/UploadedImageRepository';
 import {
   br, code, fmt, room, table, Text, user,
 } from './formatting/formatting';
+import HookCallRepository from './repositories/HookCallRepository';
 
 const HOOK_SECRET_LENGTH = 48;
 
@@ -44,12 +45,14 @@ export default class WebhookService {
     this.webhookRepository = new WebhookRepository(this.database);
     this.userRepository = new UserRepository(this.database);
     const imageRepository = new UploadedImageFromDatabase(this.database);
+    const hookCallRepository = new HookCallRepository(this.database);
 
     this.bridge = new MatrixBridge(config.app_service, imageRepository, this.userRepository);
     this.commandHandler.onCommand.observe(this.handleCommand.bind(this));
     this.webhookListener = new WebhookListener(
       config.webhooks,
       new Matcher(this.webhookRepository, this.config.webhooks),
+      hookCallRepository,
     );
     this.webhookListener.onWebhookResult.observe(this.handleHookResult.bind(this));
   }
