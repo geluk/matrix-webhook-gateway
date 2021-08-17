@@ -1,0 +1,72 @@
+# Modify this file to configure the webhook gateway.
+
+# Homeserver appservice configuration.
+# These settings will be used to generate an appservice.yaml file,
+# which should be moved to a place where it's accessible from Synapse,
+# and added to the app_service_config_files configuration field in your 
+# homeserver.yaml file.
+app_service:
+  # The ID of this application service. Must be unique on your homeserver.
+  id: webhook-dev
+  # Tokens used to facilitate communication between the appservice and the
+  # homeserver. Keep these secret! Randomly generated on first startup.
+  hs_token: 'LOCAL_DEV_hs_JWCcAqU5TmTX94nj3hlw'
+  as_token: 'LOCAL_DEV_as_eRUxytaEISYK47kgBjGo'
+  # All webhook user IDs will be generated from this pattern.
+  user_pattern: '@_hook_{name}_{room}'
+  # The user ID of the webhook configuration bot.
+  sender_localpart: webhook
+  # Should server rate limits be enforced on the application service?
+  rate_limited: true
+  # The name of your homeserver. This should match the value of the server_name
+  # configuration key in Synapse's homeserver.yaml file.
+  homeserver_name: matrix.local
+  # URL used by the homeserver to communicate with the application service.
+  app_service_url: http://127.0.0.1:8023
+  # URL used by the application service to communicate with the homeserver.
+  homeserver_url: http://synapse:8008
+  # Address and port used to listen for incoming events from the homeserver.
+  listen_host: '0.0.0.0'
+  listen_port: 8023
+  # Display name of the bot user.
+  bot_user_name: 'Webhook'
+
+# Configuration for the webhook service.
+webhooks:
+  # Address and port used to listen for incoming webhooks.
+  listen_host: '0.0.0.0'
+  listen_port: 8020
+  # Public base URL to which the webhook path should be appended. If you run the
+  # service at some subpath behind a reverse proxy, it should be included here.
+  public_url: http://127.0.0.1:8020
+  # Path to the plugin directory. Any Typescript files in this directory will be
+  # loaded as webhook plugins.
+  plugin_directory: ./plugins
+  # Path to the directory where the plugin compiler may store cached plugins.
+  plugin_cache_directory: ./plugins/__cache
+
+# Configures the database where the webhook details are stored.
+database:
+  # The database driver to use. Should be one of the following:
+  # pg, mysql, sqlite3, oracledb, mssql
+  driver: sqlite3
+  # How to connect to the database. Can either be a connection string,
+  # or a connection object, containing either a filename (for sqlite3),
+  # or a host, user, password, database, and, optionally, a port and tls
+  # configuration.
+
+  # Example 1: sqlite3 (default)
+  connection:
+    filename: webhook-db.sqlite
+
+  # # Example 2: PostgreSQL
+  # connection:
+  #   host: localhost
+  #   port: 5432
+  #   user: webhook
+  #   password: password
+  #   database: webhook
+  #   tls: require
+
+  # # Example 3: Connection string for MariaDB/MySQL
+  # connection: 'Server=localhost;Database=webhook;Uid=webhook;Pwd=password;'

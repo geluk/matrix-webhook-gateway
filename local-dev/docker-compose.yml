@@ -30,6 +30,20 @@ services:
     networks:
       matrix:
         ipv4_address: 172.31.0.11
+# Uncomment this to test the gateway inside Docker
+# May require some manual configuration
+  # matrix-webhooks:
+  #   build: ../
+  #   command: -vv
+  #   volumes:
+  #     - ./webhook-config:/config
+  #   ports:
+  #     - 8020:8020
+  #     - 8023:8023
+  #   restart: unless-stopped
+  #   networks:
+  #     matrix:
+  #       ipv4_address: 172.31.0.12
 networks:
   matrix:
     driver: bridge
