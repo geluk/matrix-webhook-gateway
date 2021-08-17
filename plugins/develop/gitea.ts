@@ -168,6 +168,7 @@ const plugin: WebhookPluginV2 = {
           ': "',
           a(body.issue.html_url, body.issue.title),
           '"',
+          ` (#${body.issue.number})`,
         ),
       };
     }
@@ -178,7 +179,8 @@ const plugin: WebhookPluginV2 = {
           body.sender.username,
           ' closed "',
           a(body.issue.html_url, body.issue.title),
-          '" in ',
+          `" (#${body.issue.number})`,
+          ' in ',
           a(body.repository.html_url, body.repository.full_name),
         ),
       };
@@ -190,7 +192,8 @@ const plugin: WebhookPluginV2 = {
           body.sender.username,
           ' commented on "',
           a(body.comment.html_url, body.issue.title),
-          '" in ',
+          `" (#${body.issue.number})`,
+          ' in ',
           a(body.repository.html_url, body.repository.full_name),
           ':', br(),
           blockquote(truncate(200, body.comment.body)),

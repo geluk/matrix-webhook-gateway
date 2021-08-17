@@ -5,10 +5,10 @@
   "private": true,
   "scripts": {
     "start": "ts-node entry.ts -v",
-    "build": "npx ttsc --build",
+    "build": "ttsc --build",
     "package": "cp -r templates migrations node_modules out/webhook-gateway",
-    "lint": "npx eslint . --ext .ts",
-    "test": "npx jest"
+    "lint": "eslint . --ext .ts",
+    "test": "jest"
   },
   "author": "",
   "license": "MIT",
