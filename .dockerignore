@@ -2,11 +2,16 @@
 .git
 .gitignore
 
+# CI/CD
+/.circleci
+/ci
+
 # Development configuration/data
 /appservice.yaml
 /gateway-config.yaml
 /local-dev
 /webhook-db.sqlite
+.editorconfig
 
 # Build output
 /out
