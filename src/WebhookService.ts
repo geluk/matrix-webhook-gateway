@@ -51,7 +51,7 @@ export default class WebhookService {
     this.commandHandler.onCommand.observe(this.handleCommand.bind(this));
     this.webhookListener = new WebhookListener(
       config.webhooks,
-      new Matcher(this.webhookRepository, this.config.webhooks),
+      new Matcher(this.webhookRepository, this.config.webhooks, this.bridge),
       hookCallRepository,
     );
     this.webhookListener.onWebhookResult.observe(this.handleHookResult.bind(this));

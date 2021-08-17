@@ -6,9 +6,10 @@ import { is } from 'typescript-is';
 import isTransformer from 'typescript-is/lib/transform-inline/transformer';
 import logger from '../util/logger';
 import {
-  WebhookMessageV2, WebhookMessageV1, WebhookPluginV1, WebhookPluginV2,
+  WebhookMessageV2, WebhookMessageV1, WebhookPluginV1, WebhookPluginV2, WebhookContextV2,
 } from './pluginApi';
 import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
+import MatrixBridge from '../bridge/MatrixBridge';
 
 interface PluginBase {
   version: '1' | '2',
@@ -32,6 +33,7 @@ export default class PluginCollection {
 
   public constructor(
     private config: WebhooksConfiguration,
+    private bridge: MatrixBridge,
   ) {
     this.pluginDirectory = path.resolve(this.config.plugin_directory);
     this.cacheDirectory = path.resolve(this.config.plugin_cache_directory);
@@ -69,7 +71,7 @@ export default class PluginCollection {
 
   public apply(body: unknown, type: string): WebhookMessageV2 | WebhookMessageV1 | undefined {
     const plugin = this.plugins[type];
-    return plugin.transform(body);
+    return plugin.transform(body, this.createContext(type));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -149,10 +151,12 @@ export default class PluginCollection {
 
     if (is<WebhookPluginV2>(pluginContainer)) {
       if (pluginContainer.init) {
-        const pluginLogger = logger.getChildLogger({
-          name: `plg-${pluginContainer.format}`,
-        });
-        pluginContainer.init(pluginLogger);
+        try {
+          pluginContainer.init(this.createContext(pluginContainer.format));
+        } catch (error) {
+          logger.error(`Plugin '${pluginContainer.format}' threw an exception during initialisation:`, error);
+          return;
+        }
       }
       this.plugins[pluginContainer.format] = pluginContainer;
       return;
@@ -160,6 +164,15 @@ export default class PluginCollection {
 
     logger.warn(`Unknown plugin type: ${pluginPath}`);
     logger.debug('Plugin container:', pluginContainer);
+  }
+
+  private createContext(pluginName: string): WebhookContextV2 {
+    return {
+      logger: logger.getChildLogger({
+        name: `plg-${pluginName}`,
+      }),
+      bridge: this.bridge,
+    };
   }
 
   private compilePlugin(source: string, hash: string, cachePath: string) {

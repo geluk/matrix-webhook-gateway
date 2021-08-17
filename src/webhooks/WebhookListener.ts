@@ -46,7 +46,7 @@ export default class WebhookListener {
       logger.prettyError(error);
     }
     if (!match) {
-      rs.status(404).send('Not Found');
+      rs.status(404).send('Not Found').end();
       return;
     }
 
@@ -66,9 +66,8 @@ export default class WebhookListener {
       this.onWebhookResult.notify(result).catch((error) => {
         logger.error('Failed to handle webhook invocation: ', error);
       });
-      return;
     }
     logger.info('Closing connection');
-    rs.status(200).send('Ok');
+    rs.status(200).send('Ok').end();
   }
 }

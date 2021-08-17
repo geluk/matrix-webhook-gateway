@@ -1,4 +1,5 @@
 import { is } from 'typescript-is';
+import MatrixBridge from '../bridge/MatrixBridge';
 import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 import Webhook from '../models/Webhook';
 import WebhookRepository from '../repositories/WebhookRepository';
@@ -24,8 +25,9 @@ export default class Matcher {
   public constructor(
     private webhookRepository: WebhookRepository,
     private config: WebhooksConfiguration,
+    bridge: MatrixBridge,
   ) {
-    this.plugins = new PluginCollection(config);
+    this.plugins = new PluginCollection(config, bridge);
   }
 
   public load(): Promise<void> {
