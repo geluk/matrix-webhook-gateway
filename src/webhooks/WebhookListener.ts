@@ -59,15 +59,18 @@ export default class WebhookListener {
     } catch (error) {
       logger.error('Error inserting hook call details into database: ', error);
     }
-
-    const result = this.webhookMatcher.executeHook(match, rq);
+    let result;
+    try {
+      result = this.webhookMatcher.executeHook(match, rq);
+    } catch (error) {
+      logger.error(`An error occurred while executing plugin ${match.pluginName}`);
+    }
     if (result) {
       logger.silly('Request body: ', rq.body);
       this.onWebhookResult.notify(result).catch((error) => {
         logger.error('Failed to handle webhook invocation: ', error);
       });
     }
-    logger.info('Closing connection');
     rs.status(200).send('Ok').end();
   }
 }
