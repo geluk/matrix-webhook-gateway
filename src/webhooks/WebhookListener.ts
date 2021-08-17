@@ -3,13 +3,13 @@ import { Request, Response, NextFunction } from 'express';
 import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 import logger from '../util/logger';
 import Observable from '../util/Observable';
-import { HookCall } from './formats';
+import { WebhookResult } from './formats';
 import Matcher from './Matcher';
 
 export default class WebhookListener {
   private app = Express.default();
 
-  public onHookCall = new Observable<HookCall>();
+  public onWebhookResult = new Observable<WebhookResult>();
 
   public constructor(
     private config: WebhooksConfiguration,
@@ -46,7 +46,7 @@ export default class WebhookListener {
     if (match) {
       logger.silly('Request body: ', rq.body);
       rs.send('Ok');
-      this.onHookCall.notify(match).catch((error) => {
+      this.onWebhookResult.notify(match).catch((error) => {
         logger.error('Failed to handle webhook invocation: ', error);
       });
     } else {

@@ -3,7 +3,7 @@ import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 import WebhookRepository from '../repositories/WebhookRepository';
 import logger from '../util/logger';
 import {
-  HookCall, WebhookMessageV2, WebhookContent, WebhookMessageV1,
+  WebhookResult, WebhookMessageV2, WebhookContent, WebhookMessageV1,
 } from './formats';
 import PluginCollection from './PluginCollection';
 import transformWebhook from './transformWebhook';
@@ -27,7 +27,7 @@ export default class Matcher {
     return this.plugins.load();
   }
 
-  public async matchRequest(rq: Request): Promise<HookCall | undefined> {
+  public async matchRequest(rq: Request): Promise<WebhookResult | undefined> {
     const fullPath = rq.path;
 
     let webhook = await this.webhookRepository.getByPath(fullPath);

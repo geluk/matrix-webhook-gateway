@@ -1,7 +1,7 @@
 import { Text } from '../formatting/formatting';
 import Webhook from '../models/Webhook';
 
-export interface HookCall {
+export interface WebhookResult {
   webhook: Webhook;
   content: WebhookMessageV1 | WebhookMessageV2;
 }
