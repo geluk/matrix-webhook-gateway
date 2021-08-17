@@ -1,6 +1,6 @@
 import { is } from 'typescript-is';
 import {
-  blockquote, fmt, strong, toPlain,
+  blockquote, fmt, strong,
 } from '../../src/formatting/formatting';
 import { WebhookMessageV2 } from '../../src/webhooks/formats';
 
@@ -32,12 +32,12 @@ const plugin = {
     // safely interpolate its properties into the webhook message.
     return {
       version: '2',
-      text: toPlain(fmt(
+      text: fmt(
         'Hello, ',
         strong(body.recipient),
         '! You have a new message: ',
         blockquote(body.message),
-      )),
+      ),
     };
   },
 };

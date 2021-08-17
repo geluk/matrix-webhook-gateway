@@ -198,7 +198,7 @@ export default class WebhookService {
     if (command.full) {
       const rows: Text[][] = await Promise.all(hooks.map(async (h) => {
         const profile = await this.bridge.getProfileInfo(h.user_id);
-        return [`#${h.id}`, fmt(user(profile)), code(`${this.config.webhooks.public_url}${h.path}...`)];
+        return [`#${h.id}`, fmt(user(profile)), code(`${this.config.webhooks.public_url}${h.path}`)];
       }));
 
       const message = fmt(

@@ -112,7 +112,7 @@ export default class CommandParser {
       }
       case 'set':
       {
-        const hookId = this.parseNumber(1);
+        const hookId = this.parseNumber(2);
         if (
           this.args.length !== 4
           || (this.args[1] !== 'name'
