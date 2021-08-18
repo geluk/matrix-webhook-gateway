@@ -33,9 +33,9 @@ jobs:
     - run:
         name: Compress artifacts
         command: tar -czf webhook-gateway.tar.gz ./webhook-gateway
-        working_directory: ./out/dist
+        working_directory: ./out
     - store_artifacts:
-        path: ./out/dist/webhook-gateway.tar.gz
+        path: ./out/webhook-gateway.tar.gz
         destination: webhook-gateway.tar.gz
   docker_publish:
     executor: docker_exec
