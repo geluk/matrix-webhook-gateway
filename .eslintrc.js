@@ -2,7 +2,7 @@ module.exports = {
     root: true,
     parser: "@typescript-eslint/parser",
     parserOptions: {
-        project: "tsconfig.json"
+        project: "tsconfig.json",
     },
     plugins: [
         "@typescript-eslint",
@@ -26,4 +26,7 @@ module.exports = {
             "argsIgnorePattern": "^_",
         }],
     },
+    ignorePatterns: [
+        "plugins"
+    ],
 };
