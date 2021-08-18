@@ -22,6 +22,24 @@ interface IssueClosed {
   sender: User,
 }
 
+interface IssueAssigned {
+  secret: string,
+  action: 'assigned',
+  number: number,
+  issue: Issue,
+  repository: Repository,
+  sender: User,
+}
+
+interface PullRequestClosed {
+  secret: string,
+  action: 'closed',
+  number: number,
+  pull_request: PullRequest,
+  repository: Repository,
+  sender: User,
+}
+
 interface CommentCreated {
   secret: string,
   action: 'created',
@@ -51,6 +69,19 @@ interface CommentDeleted {
   sender: User,
 }
 
+interface WebhookTest {
+  secret: string,
+  ref: string,
+  before: string,
+  after: string,
+  compare_url: string,
+  commits: Commit[],
+  head_commit: unknown,
+  repository: Repository,
+  pusher: User,
+  sender: User,
+}
+
 interface Issue {
   id: number,
   url: string,
@@ -62,17 +93,17 @@ interface Issue {
   title: string,
   body: string,
   ref: string,
-  labels: unknown[],
+  labels: Label[],
   milestone: unknown,
-  assignee: unknown,
-  assignees: unknown,
+  assignee: User | null,
+  assignees: User[] | null,
   state: string,
   is_locked: boolean,
   comments: number,
   created_at: string,
   updated_at: string,
-  closed_at: unknown,
-  due_date: unknown,
+  closed_at: string | null,
+  due_date: string | null,
   pull_request: unknown,
   repository: {
     id: number,
@@ -80,6 +111,37 @@ interface Issue {
     owner: string,
     full_name: string,
   },
+}
+
+interface PullRequest {
+  id: number,
+  url: string,
+  number: number,
+  user: User,
+  title: string,
+  body: string,
+  labels: Label[],
+  milestone: unknown,
+  assignee: User | null,
+  assignees: User[] | null,
+  state: string,
+  is_locked: boolean,
+  comments: number,
+  html_url: string,
+  diff_url: string,
+  patch_url: string,
+  mergeable: boolean,
+  merged: boolean,
+  merged_at: string,
+  merge_commit_sha: string,
+  merged_by: User,
+  base: Ref,
+  head: Ref,
+  merge_base: string,
+  due_date: string | null,
+  created_at: string,
+  updated_at: string,
+  closed_at: string | null,
 }
 
 interface Repository {
@@ -161,12 +223,46 @@ interface Comment {
   updated_at: string,
 }
 
+interface Commit {
+  id: string,
+  message: string,
+  url: string,
+  author: Author,
+  committer: Author,
+  verification: unknown,
+  timestamp: string,
+  added: unknown,
+  removed: unknown,
+  modified: unknown,
+}
+
+interface Ref {
+  label: string,
+  ref: string,
+  sha: string,
+  repo_id: number,
+  repo: Repository,
+}
+
+interface Author {
+  name: string,
+  email: string,
+  username: string,
+}
+
+interface Label {
+  id: number,
+  name: string,
+  color: string,
+  description: string,
+  url: string,
+}
+
 const plugin: WebhookPluginV2 = {
   format: 'gitea',
   version: '2',
   async init(context: WebhookContextV2) {
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async transform(body: any, context: WebhookContextV2): Promise<WebhookMessageV2 | undefined> {
     if (is<IssueOpened>(body)) {
       return {
@@ -195,6 +291,33 @@ const plugin: WebhookPluginV2 = {
         ),
       };
     }
+    if (is<PullRequestClosed>(body)) {
+      if(body.pull_request.merged) {
+        return {
+          version: '2',
+          text: fmt(
+            body.sender.username,
+            ' merged "',
+            a(body.pull_request.html_url, body.pull_request.title),
+            `" (#${body.pull_request.number})`,
+            ' in ',
+            a(body.repository.html_url, body.repository.full_name),
+          ),
+        };
+      } else {
+        return {
+          version: '2',
+          text: fmt(
+            body.sender.username,
+            ' closed "',
+            a(body.pull_request.html_url, body.pull_request.title),
+            `" (#${body.pull_request.number})`,
+            ' in ',
+            a(body.repository.html_url, body.repository.full_name),
+          ),
+        };
+      }
+    }
     if (is<CommentCreated>(body)) {
       return {
         version: '2',
@@ -207,6 +330,18 @@ const plugin: WebhookPluginV2 = {
           a(body.repository.html_url, body.repository.full_name),
           ':', br(),
           blockquote(truncate(200, body.comment.body)),
+        ),
+      };
+    }
+    if (is<WebhookTest>(body)) {
+      return {
+        version: '2',
+        text: fmt(
+          'Webhook test by ',
+          body.sender.username,
+          ' for repository ',
+          a(body.repository.html_url, body.repository.full_name),
+          ' succeeded.',
         ),
       };
     }
