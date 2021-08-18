@@ -137,7 +137,7 @@ export default class CommandParser {
   }
 
   private parseNumber(argumentIndex: number): number | undefined {
-    const cleaned = this.args[argumentIndex].replaceAll('#', '');
+    const cleaned = this.args[argumentIndex]?.replaceAll('#', '');
     const parsed = parseInt(cleaned, 10);
     if (Number.isNaN(parsed)) {
       return undefined;
