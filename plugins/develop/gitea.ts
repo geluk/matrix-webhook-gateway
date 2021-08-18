@@ -42,6 +42,15 @@ interface CommentEdited {
   sender: User,
 }
 
+interface CommentDeleted {
+  secret: string,
+  action: 'deleted',
+  issue: Issue,
+  comment: Comment,
+  repository: Repository,
+  sender: User,
+}
+
 interface Issue {
   id: number,
   url: string,
@@ -199,6 +208,10 @@ const plugin: WebhookPluginV2 = {
           blockquote(truncate(200, body.comment.body)),
         ),
       };
+    }
+    if (is<CommentEdited | CommentDeleted>(body)) {
+      context.logger.info(`Ignoring Gitea action: ${body.action}`);
+      return undefined;
     }
     context.logger.info(`Unknown Gitea action: '${body.action}'`);
     return undefined;
