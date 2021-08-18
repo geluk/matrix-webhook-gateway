@@ -1,19 +1,19 @@
 version: 2.1
 orbs:
-  node: circleci/node@4.1.0
+  node: circleci/node@4.7.0
 executors:
-  docker_exec:
+  main:
     environment:
       IMAGE_NAME: geluk/matrix-webhook-gateway
     docker:
-    - image: circleci/buildpack-deps:stretch
+      # This image has both Node and Docker pre-installed,
+      # so we can use it for everything.
+    - image: cimg/node:16.7.0
 jobs:
-  build:
-    docker:
-    - image: 'cimg/base:stable'
+  npm-build:
+    executor: main
     steps:
     - checkout
-    - node/install
     - run:
         name: Check Node version
         command: node --version
@@ -37,56 +37,52 @@ jobs:
     - store_artifacts:
         path: ./out/webhook-gateway.tar.gz
         destination: webhook-gateway.tar.gz
-  docker_publish:
-    executor: docker_exec
+  docker-build:
+    executor: main
     steps:
     - checkout
     - setup_remote_docker
     - run:
         name: Build Docker image
-        command: |
-          docker build -t $IMAGE_NAME:latest \
-          -t $IMAGE_NAME:$(./ci/tag.sh --major) \
-          -t $IMAGE_NAME:$(./ci/tag.sh --minor) \
-          -t $IMAGE_NAME:$(./ci/tag.sh --patch) .
+        command: docker build -t $IMAGE_NAME:dev .
+    - when:
+        condition:
+          matches:
+            pattern: "^\\d+(\\.\\d+)?(\\.\\d+)?(-[a-z0-9]+)$"
+            value: << pipeline.git.tag >>
+        steps:
+        - run:
+            name: Tag pre-release image
+            # We only tag pre-releases with the full version string.
+            command: |
+              docker tag $IMAGE_NAME:dev $IMAGE_NAME:$(./ci/tag.sh --patch)
+    - when:
+        condition:
+          matches:
+            pattern: "^\\d+(\\.\\d+)?(\\.\\d+)?$"
+            value: << pipeline.git.tag >>
+        steps:
+        - run:
+            name: Tag release image
+            command: |
+              docker tag $IMAGE_NAME:dev $IMAGE_NAME:latest
+              docker tag $IMAGE_NAME:dev $IMAGE_NAME:$(./ci/tag.sh --major)
+              docker tag $IMAGE_NAME:dev $IMAGE_NAME:$(./ci/tag.sh --minor)
+              docker tag $IMAGE_NAME:dev $IMAGE_NAME:$(./ci/tag.sh --patch)
     - run:
         name: Publish Docker image
         command: |
           echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
-          docker push $IMAGE_NAME
-  docker_publish_dev:
-    executor: docker_exec
-    steps:
-    - checkout
-    - setup_remote_docker
-    - run:
-        name: Build Docker image
-        command: |
-          docker build -t $IMAGE_NAME:dev .
-    - run:
-        name: Publish Docker image
-        command: |
-          echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
-          docker push $IMAGE_NAME
+          docker push $IMAGE_NAME:dev
 workflows:
-  node-tests:
+  build-and-test:
     jobs:
-    - build
-  build:
-    jobs:
-    - build:
+    - docker-build:
         filters:
           tags:
-            only: /^.+/
-          branches:
-            ignore: /.*/
-    - docker_publish:
-        filters:
-          tags:
-            only: /^[0-9.]+$/
-          branches:
-            ignore: /.*/
-    - docker_publish_dev:
-        filters:
-          branches:
-            only: master
+            only: /.*/
+
+    # - npm-build
+    # - docker-publish:
+    #     requires:
+    #     - npm-build
