@@ -14,23 +14,38 @@ services:
       - ./data:/data
       - ./config:/config
     ports:
+        # This port is used to listen for incoming webhooks.
       - 8020:8020
+        # This port is used for communication with your homeserver.
       - 8023:8023
     restart: unless-stopped
+    # Defaults show below, these can be uncommented and edited if required:
+    #user: 953:953
+    #command: --config /config/gateway-config.yaml --appservice-config /data/appservice-webhook-gateway.yaml
 ```
 
 ## Without Docker
-It is also possible to run the application directly. In the future, releases will be provided to simplify this, but for now, the best option is to clone the repository, and run the application (`npm ci && npm run start`). Commandline options can be used to alter the default configuration file location.
-Run `npm run start -- <options>` to add them. For a list of available options, try `npm run start -- --help`.
+It is also possible to run the application directly. In the future, releases
+will be provided to simplify this, but for now, the best option is to clone the
+repository, and run the application (`npm ci && npm run start`).
+Commandline options can be used to alter the default configuration file
+location. Run `npm run start -- <options>` to add them. For a list of available
+options, try `npm run start -- --help`.
 
 # Configuration
-A new configuration file (`/config/gateway-config.yaml` in Docker, or `./gateway-config.yaml` outside Docker) is generated on first startup.
-The webhook gateway will use the settings in this file to automatically generate an appservice registration file (default location: `/data/appservice-webhook-gateway.yaml` in Docker, `./appservice.yaml` outside). You should copy this file to your Matrix server, and add it to your Synapse configuration:
+A new configuration file (`/config/gateway-config.yaml` in Docker, or
+`./gateway-config.yaml` outside Docker) is generated on first startup. The
+webhook gateway will use the settings in this file to automatically generate an
+appservice registration file (default location:
+`/data/appservice-webhook-gateway.yaml` in Docker, `./appservice.yaml` outside).
+You should copy this file to your Matrix server, and add it to your Synapse
+configuration:
 ```yaml
  app_service_config_files:
  - "./appservices/appservice-webhook-gateway.yaml"
 ```
-If your webhook and Matrix server live on the same host, you can also choose to directly point Matrix to the generated appservice file.
+If your webhook and Matrix server live on the same host, you can also choose to
+directly point Matrix to the generated appservice file.
 
 # Usage
 
@@ -45,7 +60,8 @@ To create a webhook in the channel, enter the following command:
 -hook create <webhook_name>
 ```
 
-The bot will create a new user for this webhook, invite it, and send you the webhook URL in a private message.
+The bot will create a new user for this webhook, invite it, and send you the
+webhook URL in a private message.
 
 To list all enabled webhooks in a channel, use:
 ```
@@ -57,6 +73,17 @@ To delete a webhook, use:
 -hook delete <id>
 ```
 Where `<id>` is the numeric ID of a webhook as returned by `-hook list`.
+
+A webhook user will automatically update its username and avatar if the relevant
+fields in the webhook are set. Alternatively, you can use commands to set
+the profile details of a user.
+```
+-hook set name <id> <username>
+```
+or:
+```
+-hook set avatar <id> <url>
+```
 
 ## Call the webhook
 
@@ -85,7 +112,8 @@ Apprise:
   "message": "I am a webhook message"
 }
 ```
-As well as the format exposed by [turt2live/matrix-appservice-webhooks](https://github.com/turt2live/matrix-appservice-webhooks)
+As well as the format exposed by
+[turt2live/matrix-appservice-webhooks](https://github.com/turt2live/matrix-appservice-webhooks):
 ```
 {
   "text": "Hello world!",
@@ -96,17 +124,40 @@ As well as the format exposed by [turt2live/matrix-appservice-webhooks](https://
 ```
 Other formats can be supported by writing a custom plugin, see below.
 
+# Webhook user management
+
+When a new webhook is created, the gateway will generate an ID for the webhook
+user using the pattern specified in `app_service.user_pattern` in the
+configuration file.
+
+It is possible to create multiple separate webhooks with the same name in the
+same channel. Those webhooks will all be handled by the same user.
+
+If you remove the `{room}` variable from the `user_pattern`, webhooks with the
+same name will map to the same user everywhere, which may lead to a single
+webhook user being active in multiple rooms at once. Despite this, webhooks
+will still only be posted to the room in which they were created.
+
 # Plugins
 
-To support arbitrary JSON POSTs, you can write a custom plugin to interpret the message body and format it into something the webhook gateway understands.
+To support arbitrary JSON POSTs, you can write a custom plugin to interpret the
+message body and format it into something the webhook gateway understands.
 
-A plugin is a Typescript file dropped into `/data/plugins`, which needs to conform to a specific format.
+A plugin is a Typescript file dropped into `/data/plugins`, which needs to
+conform to a specific format.
 
-A sample plugin can be found [here](https://github.com/geluk/matrix-webhook-gateway/blob/master/plugins/sample.ts).
+A sample plugin can be found
+[here](https://github.com/geluk/matrix-webhook-gateway/blob/master/plugins/sample.ts).
 
-[this plugin](https://github.com/geluk/matrix-webhook-gateway/blob/master/plugins/prometheus.ts) may also be interesting to look at. It generates a message from an alert notification as sent by Prometheus [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/).
+[this plugin](https://github.com/geluk/matrix-webhook-gateway/blob/master/plugins/prometheus.ts)
+may also be interesting to look at. It generates a message from an alert notification
+as sent by Prometheus
+[Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/).
 
-To execute a plugin, you must append its name (as specified by the `format` key in your plugin definition) to the webhook URL. For instance, to execute the sample plugin, send a POST to `https://your-webhook-gateway-url/hook/your-webhook/sample`
+To execute a plugin, you must append its name (as specified by the `format` key
+in your plugin definition) to the webhook URL. For instance, to execute the 
+sample plugin, send a POST to
+`https://your-webhook-gateway-url/hook/your-webhook/sample`
 
 ## Writing plugins
 
