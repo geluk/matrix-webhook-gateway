@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "start": "ts-node entry.ts -v",
-    "build": "ttsc --build",
-    "package": "cp -r templates migrations node_modules out/webhook-gateway",
+    "build": "ttsc",
+    "dist": "scripts/dist.sh",
     "lint": "eslint . --ext .ts",
     "test": "jest"
   },
