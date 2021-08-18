@@ -15,6 +15,9 @@
                 "functionBehavior": "basic",
                 "ignoreMethods": "true"
             },
-        ]
+        ],
     },
+    "exclude": [
+        "plugins",
+    ],
 }
