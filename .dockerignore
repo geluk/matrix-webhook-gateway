@@ -12,6 +12,8 @@
 /local-dev
 /webhook-db.sqlite
 .editorconfig
+Dockerfile
+dist.sh
 
 # Build output
 /out
