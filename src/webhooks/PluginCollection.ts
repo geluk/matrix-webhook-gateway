@@ -201,7 +201,9 @@ export default class PluginCollection {
 
   private ensureWorkDirExists() {
     if (!fs.existsSync(WORK_DIR)) {
-      fs.mkdirSync(WORK_DIR);
+      fs.mkdirSync(WORK_DIR, {
+        recursive: true,
+      });
     }
   }
 }
