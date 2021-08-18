@@ -23,8 +23,10 @@ export default class WebhookListener {
     await this.webhookMatcher.load();
     this.app.use(Express.json());
 
-    this.app.get('/hook/*', this.handleRequest.bind(this));
     this.app.post('/hook/*', this.handleRequest.bind(this));
+    this.app.get('/', (rq, rs) => {
+      rs.status(200).send('Webhook gateway ready.').end();
+    });
 
     this.app.use((err: unknown, _req: unknown, res: Response, _next: NextFunction) => {
       logger.error(err);
