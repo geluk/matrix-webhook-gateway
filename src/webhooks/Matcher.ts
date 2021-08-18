@@ -5,7 +5,9 @@ import Webhook from '../models/Webhook';
 import WebhookRepository from '../repositories/WebhookRepository';
 import logger from '../util/logger';
 import { WebhookContent } from './formats';
-import { WebhookResult, WebhookMessageV2, WebhookMessageV1 } from './pluginApi';
+import {
+  WebhookResult, WebhookMessageV2, WebhookMessageV1,
+} from './pluginApi';
 import PluginCollection from './PluginCollection';
 import transformWebhook from './transformWebhook';
 
@@ -63,7 +65,7 @@ export default class Matcher {
     };
   }
 
-  public executeHook(match: Match, request: Request): WebhookResult | undefined {
+  public async executeHook(match: Match, request: Request): Promise<WebhookResult | undefined> {
     if (match.pluginName === undefined) {
       if (is<WebhookContent>(request.body)) {
         return {
@@ -81,7 +83,7 @@ export default class Matcher {
     }
 
     logger.debug(`Invoking plugin: '${match.pluginName}'`);
-    const content = this.plugins.apply(request.body, match.pluginName);
+    const content = await this.plugins.apply(request.body, match.pluginName);
     if (content === undefined) {
       logger.debug(`Plugin '${match.pluginName}' rejected the webhook.`);
       return undefined;

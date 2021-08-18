@@ -164,9 +164,10 @@ interface Comment {
 const plugin: WebhookPluginV2 = {
   format: 'gitea',
   version: '2',
-  init() { },
+  async init(context: WebhookContextV2) {
+  },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  transform(body: any, context: WebhookContextV2): WebhookMessageV2 | undefined {
+  async transform(body: any, context: WebhookContextV2): Promise<WebhookMessageV2 | undefined> {
     if (is<IssueOpened>(body)) {
       return {
         version: '2',

@@ -61,7 +61,7 @@ export default class WebhookListener {
     }
     let result;
     try {
-      result = this.webhookMatcher.executeHook(match, rq);
+      result = await this.webhookMatcher.executeHook(match, rq);
     } catch (error) {
       logger.error(`An error occurred while executing plugin ${match.pluginName}`);
     }

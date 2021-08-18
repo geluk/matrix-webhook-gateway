@@ -37,8 +37,8 @@ const alertStatusIcon: Record<AlertStatus, string> = {
 const plugin: WebhookPluginV2 = {
   format: 'prometheus',
   version: '2',
-  init() { },
-  transform(body: unknown): WebhookMessageV2 | undefined {
+  async init() { },
+  async transform(body: unknown): Promise<WebhookMessageV2 | undefined> {
     if (!is<PrometheusWebhook>(body)) {
       return undefined;
     }

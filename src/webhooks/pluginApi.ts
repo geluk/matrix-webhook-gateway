@@ -14,8 +14,8 @@ export interface WebhookPluginV1 {
 export interface WebhookPluginV2 {
   version: '2',
   format: string,
-  init?: (context: WebhookContextV2) => unknown,
-  transform: (body: unknown, context: WebhookContextV2) => WebhookMessageV2 | undefined,
+  init?: (context: WebhookContextV2) => Promise<unknown>,
+  transform: (body: unknown, context: WebhookContextV2) => Promise<WebhookMessageV2 | undefined>,
 }
 
 export interface WebhookMessageV2 {

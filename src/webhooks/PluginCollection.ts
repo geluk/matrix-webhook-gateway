@@ -52,7 +52,7 @@ export default class PluginCollection {
     // eslint-disable-next-line no-restricted-syntax
     for await (const file of this.walk(this.pluginDirectory)) {
       if (file.endsWith('.ts')) {
-        this.loadPlugin(`${file}`);
+        await this.loadPlugin(`${file}`);
       }
     }
 
@@ -69,7 +69,8 @@ export default class PluginCollection {
     return !!this.plugins[type];
   }
 
-  public apply(body: unknown, type: string): WebhookMessageV2 | WebhookMessageV1 | undefined {
+  public async apply(body: unknown, type: string):
+  Promise<WebhookMessageV2 | WebhookMessageV1 | undefined> {
     const plugin = this.plugins[type];
     return plugin.transform(body, this.createContext(type));
   }
@@ -93,7 +94,7 @@ export default class PluginCollection {
     }
   }
 
-  private loadPlugin(pluginPath: string) {
+  private async loadPlugin(pluginPath: string) {
     const source = fs.readFileSync(pluginPath, 'utf8');
     const hash = hasha(source, { algorithm: 'sha256' });
     const cacheFile = `${this.cacheDirectory}/${hash}.js`;
@@ -152,7 +153,7 @@ export default class PluginCollection {
     if (is<WebhookPluginV2>(pluginContainer)) {
       if (pluginContainer.init) {
         try {
-          pluginContainer.init(this.createContext(pluginContainer.format));
+          await pluginContainer.init(this.createContext(pluginContainer.format));
         } catch (error) {
           logger.error(`Plugin '${pluginContainer.format}' threw an exception during initialisation:`, error);
           return;
