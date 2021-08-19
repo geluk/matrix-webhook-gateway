@@ -38,7 +38,6 @@ export default class WebhookRepository {
   }
 
   public async getByPath(path: string): Promise<Webhook | undefined> {
-    logger.debug(`Looking up webhook for path '${path}'`);
     return this.database.knex<Webhook>('webhook')
       .where('path', '=', path.toLowerCase())
       .first();

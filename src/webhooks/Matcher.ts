@@ -36,32 +36,15 @@ export default class Matcher {
     return this.plugins.load();
   }
 
-  public async matchRequest(rq: Request): Promise<Match | undefined> {
-    const fullPath = rq.path;
-
-    let webhook = await this.webhookRepository.getByPath(fullPath);
-    if (webhook) {
-      return {
-        webhook,
-      };
-    }
-    const match = fullPath.match(/^(.*)\/([a-z0-9_]+)$/);
-    if (!match) {
-      logger.debug('Path does not conform to the format <webhook>/<plugin_identifer>.');
-      return undefined;
-    }
-
-    const [path, pluginName] = match.slice(1);
-    webhook = await this.webhookRepository.getByPath(path);
+  public async matchRequest(path: string, plugin: string | undefined): Promise<Match | undefined> {
+    const webhook = await this.webhookRepository.getByPath(`/hook/${path}`);
     if (!webhook) {
       logger.debug('Webhook not found.');
       return undefined;
     }
-
-    logger.debug(`Received typed webhook for plugin '${pluginName}'`);
     return {
       webhook,
-      pluginName,
+      pluginName: plugin,
     };
   }
 
