@@ -44,6 +44,10 @@ webhooks:
   plugin_directory: ./plugins
   # Path to the directory where the plugin compiler may store cached plugins.
   plugin_cache_directory: ./plugins/__cache
+  # Should the content of valid webhooks be logged to the database?
+  # Logging occurs after a webhook URL has been validated, but before the
+  # webhook has been executed, so it can be useful while testing plugins.
+  log_to_database: false
 
 # Configures the database where the webhook details are stored.
 database:

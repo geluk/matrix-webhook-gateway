@@ -82,5 +82,8 @@ properties:
         type: string
       plugin_cache_directory:
         type: string
+      log_to_database:
+        type: boolean
     required: [ public_url ]
+    additionalProperties: false
 required: [ app_service, webhooks ]

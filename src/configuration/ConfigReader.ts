@@ -119,17 +119,19 @@ export default class ConfigReader {
     if (!res) {
       logger.error('Configuration file validation failed');
       val.errors.forEach((error) => {
-        logger.debug(error);
         const field = error.field.substr('data.'.length);
         if (error.message === 'must be an enum value') {
-          logger.error(`The field ${field} has an invalid value: '${error.value}'`);
+          logger.error(`The field '${field}' has an invalid value: '${error.value}'`);
         } else if (
           field === 'database.connection'
            && error.message.startsWith('no (or more than one) schemas match')
         ) {
-          logger.error(`The field ${field} has invalid properties`);
+          logger.error(`The field '${field}' has invalid properties`);
+        } else if (error.message === 'has additional properties') {
+          const value = (error.value as string).substr('data.'.length);
+          logger.error(`Unrecognised property: '${value}'`);
         } else {
-          logger.error(`The field ${field} ${error.message}`);
+          logger.error(`The field '${field}' ${error.message}`);
         }
         logger.silly('Error value: ', error);
       });
