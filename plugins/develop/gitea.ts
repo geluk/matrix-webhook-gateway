@@ -1,6 +1,6 @@
 import { is } from 'typescript-is';
 import {
-  a, blockquote, br, fmt, truncate,
+  a, blockquote, br, brace, code, cond, fmt, preview, quote, truncate,
 } from '../../src/formatting/formatting';
 import { WebhookContextV2, WebhookMessageV2, WebhookPluginV2 } from '../../src/webhooks/pluginApi';
 
@@ -29,6 +29,26 @@ interface IssueAssigned {
   issue: Issue,
   repository: Repository,
   sender: User,
+}
+
+interface PullRequestOpened {
+  secret: string,
+  action: 'opened',
+  number: number,
+  pull_request: PullRequest,
+  repository: Repository,
+  sender: User,
+  review: unknown,
+}
+
+interface PullRequestPushed {
+  secret: string,
+  action: 'synchronized',
+  number: number,
+  pull_request: PullRequest,
+  repository: Repository,
+  sender: User,
+  review: unknown,
 }
 
 interface PullRequestClosed {
@@ -69,7 +89,7 @@ interface CommentDeleted {
   sender: User,
 }
 
-interface WebhookTest {
+interface ChangesPushed {
   secret: string,
   ref: string,
   before: string,
@@ -132,9 +152,9 @@ interface PullRequest {
   patch_url: string,
   mergeable: boolean,
   merged: boolean,
-  merged_at: string,
-  merge_commit_sha: string,
-  merged_by: User,
+  merged_at: string | null,
+  merge_commit_sha: string | null,
+  merged_by: User | null,
   base: Ref,
   head: Ref,
   merge_base: string,
@@ -278,6 +298,33 @@ const plugin: WebhookPluginV2 = {
         ),
       };
     }
+    if (is<PullRequestOpened>(body)) {
+      return {
+        version: '2',
+        text: fmt(
+          body.sender.username,
+          ' opened a new pull request in ',
+          a(body.repository.html_url, body.repository.full_name),
+          ': "',
+          a(body.pull_request.html_url, body.pull_request.title),
+          '"',
+          ` (#${body.pull_request.number})`,
+        ),
+      };
+    }
+    if (is<PullRequestPushed>(body)) {
+      return {
+        version: '2',
+        text: fmt(
+          body.sender.username,
+          ' pushed new changes to "',
+          a(body.pull_request.html_url, body.pull_request.title),
+          `" (#${body.pull_request.number})`,
+          ' in ',
+          a(body.repository.html_url, body.repository.full_name),
+        ),
+      };
+    }
     if (is<IssueClosed>(body)) {
       return {
         version: '2',
@@ -329,23 +376,50 @@ const plugin: WebhookPluginV2 = {
           ' in ',
           a(body.repository.html_url, body.repository.full_name),
           ':', br(),
-          blockquote(truncate(200, body.comment.body)),
+          blockquote(preview(200, body.comment.body)),
         ),
       };
     }
-    if (is<WebhookTest>(body)) {
+    if (is<ChangesPushed>(body)) {
+      let matchedAfter = body.commits.find(c => c.id === body.after) as Commit | undefined;
+      let matchedBefore = body.commits.find(c => c.id === body.before) as Commit | undefined;
+
+      let fmtCommit = (commit: Commit) => fmt(
+        code(a(commit.url, truncate(8, commit.id))),
+        ' ',
+        (quote(preview(80, commit.message.trim()))),
+      );
+
+      let fmtUnknown = (id: string) => fmt(
+        code(a(`${body.repository.html_url}/commit/${id}`, truncate(8, id))),
+      )
+
+      let fmtAfter = matchedAfter ? fmtCommit(matchedAfter) : fmtUnknown(body.after);
+      let fmtBefore = matchedBefore ? fmtCommit(matchedBefore) : fmtUnknown(body.before);
+
+      let ref = body.ref;
+      if (ref.startsWith('refs/heads/')) {
+        ref = ref.substring('refs/heads/'.length);
+      }
+
       return {
         version: '2',
         text: fmt(
-          'Webhook test by ',
           body.sender.username,
-          ' for repository ',
+          ' pushed ',
+          ref,
+          ' in ',
           a(body.repository.html_url, body.repository.full_name),
-          ' succeeded.',
+          ' from ',
+          fmtBefore,
+          ' to ',
+          fmtAfter,
+          ' ',
+          brace(a(body.compare_url, 'compare')),
         ),
       };
     }
-    if (is<CommentEdited | CommentDeleted>(body)) {
+    if (is<CommentEdited | CommentDeleted | IssueAssigned>(body)) {
       context.logger.info(`Ignoring Gitea action: ${body.action}`);
       return undefined;
     }
