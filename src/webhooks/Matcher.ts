@@ -1,6 +1,4 @@
 import { is } from 'typescript-is';
-import MatrixBridge from '../bridge/MatrixBridge';
-import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 import Webhook from '../models/Webhook';
 import WebhookRepository from '../repositories/WebhookRepository';
 import logger from '../util/logger';
