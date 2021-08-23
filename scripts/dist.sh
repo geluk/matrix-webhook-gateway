@@ -10,3 +10,4 @@ stat out/webhook-gateway > /dev/null 2>&1 || \
 
 cp -r templates node_modules out/webhook-gateway
 
+./ci/tag.sh --patch > out/VERSION

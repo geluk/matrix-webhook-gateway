@@ -34,9 +34,11 @@ jobs:
         name: Compress artifacts
         command: tar -czf webhook-gateway.tar.gz ./webhook-gateway
         working_directory: ./out
-    - store_artifacts:
-        path: ./out/webhook-gateway.tar.gz
-        destination: webhook-gateway.tar.gz
+    - persist_to_workspace:
+        root: out
+        paths:
+          - webhook-gateway.tar.gz
+          - VERSION
   docker-build:
     executor: main
     steps:
@@ -53,7 +55,11 @@ jobs:
         steps:
         - run:
             name: Tag pre-release image
-            # We only tag pre-releases with the full version string.
+            # We only tag pre-releases with the full version string,
+            # because there probably won't be any scenario where you want
+            # to pull in :0.1-pre0 instead of :0.1.0-pre0.
+            # If anyone wants to track 'any release including pre-releases'
+            # at some point in the future, we can add a :latest-pre tag.
             command: |
               docker tag $IMAGE_NAME:dev $IMAGE_NAME:$(./ci/tag.sh --patch)
     - when:
@@ -74,13 +80,50 @@ jobs:
         command: |
           echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
           docker push $IMAGE_NAME:dev
+  publish-github-release:
+    docker:
+    - image: cibuilds/github:0.10
+    steps:
+    - attach_workspace:
+        at: ./out
+    - checkout
+    - run:
+        name: Publish release
+        command: echo Publishing for tag << pipeline.git.tag >>
+    - run:
+        name: Publish release
+        command: |
+          VERSION="$(<out/VERSION)"
+          echo publishing $VERSION
+          ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} \
+            -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} \
+            -draft -replace v${VERSION} out/webhook-gateway.tar.gz
 workflows:
   build-and-test:
     jobs:
-    - npm-build
-    - docker-build:
+    - npm-build:
+        # NPM build should run for tags as well as branches,
+        # because it is a dependency of the next two jobs.
         filters:
           tags:
             only: /.*/
+    - docker-build:
+        # The Docker build job will always push the :dev tag,
+        # and if a git tag is set, it will also push either a
+        # pre-release tag or a release tag, so this job also
+        # nees to run on al tags and branches.
+        filters:
+          tags:
+            only: /.*/
+        requires:
+        - npm-build
+    - publish-github-release:
+        # Github releases should only be published on tag builds,
+        # so we exclude all branches here.
+        filters:
+          tags:
+            only: /^(\d+)(.\d+)?(.\d+)?(-[a-z0-9-]+)?$/
+          branches:
+            ignore: /.*/
         requires:
         - npm-build
