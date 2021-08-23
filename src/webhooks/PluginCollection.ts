@@ -184,7 +184,9 @@ export default class PluginCollection {
     // won't desugar any of its is<T>() calls in the plugin file.
     this.ensureWorkDirExists();
     fs.writeFileSync(sourcePath, source);
-    const prog = tts.createProgram([sourcePath], {});
+    const prog = tts.createProgram([sourcePath], {
+      strictNullChecks: true,
+    });
 
     prog.emit(undefined, (_name, data) => {
       fs.writeFileSync(cachePath, data, {
