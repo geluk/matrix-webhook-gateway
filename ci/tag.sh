@@ -11,18 +11,26 @@ function print_version {
     fi
 }
 
+function print_prerelease {
+    if [[ -n "$1" ]]; then
+        echo -n $1
+    fi
+}
+
 tag="$(git describe --tags)"
-tag_regex='^([[:digit:]]+)(.([[:digit:]]+))?(.([[:digit:]]+))?(-[1-9][[:digit:]]*-g[a-f0-9]{6})?.?$'
+tag_regex='^([[:digit:]]+)(.([[:digit:]]+))?(.([[:digit:]]+))?(-[a-z0-9]+)?$'
 
 if [[ $tag =~ $tag_regex ]]; then
     case $version in
     "--major")
         print_version "${BASH_REMATCH[1]}"
+        print_prerelease "${BASH_REMATCH[6]}"
         ;;
     "--minor")
         print_version "${BASH_REMATCH[1]}"
         echo -n '.'
         print_version "${BASH_REMATCH[3]}"
+        print_prerelease "${BASH_REMATCH[6]}"
         ;;
     "--patch")
         print_version "${BASH_REMATCH[1]}"
@@ -30,6 +38,7 @@ if [[ $tag =~ $tag_regex ]]; then
         print_version "${BASH_REMATCH[3]}"
         echo -n '.'
         print_version "${BASH_REMATCH[5]}"
+        print_prerelease "${BASH_REMATCH[6]}"
         ;;
     esac
 else
