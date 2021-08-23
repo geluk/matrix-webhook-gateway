@@ -77,12 +77,10 @@ jobs:
 workflows:
   build-and-test:
     jobs:
+    - npm-build
     - docker-build:
         filters:
           tags:
             only: /.*/
-
-    # - npm-build
-    # - docker-publish:
-    #     requires:
-    #     - npm-build
+        requires:
+        - npm-build
