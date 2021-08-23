@@ -18,7 +18,7 @@ function print_prerelease {
 }
 
 tag="$(git describe --tags)"
-tag_regex='^([[:digit:]]+)(.([[:digit:]]+))?(.([[:digit:]]+))?(-[a-z0-9]+)?$'
+tag_regex='^([[:digit:]]+)(.([[:digit:]]+))?(.([[:digit:]]+))?(-[a-z0-9-]+)?$'
 
 if [[ $tag =~ $tag_regex ]]; then
     case $version in
