@@ -96,7 +96,7 @@ export default class WebhookListener {
     try {
       result = await this.webhookMatcher.executeHook(match, rq);
     } catch (error) {
-      logger.error(`An error occurred while executing plugin ${match.pluginName}`);
+      logger.error(`An error occurred while executing plugin ${match.pluginName}`, error);
     }
     if (result) {
       logger.silly('Request body: ', rq.body);
