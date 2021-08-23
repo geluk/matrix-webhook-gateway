@@ -155,6 +155,23 @@ export function truncate(maxLength: number, content: string): Format {
     if (content.length <= maxLength) {
       return content;
     }
+    return content.substring(0, maxLength);
+  };
+  return {
+    formatHtml(): string {
+      return encode(impl());
+    },
+    formatPlain(): string {
+      return impl();
+    },
+  };
+}
+
+export function preview(maxLength: number, content: string): Format {
+  const impl = () => {
+    if (content.length <= maxLength) {
+      return content;
+    }
     return `${content.substring(0, maxLength)}...`;
   };
   return {
@@ -198,6 +215,31 @@ export function cond(condition: boolean, ...args: Text[]): Format {
     },
     formatPlain(): string {
       return condition ? args.map(toPlain).join('') : '';
+    },
+  };
+}
+
+// General formatting
+// ------------------
+
+export function quote(...args: Text[]): Format {
+  return {
+    formatHtml(): string {
+      return `"${args.map(toHtml).join('')}"`;
+    },
+    formatPlain(): string {
+      return `"${args.map(toPlain).join('')}"`;
+    },
+  };
+}
+
+export function brace(...args: Text[]): Format {
+  return {
+    formatHtml(): string {
+      return `(${args.map(toHtml).join('')})`;
+    },
+    formatPlain(): string {
+      return `(${args.map(toPlain).join('')})`;
     },
   };
 }
