@@ -3,6 +3,7 @@ import path from 'path';
 import hasha from 'hasha';
 import * as tts from 'ttypescript';
 import { is } from 'typescript-is';
+import watch from 'node-watch';
 import isTransformer from 'typescript-is/lib/transform-inline/transformer';
 import logger from '../util/logger';
 import {
@@ -61,6 +62,19 @@ export default class PluginCollection {
     } else {
       logger.info('No plugins were loaded');
     }
+
+    watch(this.pluginDirectory, {
+      recursive: true,
+      delay: 1000,
+      persistent: false,
+      filter: (f) => f.endsWith('.ts'),
+    }, async (evt, name) => {
+      if (evt === 'update' && name) {
+        logger.info(`Plugin ${name} was updated, reloading`);
+        this.loadPlugin(name);
+      }
+    });
+
     this.loaded = true;
   }
 
@@ -74,7 +88,15 @@ export default class PluginCollection {
     return plugin.transform(body, this.createContext(type));
   }
 
-  async* walk(dir: string): AsyncIterable<string> {
+  public async clearCache(): Promise<void> {
+    for (const entry of fs.readdirSync(this.cacheDirectory)) {
+      fs.rmSync(entry, {
+        recursive: true,
+      });
+    }
+  }
+
+  private async* walk(dir: string): AsyncIterable<string> {
     for await (const d of await fs.promises.opendir(dir)) {
       const entry = path.join(dir, d.name);
       if (d.isDirectory()) {

@@ -25,6 +25,7 @@
     "mustache": "^4.1.0",
     "mysql": "^2.18.1",
     "node-fetch": "^2.6.1",
+    "node-watch": "^0.7.1",
     "oracledb": "^5.1.0",
     "pg": "^8.5.1",
     "sqlite3": "^5.0.2",

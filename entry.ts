@@ -29,6 +29,12 @@ const { argv } = yargs(process.argv.slice(2))
   .nargs('a', 1)
   .default('a', './appservice.yaml')
   .describe('a', 'Where the generated appservice.yaml should be placed.')
+  .boolean('clear-plugin-cache')
+  .default('clear-plugin-cache', false)
+  .describe(
+    'clear-plugin-cache',
+    'Clear the plugin cache before compiling plugins.',
+  )
   .count('v')
   .alias('v', 'verbose')
   .describe('v', 'Log verbosity, repeat multiple times to raise.')
@@ -64,7 +70,7 @@ database.migrate()
     const hookCallRepository = new HookCallRepository(database);
 
     const bridge = new MatrixBridge(config.app_service, imageRepository, userRepository);
-    const plugins = new PluginCollection(config.webhooks, bridge, argv['cache-plugins']);
+    const plugins = new PluginCollection(config.webhooks, bridge);
     const matcher = new Matcher(webhookRepository, plugins);
     const webhookListener = new WebhookListener(
       config.webhooks,
@@ -78,6 +84,9 @@ database.migrate()
       config,
     );
     try {
+      if (argv['clear-plugin-cache']) {
+        plugins.clearCache();
+      }
       await whs.start();
       await webhookListener.start();
     } catch (error) {
