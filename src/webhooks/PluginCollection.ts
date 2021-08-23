@@ -49,7 +49,6 @@ export default class PluginCollection {
       return;
     }
 
-    // eslint-disable-next-line no-restricted-syntax
     for await (const file of this.walk(this.pluginDirectory)) {
       if (file.endsWith('.ts')) {
         await this.loadPlugin(`${file}`);
@@ -75,9 +74,7 @@ export default class PluginCollection {
     return plugin.transform(body, this.createContext(type));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async* walk(dir: string): any {
-    // eslint-disable-next-line no-restricted-syntax
+  async* walk(dir: string): AsyncIterable<string> {
     for await (const d of await fs.promises.opendir(dir)) {
       const entry = path.join(dir, d.name);
       if (d.isDirectory()) {
@@ -86,7 +83,7 @@ export default class PluginCollection {
         } else if (d.name === '__workdir') {
           logger.silly('Plugin discovery - skipping working directory: ', entry);
         } else {
-          yield* await this.walk(entry);
+          yield* this.walk(entry);
         }
       } else if (d.isFile()) {
         yield entry;

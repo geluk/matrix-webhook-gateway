@@ -20,6 +20,7 @@ module.exports = {
         "no-underscore-dangle": ["error", {
                 "allowAfterThis": true,
             }],
+        "no-restricted-syntax": ["off"],
         "no-unused-vars": ["off"],
         "prefer-destructuring": ["off"],
         "@typescript-eslint/no-unused-vars": ["warn", {
