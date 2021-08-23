@@ -22,14 +22,10 @@ export interface Match {
 }
 
 export default class Matcher {
-  plugins: PluginCollection;
-
   public constructor(
     private webhookRepository: WebhookRepository,
-    private config: WebhooksConfiguration,
-    bridge: MatrixBridge,
+    private plugins: PluginCollection,
   ) {
-    this.plugins = new PluginCollection(config, bridge);
   }
 
   public load(): Promise<void> {

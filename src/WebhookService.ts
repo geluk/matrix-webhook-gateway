@@ -2,59 +2,43 @@ import CommandHandler from './commands/CommandHandler';
 import MatrixBridge from './bridge/MatrixBridge';
 import MatrixEventHandlers from './bridge/events/MatrixEventHandlers';
 import logger from './util/logger';
-import Database from './repositories/Database';
 import WebhookRepository from './repositories/WebhookRepository';
 import {
   Command, CreateWebhookCommand, DeleteWebhookCommand, ListWebhookCommand,
   RotateWebhookCommand, SetWebhookPropertyCommand,
 } from './commands/CommandParser';
 import randomString from './util/randomString';
-import WebhookListener from './webhooks/WebhookListener';
 import Configuration from './configuration/Configuration';
 import { generateLocalPart } from './util/matrixUtilities';
-import UserRepository from './repositories/UserRepository';
 import { WebhookResult } from './webhooks/pluginApi';
-import Matcher from './webhooks/Matcher';
-import UploadedImageFromDatabase from './repositories/UploadedImageRepository';
 import {
   br, code, fmt, room, table, Text, user,
 } from './formatting/formatting';
-import HookCallRepository from './repositories/HookCallRepository';
+import Observable from './util/Observable';
 
 const HOOK_SECRET_LENGTH = 48;
 
 export default class WebhookService {
-  database: Database;
-
-  config: Configuration;
+  bridge: MatrixBridge;
 
   webhookRepository: WebhookRepository;
 
-  userRepository: UserRepository;
-
-  bridge: MatrixBridge;
+  config: Configuration;
 
   commandHandler = new CommandHandler();
 
-  webhookListener: WebhookListener;
-
-  public constructor(database: Database, config: Configuration) {
-    this.database = database;
+  public constructor(
+    bridge: MatrixBridge,
+    webhookRepository: WebhookRepository,
+    onWebhook: Observable<WebhookResult>,
+    config: Configuration,
+  ) {
+    this.webhookRepository = webhookRepository;
     this.config = config;
+    this.bridge = bridge;
 
-    this.webhookRepository = new WebhookRepository(this.database);
-    this.userRepository = new UserRepository(this.database);
-    const imageRepository = new UploadedImageFromDatabase(this.database);
-    const hookCallRepository = new HookCallRepository(this.database);
-
-    this.bridge = new MatrixBridge(config.app_service, imageRepository, this.userRepository);
+    onWebhook.observe(this.handleHookResult.bind(this));
     this.commandHandler.onCommand.observe(this.handleCommand.bind(this));
-    this.webhookListener = new WebhookListener(
-      config.webhooks,
-      new Matcher(this.webhookRepository, this.config.webhooks, this.bridge),
-      hookCallRepository,
-    );
-    this.webhookListener.onWebhookResult.observe(this.handleHookResult.bind(this));
   }
 
   private async handleCommand(command: Command) {
@@ -267,7 +251,5 @@ export default class WebhookService {
       }
       return true;
     }));
-
-    await this.webhookListener.start();
   }
 }
