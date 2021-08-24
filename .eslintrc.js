@@ -22,6 +22,7 @@ module.exports = {
             }],
         "no-restricted-syntax": ["off"],
         "no-unused-vars": ["off"],
+        "no-await-in-loop": ["off"],
         "prefer-destructuring": ["off"],
         "@typescript-eslint/no-unused-vars": ["warn", {
             "argsIgnorePattern": "^_",
