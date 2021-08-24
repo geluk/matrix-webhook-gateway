@@ -122,8 +122,8 @@ export function strong(inner: Text): Format {
 export function table(head: Text[], rows: Text[][]): Format {
   return {
     formatHtml(): string {
-      const fHead = head.map((h) => `<td>${toHtml(h)}</td>`).join('');
-      const fBody = rows.map((r) => `<tr>${r.map((c) => `<td>${toHtml(c)}</td>`).join('')}</tr>`).join('\n');
+      const fHead = head.map((h) => `<td>${toHtml(h)} </td>`).join('');
+      const fBody = rows.map((r) => `<tr>${r.map((c) => `<td>${toHtml(c)} </td>`).join('')}</tr>`).join('\n');
 
       return `<table><thead><tr>${fHead}</tr></thead><tbody>${fBody}</tbody></table>`;
     },
