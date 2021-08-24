@@ -35,11 +35,36 @@ const { argv } = yargs(process.argv.slice(2))
     'clear-plugin-cache',
     'Clear the plugin cache before compiling plugins.',
   )
+  .option('migrate', {
+    type: 'number',
+    description: 'Apply the specified number of migrations. To migrate up, supply a '
+    + 'positive number. To migrate down, supply a negative number. '
+    + 'Implies --no-auto-migrate.',
+    nargs: 1,
+  })
+  .option('migrate-status', {
+    type: 'boolean',
+    description: 'Print the migration status, then exit.',
+  })
+  .boolean('auto-migrate')
+  .default('auto-migrate', true)
+  .hide('auto-migrate')
+  .describe(
+    'no-auto-migrate',
+    'Do not perform automatic migrations. This will cause the application to '
+    + 'exit with a non-zero exit code if there are pending migrations.',
+  )
   .count('v')
   .alias('v', 'verbose')
   .describe('v', 'Log verbosity, repeat multiple times to raise.')
   .help('h')
-  .alias('h', 'help');
+  .alias('h', 'help')
+  .check((a) => {
+    if (a.migrate !== undefined && Number.isNaN(a.migrate)) {
+      throw new Error('Invalid number of migrations supplied.');
+    }
+    return true;
+  });
 
 configureLogger(argv.verbose);
 
@@ -61,42 +86,108 @@ if (typeof config === 'undefined') {
   process.exit(1);
 }
 
-const database = new Database(config.database);
-database.migrate()
-  .then(async () => {
-    const imageRepository = new UploadedImageFromDatabase(database);
-    const userRepository = new UserRepository(database);
-    const webhookRepository = new WebhookRepository(database);
-    const hookCallRepository = new HookCallRepository(database);
+const startup = async () => {
+  const database = new Database(config.database);
 
-    const bridge = new MatrixBridge(config.app_service, imageRepository, userRepository);
-    const plugins = new PluginCollection(config.webhooks, bridge);
-    const matcher = new Matcher(webhookRepository, plugins);
-    const webhookListener = new WebhookListener(
-      config.webhooks,
-      matcher,
-      hookCallRepository,
-    );
-    const whs = new WebhookService(
-      bridge,
-      webhookRepository,
-      webhookListener.onWebhookResult,
-      config,
-    );
-    try {
-      if (argv['clear-plugin-cache']) {
-        plugins.clearCache();
-      }
-      await whs.start();
-      await webhookListener.start();
-    } catch (error) {
-      logger.prettyError(error);
-      logger.fatal('Could not start webhook-gateway');
+  try {
+    await database.assertConnected();
+  } catch (error) {
+    logger.fatal('Unable to connect to the database: ', error);
+    process.exit(1);
+  }
+
+  if (argv['auto-migrate']) {
+    await database.migrate();
+  } else {
+    const migrations = await database.getMigrationStatus();
+    if (migrations.pending.length > 0) {
+      logger.fatal(
+        'Application failed to start: there are pending migrations, and --no-auto-migrate was specified',
+      );
       process.exit(1);
     }
-  })
-  .catch((error) => {
+  }
+
+  const imageRepository = new UploadedImageFromDatabase(database);
+  const userRepository = new UserRepository(database);
+  const webhookRepository = new WebhookRepository(database);
+  const hookCallRepository = new HookCallRepository(database);
+
+  const bridge = new MatrixBridge(config.app_service, imageRepository, userRepository);
+  const plugins = new PluginCollection(config.webhooks, bridge);
+  const matcher = new Matcher(webhookRepository, plugins);
+  const webhookListener = new WebhookListener(
+    config.webhooks,
+    matcher,
+    hookCallRepository,
+  );
+  const whs = new WebhookService(
+    bridge,
+    webhookRepository,
+    webhookListener.onWebhookResult,
+    config,
+  );
+  try {
+    if (argv['clear-plugin-cache']) {
+      plugins.clearCache();
+    }
+    await whs.start();
+    await webhookListener.start();
+  } catch (error) {
     logger.prettyError(error);
-    logger.fatal('Could not run migrations, application will now exit');
+    logger.fatal('Could not start webhook-gateway');
     process.exit(1);
-  });
+  }
+};
+
+const migrateAndQuit = async (migrations: number) => {
+  const database = new Database(config.database);
+  try {
+    await database.migrateBy(migrations);
+  } catch (error) {
+    logger.error(error.message);
+    logger.fatal('Encountered an error performing migrations, application will now exit');
+    process.exit(1);
+  }
+  logger.info('Migration successful, application will now exit');
+  process.exit(0);
+};
+
+const printMigrationStatus = async () => {
+  const database = new Database(config.database);
+  const migrations = await database.getMigrationStatus();
+  if (migrations.completed.length === 1) {
+    logger.info('There is one completed migration');
+  } else {
+    logger.info(`There are ${migrations.completed.length} completed migrations`);
+  }
+  for (const migration of migrations.completed) {
+    logger.info(` - ${migration}`);
+  }
+
+  if (migrations.pending.length === 1) {
+    logger.info('There is one pending migration');
+  } else {
+    logger.info(`There are ${migrations.pending.length} pending migrations`);
+  }
+  for (const migration of migrations.pending) {
+    logger.info(` - ${migration.file}`);
+  }
+  process.exit(1);
+};
+
+const entry = async () => {
+  if (argv['migrate-status']) {
+    await printMigrationStatus();
+  } else if (argv.migrate) {
+    await migrateAndQuit(argv.migrate);
+  } else {
+    await startup();
+  }
+};
+
+entry().catch((error) => {
+  logger.prettyError(error);
+  logger.fatal('Encountered an error during startup, application will now exit');
+  process.exit(1);
+});
