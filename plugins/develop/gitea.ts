@@ -407,7 +407,7 @@ const plugin: WebhookPluginV2 = {
         text: fmt(
           body.sender.username,
           ' pushed ',
-          ref,
+          code(ref),
           ' in ',
           a(body.repository.html_url, body.repository.full_name),
           ' from ',
