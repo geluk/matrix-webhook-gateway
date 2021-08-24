@@ -260,7 +260,7 @@ export function user(profileInfo: ProfileInfo): Format {
 export function room(roomId: string): Format {
   return {
     formatHtml(): string {
-      return `<a href="https://matrix.to/#/${encode(roomId)}"></a>`;
+      return `<a href="https://matrix.to/#/${encode(roomId)}">${encode(roomId)}</a>`;
     },
     formatPlain(): string {
       return roomId;
