@@ -6,7 +6,7 @@
 
 # Development data
 /local-dev/synapse-data
-/webhook-db.sqlite
+/*.sqlite
 /gateway-config.yaml
 /appservice.yaml
 /plugins/__cache
