@@ -55,7 +55,7 @@ export default class ImageUploader {
     const download = await this.downloader(url, existingImage?.cache_details?.etag ?? undefined);
 
     if (download.status === 'error') {
-      logger.info(`Error ${download.status} while trying to download '${url}'`);
+      logger.info(`Error ${download.statusCode} while trying to download '${url}'`);
       return undefined;
     }
     if (download.status === 'not-modified') {
