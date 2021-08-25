@@ -165,8 +165,9 @@ If you're just looking to write a simple plugin, the easiest way to get started
 is by copying the sample plugin, adapting it to your needs, and installing it
 in the right directory.
 
-For more complicated plugins, I recommend cloning the repository and developing
-your plugin in the `./plugins/develop` directory.
+If you're writing a more complicated plugin and would like to have access to
+code analysis, you can clone the repository and write your plugin in the 
+`./plugins/develop` directory.
 
 ## Plugin loading process
 
@@ -191,8 +192,8 @@ loaded one by one. The loading process of a plugin looks like this:
    are resolved correctly during the loading process.
 6. The plugin is `require()`d and some basic integrity checks are performed
    against the resulting object to validate that it is correctly formed.
-7. The `init()` function is executed, and the plugin is added to the list of
-   active plugins.
+7. The plugin class is instantiated, the `init()` function is executed, 
+  and the plugin is added to the list of active plugins.
 
 # Development setup
 
