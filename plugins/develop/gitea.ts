@@ -2,7 +2,7 @@ import { is } from 'typescript-is';
 import {
   a, blockquote, br, brace, code, fmt, preview, quote, truncate,
 } from '../../src/formatting/formatting';
-import { WebhookContext, WebhookMessage, WebhookPlugin } from '../../src/pluginApi/v2';
+import { WebhookMessage, PluginBase } from '../../src/pluginApi/v2';
 
 interface IssueOpened {
   secret: string,
@@ -278,12 +278,13 @@ interface Label {
   url: string,
 }
 
-const plugin: WebhookPlugin = {
-  format: 'gitea',
-  version: '2',
-  async init(context: WebhookContext) {
-  },
-  async transform(body: any, context: WebhookContext): Promise<WebhookMessage | undefined> {
+export const format = 'gitea';
+
+export default class GiteaPlugin extends PluginBase {
+  public async init() {
+  }
+
+  public async transform(body: any): Promise<WebhookMessage | undefined> {
     if (is<IssueOpened>(body)) {
       return {
         version: '2',
@@ -420,12 +421,10 @@ const plugin: WebhookPlugin = {
       };
     }
     if (is<CommentEdited | CommentDeleted | IssueAssigned>(body)) {
-      context.logger.info(`Ignoring Gitea action: ${body.action}`);
+      this.logger.info(`Ignoring Gitea action: ${body.action}`);
       return undefined;
     }
-    context.logger.info(`Unknown Gitea action: '${body.action}'`);
+    this.logger.info(`Unknown Gitea action: '${body.action}'`);
     return undefined;
-  },
+  }
 };
-
-export default plugin;

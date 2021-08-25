@@ -2,7 +2,7 @@ import { is } from 'typescript-is';
 import {
   a, cond, fmt, ul,
 } from '../../src/formatting/formatting';
-import { WebhookMessage, WebhookPlugin } from '../../src/pluginApi/v2';
+import { WebhookMessage, PluginBase } from '../../src/pluginApi/v2';
 
 type AlertStatus = 'resolved' | 'firing';
 
@@ -34,11 +34,12 @@ const alertStatusIcon: Record<AlertStatus, string> = {
   firing: '🔴',
 };
 
-const plugin: WebhookPlugin = {
-  format: 'prometheus',
-  version: '2',
-  async init() { },
-  async transform(body: unknown): Promise<WebhookMessage | undefined> {
+export const format = 'prometheus';
+
+export default class WebhookPlugin extends PluginBase {
+  public async init() { };
+
+  public async transform(body: unknown): Promise<WebhookMessage | undefined> {
     if (!is<PrometheusWebhook>(body)) {
       return undefined;
     }
@@ -67,7 +68,5 @@ const plugin: WebhookPlugin = {
         ),
       ),
     };
-  },
+  };
 };
-
-export default plugin;

@@ -5,20 +5,18 @@ import * as tts from 'ttypescript';
 import { is } from 'typescript-is';
 import watch from 'node-watch';
 import isTransformer from 'typescript-is/lib/transform-inline/transformer';
+import { ModuleKind, ScriptTarget } from 'ttypescript';
+import { Logger } from 'tslog';
+
 import logger from '../util/logger';
 import * as v1 from '../pluginApi/v1';
 import * as v2 from '../pluginApi/v2';
 import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 import MatrixBridge from '../bridge/MatrixBridge';
 
-interface PluginBase {
-  version: '1' | '2',
-  format: string,
-}
-
 type Plugin =
   | v1.WebhookPlugin
-  | v2.WebhookPlugin;
+  | v2.PluginBase;
 
 const WORK_DIR = './plugins/__workdir';
 
@@ -57,7 +55,7 @@ export default class PluginCollection {
 
     const plugins = Object.keys(this.plugins);
     if (plugins.length > 0) {
-      logger.info(`Loaded plugins: ${plugins.join(', ')}`);
+      logger.info(`Loaded plugins: ${plugins.sort().join(', ')}`);
     } else {
       logger.info('No plugins were loaded');
     }
@@ -84,12 +82,12 @@ export default class PluginCollection {
   public async apply(body: unknown, type: string):
   Promise<v1.WebhookMessage | v2.WebhookMessage | undefined> {
     const plugin = this.plugins[type];
-    return plugin.transform(body, this.createContext(type));
+    return plugin.transform(body);
   }
 
   public async clearCache(): Promise<void> {
     for (const entry of fs.readdirSync(this.cacheDirectory)) {
-      fs.rmSync(entry, {
+      fs.rmSync(`${this.cacheDirectory}/${entry}`, {
         recursive: true,
       });
     }
@@ -137,45 +135,44 @@ export default class PluginCollection {
     const importFile = path.resolve(`${WORK_DIR}/${hash}.js`);
     fs.copyFileSync(cacheFile, importFile);
 
+    let pluginFile;
     let pluginContainer;
     try {
       // There's no getting around using require() here, as we need to dynamically
       // load the plugin.
       // eslint-disable-next-line
-      pluginContainer = require(importFile).default;
+      pluginFile = require(importFile);
+      pluginContainer = pluginFile.default;
     } catch (error) {
       logger.error('Error loading plugin: ', error);
       return;
-    }
-    fs.unlinkSync(importFile);
-
-    if (!is<PluginBase>(pluginContainer)) {
-      logger.warn(`Not a valid plugin: ${pluginPath}`);
-      logger.debug('Plugin container:', pluginContainer);
-      return;
+    } finally {
+      fs.unlinkSync(importFile);
     }
 
-    if (!pluginContainer.format.match(/^[a-z0-9_]+$/)) {
-      logger.warn(`Invalid plugin name: ${pluginContainer.format}`);
+    if (pluginContainer.prototype instanceof v2.PluginBase) {
+      if (!is<{format: string}>(pluginFile)) {
+        logger.warn(`Plugin ${pluginPath} does not have a format field`);
+        return;
+      }
+
+      const pluginLogger = this.createLogger(pluginFile.format);
+
+      // eslint-disable-next-line new-cap
+      const instance = new pluginContainer(pluginLogger, this.bridge);
+      await instance.init();
+      this.plugins[pluginFile.format] = instance;
       return;
     }
 
     if (is<v1.WebhookPlugin>(pluginContainer)) {
+      if (!pluginContainer.format.match(/^[a-z0-9_]+$/)) {
+        logger.warn(`Invalid plugin name: ${pluginContainer.format}`);
+        return;
+      }
+
       if (pluginContainer.init) {
         pluginContainer.init();
-      }
-      this.plugins[pluginContainer.format] = pluginContainer;
-      return;
-    }
-
-    if (is<v2.WebhookPlugin>(pluginContainer)) {
-      if (pluginContainer.init) {
-        try {
-          await pluginContainer.init(this.createContext(pluginContainer.format));
-        } catch (error) {
-          logger.error(`Plugin '${pluginContainer.format}' threw an exception during initialisation:`, error);
-          return;
-        }
       }
       this.plugins[pluginContainer.format] = pluginContainer;
       return;
@@ -185,13 +182,10 @@ export default class PluginCollection {
     logger.debug('Plugin container:', pluginContainer);
   }
 
-  private createContext(pluginName: string): v2.WebhookContext {
-    return {
-      logger: logger.getChildLogger({
-        name: `plg-${pluginName}`,
-      }),
-      bridge: this.bridge,
-    };
+  private createLogger(pluginName: string): Logger {
+    return logger.getChildLogger({
+      name: `plg-${pluginName}`,
+    });
   }
 
   private compilePlugin(source: string, hash: string, cachePath: string) {
@@ -204,6 +198,8 @@ export default class PluginCollection {
     fs.writeFileSync(sourcePath, source);
     const prog = tts.createProgram([sourcePath], {
       strictNullChecks: true,
+      target: ScriptTarget.ES2016,
+      module: ModuleKind.CommonJS,
     });
 
     prog.emit(undefined, (_name, data) => {
