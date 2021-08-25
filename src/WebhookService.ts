@@ -10,11 +10,11 @@ import {
 import randomString from './util/randomString';
 import Configuration from './configuration/Configuration';
 import { generateLocalPart } from './util/matrixUtilities';
-import { WebhookResult } from './webhooks/pluginApi';
 import {
   br, code, fmt, room, table, Text, user,
 } from './formatting/formatting';
 import Observable from './util/Observable';
+import { WebhookResult } from './webhooks/Matcher';
 
 const HOOK_SECRET_LENGTH = 48;
 

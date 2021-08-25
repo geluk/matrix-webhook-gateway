@@ -1,11 +1,11 @@
 import { is } from 'typescript-is';
+
 import Webhook from '../models/Webhook';
 import WebhookRepository from '../repositories/WebhookRepository';
 import logger from '../util/logger';
 import { WebhookContent } from './formats';
-import {
-  WebhookResult, WebhookMessageV2, WebhookMessageV1,
-} from './pluginApi';
+import * as v1 from '../pluginApi/v1';
+import * as v2 from '../pluginApi/v2';
 import PluginCollection from './PluginCollection';
 import transformWebhook from './transformWebhook';
 
@@ -17,6 +17,11 @@ export interface Request {
 export interface Match {
   webhook: Webhook,
   pluginName?: string,
+}
+
+export interface WebhookResult {
+  webhook: Webhook;
+  content: v1.WebhookMessage | v2.WebhookMessage;
 }
 
 export default class Matcher {
@@ -65,13 +70,13 @@ export default class Matcher {
       logger.debug(`Plugin '${match.pluginName}' rejected the webhook.`);
       return undefined;
     }
-    if (is<WebhookMessageV2>(content)) {
+    if (is<v1.WebhookMessage>(content)) {
       return {
         webhook: match.webhook,
         content,
       };
     }
-    if (is<WebhookMessageV1>(content)) {
+    if (is<v2.WebhookMessage>(content)) {
       return {
         webhook: match.webhook,
         content,

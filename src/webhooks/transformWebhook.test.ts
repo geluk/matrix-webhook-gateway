@@ -1,5 +1,5 @@
 import { DiscordWebhook, SlackWebhook } from './formats';
-import { WebhookMessageV2 } from './pluginApi';
+import { WebhookMessage } from '../pluginApi/v2';
 import transformWebhook from './transformWebhook';
 
 test('transforms Slack-style webhooks', () => {
@@ -7,7 +7,7 @@ test('transforms Slack-style webhooks', () => {
     text: 'A new message',
   };
 
-  const expectedOutput: WebhookMessageV2 = {
+  const expectedOutput: WebhookMessage = {
     version: '2',
     text: 'A new message',
   };
@@ -22,7 +22,7 @@ test('transforms Discord-style webhooks', () => {
     avatar_url: 'http://example.com',
   };
 
-  const expectedOutput: WebhookMessageV2 = {
+  const expectedOutput: WebhookMessage = {
     version: '2',
     text: 'A new message',
     username: 'user',

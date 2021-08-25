@@ -6,9 +6,8 @@ import { is } from 'typescript-is';
 import watch from 'node-watch';
 import isTransformer from 'typescript-is/lib/transform-inline/transformer';
 import logger from '../util/logger';
-import {
-  WebhookMessageV2, WebhookMessageV1, WebhookPluginV1, WebhookPluginV2, WebhookContextV2,
-} from './pluginApi';
+import * as v1 from '../pluginApi/v1';
+import * as v2 from '../pluginApi/v2';
 import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 import MatrixBridge from '../bridge/MatrixBridge';
 
@@ -18,8 +17,8 @@ interface PluginBase {
 }
 
 type Plugin =
-  | WebhookPluginV1
-  | WebhookPluginV2;
+  | v1.WebhookPlugin
+  | v2.WebhookPlugin;
 
 const WORK_DIR = './plugins/__workdir';
 
@@ -83,7 +82,7 @@ export default class PluginCollection {
   }
 
   public async apply(body: unknown, type: string):
-  Promise<WebhookMessageV2 | WebhookMessageV1 | undefined> {
+  Promise<v1.WebhookMessage | v2.WebhookMessage | undefined> {
     const plugin = this.plugins[type];
     return plugin.transform(body, this.createContext(type));
   }
@@ -161,7 +160,7 @@ export default class PluginCollection {
       return;
     }
 
-    if (is<WebhookPluginV1>(pluginContainer)) {
+    if (is<v1.WebhookPlugin>(pluginContainer)) {
       if (pluginContainer.init) {
         pluginContainer.init();
       }
@@ -169,7 +168,7 @@ export default class PluginCollection {
       return;
     }
 
-    if (is<WebhookPluginV2>(pluginContainer)) {
+    if (is<v2.WebhookPlugin>(pluginContainer)) {
       if (pluginContainer.init) {
         try {
           await pluginContainer.init(this.createContext(pluginContainer.format));
@@ -186,7 +185,7 @@ export default class PluginCollection {
     logger.debug('Plugin container:', pluginContainer);
   }
 
-  private createContext(pluginName: string): WebhookContextV2 {
+  private createContext(pluginName: string): v2.WebhookContext {
     return {
       logger: logger.getChildLogger({
         name: `plg-${pluginName}`,

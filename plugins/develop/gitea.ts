@@ -1,8 +1,8 @@
 import { is } from 'typescript-is';
 import {
-  a, blockquote, br, brace, code, cond, fmt, preview, quote, truncate,
+  a, blockquote, br, brace, code, fmt, preview, quote, truncate,
 } from '../../src/formatting/formatting';
-import { WebhookContextV2, WebhookMessageV2, WebhookPluginV2 } from '../../src/webhooks/pluginApi';
+import { WebhookContext, WebhookMessage, WebhookPlugin } from '../../src/pluginApi/v2';
 
 interface IssueOpened {
   secret: string,
@@ -278,12 +278,12 @@ interface Label {
   url: string,
 }
 
-const plugin: WebhookPluginV2 = {
+const plugin: WebhookPlugin = {
   format: 'gitea',
   version: '2',
-  async init(context: WebhookContextV2) {
+  async init(context: WebhookContext) {
   },
-  async transform(body: any, context: WebhookContextV2): Promise<WebhookMessageV2 | undefined> {
+  async transform(body: any, context: WebhookContext): Promise<WebhookMessage | undefined> {
     if (is<IssueOpened>(body)) {
       return {
         version: '2',

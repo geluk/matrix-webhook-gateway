@@ -7,12 +7,12 @@ import {
   DiscordWebhook, SlackWebhook,
   Turt2liveWebhook, WebhookContent,
 } from './formats';
-import { WebhookMessageV2 } from './pluginApi';
+import { WebhookMessage } from '../pluginApi/v2';
 
 export default function transformWebhook(
   webhook: WebhookContent,
-): WebhookMessageV2 {
-  const content: WebhookMessageV2 = {
+): WebhookMessage {
+  const content: WebhookMessage = {
     version: '2',
     text: '',
   };

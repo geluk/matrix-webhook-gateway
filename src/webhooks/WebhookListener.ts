@@ -4,8 +4,7 @@ import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 import HookCallRepository from '../repositories/HookCallRepository';
 import logger from '../util/logger';
 import Observable from '../util/Observable';
-import { WebhookResult } from './pluginApi';
-import Matcher from './Matcher';
+import Matcher, { WebhookResult } from './Matcher';
 
 export default class WebhookListener {
   private app = Express.default();
