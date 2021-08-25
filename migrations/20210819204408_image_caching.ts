@@ -19,13 +19,5 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  await knex.schema.createTable('image_cache', (table) => {
-    table.string('hash')
-      .primary()
-      .notNullable();
-    table.string('original_url')
-      .notNullable();
-    table.string('matrix_url')
-      .notNullable();
-  });
+  await knex.schema.dropTable('image_cache');
 }
