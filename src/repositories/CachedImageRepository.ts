@@ -29,17 +29,16 @@ export default class CachedImageFromDatabase implements CachedImageRepository {
   public async addOrUpdate(entity: CachedImage): Promise<void> {
     logger.debug(`Adding cached image with hash ${entity.url_hash}`);
 
-    const repr: CachedImageRepr = {
-      url_hash: entity.url_hash,
-      original_url: entity.original_url,
-      matrix_url: entity.matrix_url,
-      last_retrieved: entity.last_retrieved,
-      content_hash: entity.content_hash,
-      cache_details: JSON.stringify(entity.cache_details),
-    };
+    const {
+      cache_details: cacheDetails,
+      ...rest
+    } = entity;
 
     await this.database.knex<CachedImageRepr>('image_cache')
-      .insert(repr);
+      .insert({
+        cache_details: JSON.stringify(cacheDetails),
+        ...rest,
+      });
   }
 
   public async findByUrl(url: string): Promise<CachedImage | undefined> {
@@ -57,16 +56,20 @@ export default class CachedImageFromDatabase implements CachedImageRepository {
       .first();
 
     if (repr) {
+      let details;
       try {
-        const details = JSON.parse(repr.cache_details);
+        details = JSON.parse(repr.cache_details);
+        assertType<{ revalidateAfter: string }>(details);
         details.revalidateAfter = new Date(details.revalidateAfter);
         assertType<CacheDetails>(details);
-        repr.cache_details = details;
       } catch (error) {
         logger.warn('Failed to look up image cache details: ', error);
-        (repr as unknown as CachedImage).cache_details = null;
       }
-      return repr as unknown as CachedImage;
+
+      return {
+        ...repr,
+        cache_details: details,
+      };
     }
     return undefined;
   }

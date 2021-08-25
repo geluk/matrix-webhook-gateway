@@ -340,7 +340,7 @@ export default class GiteaPlugin extends PluginBase {
       };
     }
     if (is<PullRequestClosed>(body)) {
-      if(body.pull_request.merged) {
+      if (body.pull_request.merged) {
         return {
           version: '2',
           text: fmt(
