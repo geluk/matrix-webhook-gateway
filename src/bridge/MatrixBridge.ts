@@ -110,16 +110,17 @@ export default class MatrixBridge {
   }
 
   public async setProfileDetails(
-    userId: string,
-    username: string | undefined,
-    icon: EmojiIcon | UrlIcon | undefined,
+    userId?: string,
+    username?: string,
+    icon?: EmojiIcon | UrlIcon | 'clear',
   ): Promise<void> {
-    const intent = this.bridge.getIntentFromLocalpart(userId);
-
+    const intent = this.getIntent(userId);
     if (username) {
       await intent.setDisplayName(username);
     }
-    if (is<UrlIcon>(icon)) {
+    if (icon === 'clear') {
+      await intent.setAvatarUrl('');
+    } else if (is<UrlIcon>(icon)) {
       if (icon.url.startsWith('mxc://')) {
         await intent.setAvatarUrl(icon.url);
       } else {
@@ -159,7 +160,12 @@ export default class MatrixBridge {
     await this.bridge.run(this.config.listen_port, undefined, undefined, this.config.listen_host);
     logger.info(`Matrix bridge running on ${this.config.listen_host}:${this.config.listen_port}`);
     await this.getIntent().ensureRegistered(true);
-    await this.getIntent().setDisplayName(this.config.bot_user_name);
+
+    const icon = this.config.bot_avatar_url ? {
+      url: this.config.bot_avatar_url,
+    } : 'clear';
+
+    await this.setProfileDetails(undefined, this.config.bot_user_name, icon);
   }
 
   private handleUserQuery(user: MatrixUser): Record<string, unknown> {

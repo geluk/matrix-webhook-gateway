@@ -121,7 +121,7 @@ const startup = async () => {
     matcher,
     hookCallRepository,
   );
-  const whs = new WebhookService(
+  const webhookService = new WebhookService(
     bridge,
     webhookRepository,
     webhookListener.onWebhookResult,
@@ -131,7 +131,7 @@ const startup = async () => {
     if (argv['clear-plugin-cache']) {
       plugins.clearCache();
     }
-    await whs.start();
+    await webhookService.start();
     await webhookListener.start();
   } catch (error) {
     logger.prettyError(error);

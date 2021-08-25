@@ -30,6 +30,8 @@ app_service:
   listen_port: 8023
   # Display name of the bot user.
   bot_user_name: 'Webhook'
+  # URL to an image to be used as the avatar of the bot user.
+  bot_avatar_url:
 
 # Configuration for the webhook service.
 webhooks:

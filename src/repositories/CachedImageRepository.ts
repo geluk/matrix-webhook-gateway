@@ -38,7 +38,7 @@ export default class CachedImageFromDatabase implements CachedImageRepository {
       cache_details: JSON.stringify(entity.cache_details),
     };
 
-    await this.database.knex<CachedImageRepr>('uploaded_image')
+    await this.database.knex<CachedImageRepr>('image_cache')
       .insert(repr);
   }
 
@@ -52,7 +52,7 @@ export default class CachedImageFromDatabase implements CachedImageRepository {
 
   private async findByHash(urlHash: string): Promise<CachedImage | undefined> {
     logger.debug(`Looking up cached image with hash ${urlHash}`);
-    const repr = await this.database.knex<CachedImageRepr>('uploaded_image')
+    const repr = await this.database.knex<CachedImageRepr>('image_cache')
       .where('url_hash', '=', urlHash)
       .first();
 
@@ -73,7 +73,7 @@ export default class CachedImageFromDatabase implements CachedImageRepository {
 
   public async updateCacheDetails(urlHash: string, cacheDetails: CacheDetails): Promise<void> {
     logger.debug(`Updating revalidateAfter for ${urlHash}`);
-    return this.database.knex<CachedImageRepr>('uploaded_image')
+    return this.database.knex<CachedImageRepr>('image_cache')
       .where('url_hash', '=', urlHash)
       .update({
         cache_details: JSON.stringify(cacheDetails),

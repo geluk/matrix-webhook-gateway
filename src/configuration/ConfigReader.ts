@@ -130,7 +130,26 @@ export default class ConfigReader {
         } else if (error.message === 'has additional properties') {
           const value = (error.value as string).substr('data.'.length);
           logger.error(`Unrecognised property: '${value}'`);
+        } else if (error.message === 'is the wrong type') {
+          let found;
+          if (error.value === null) {
+            found = 'null';
+          } else {
+            found = typeof error.value;
+          }
+          const types = [error.type].flat();
+          const expected = types.join(', ');
+          if (types.length === 1) {
+            logger.error(
+              `The field '${field}' has an invalid type (expected ${expected}, found ${found})`,
+            );
+          } else {
+            logger.error(
+              `The field '${field}' has an invalid type (expected one of [${expected}], found ${found})`,
+            );
+          }
         } else {
+          logger.error(error);
           logger.error(`The field '${field}' ${error.message}`);
         }
         logger.silly('Error value: ', error);

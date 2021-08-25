@@ -33,6 +33,8 @@ properties:
         minimum: 1
       bot_user_name:
         type: string
+      bot_avatar_url:
+        type: [string, 'null']
     additionalProperties: false
     required: [ hs_token, as_token, homeserver_name, app_service_url ]
   database:
