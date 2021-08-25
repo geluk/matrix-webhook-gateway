@@ -19,7 +19,7 @@ services:
         # This port is used for communication with your homeserver.
       - 8023:8023
     restart: unless-stopped
-    # Defaults show below, these can be uncommented and edited if required:
+    # Defaults shown below, these can be uncommented and edited if required:
     #user: 953:953
     #command: --config /config/gateway-config.yaml --appservice-config /data/appservice-webhook-gateway.yaml
 ```
@@ -168,6 +168,32 @@ in the right directory.
 If you're writing a more complicated plugin and would like to have access to
 code analysis, you can clone the repository and write your plugin in the 
 `./plugins/develop` directory.
+
+### Formatting API
+
+To simplify the process of generating messages with both HTML and plaintext
+content, a formatting API is available. This lets you build messages that will
+be rendered both in plaintext and as HTML.
+
+For example, creating an ordered list:
+```js
+ol(a('https://example.com', 'first'), 'second', 'third')
+```
+This generates the following plaintext:
+```
+1. first (https://example.com)
+2. second
+3. third
+```
+While generating the following HTML content:
+1. [first](https://example.com)
+2. second
+3. third
+
+Various convenience functions are available. Take a look at the sample plugins
+to see how the formatting API can be used, and see
+[here](https://github.com/geluk/matrix-webhook-gateway/blob/master/src/formatting/formatting.ts)
+for a complete list of all available formatting functions.
 
 ## Plugin loading process
 
