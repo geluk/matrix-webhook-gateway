@@ -2,7 +2,6 @@ import {
   Bridge, MatrixUser, WeakEvent, Request, Intent,
 } from 'matrix-appservice-bridge';
 import { is } from 'typescript-is';
-import fetch from 'node-fetch';
 
 import MatrixEventHandler from './events/MatrixEventHandler';
 import EventContext from './events/EventContext';
@@ -12,11 +11,12 @@ import UserRepository from '../repositories/UserRepository';
 import PrivateRoomCollection from './PrivateRoomCollection';
 import { EmojiIcon, UrlIcon } from '../webhooks/formats';
 import ImageUploader from './ImageUploader';
-import { UploadedImageRepository } from '../repositories/UploadedImageRepository';
+import { CachedImageRepository } from '../repositories/CachedImageRepository';
 import {
   fmt, Text, toHtml, toPlain,
 } from '../formatting/formatting';
 import ProfileInfo from './ProfileInfo';
+import downloader from '../downloads/downloader';
 
 export default class MatrixBridge {
   private bridge: Bridge;
@@ -27,7 +27,7 @@ export default class MatrixBridge {
 
   public constructor(
     private config: AppServiceConfiguration,
-    private imageRepository: UploadedImageRepository,
+    private imageRepository: CachedImageRepository,
     userRepository: UserRepository,
   ) {
     this.bridge = new Bridge({
@@ -123,8 +123,8 @@ export default class MatrixBridge {
       if (icon.url.startsWith('mxc://')) {
         await intent.setAvatarUrl(icon.url);
       } else {
-        const client = new ImageUploader(intent.getClient(), fetch, this.imageRepository);
-        const result = await client.uploadImage(userId, icon.url);
+        const client = new ImageUploader(intent.getClient(), downloader, this.imageRepository);
+        const result = await client.uploadImage(icon.url);
         if (result) {
           await intent.setAvatarUrl(result);
         }

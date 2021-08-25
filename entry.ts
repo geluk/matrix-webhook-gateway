@@ -8,7 +8,7 @@ import WebhookService from './src/WebhookService';
 import WebhookListener from './src/webhooks/WebhookListener';
 import HookCallRepository from './src/repositories/HookCallRepository';
 import Matcher from './src/webhooks/Matcher';
-import UploadedImageFromDatabase from './src/repositories/UploadedImageRepository';
+import CachedImageFromDatabase from './src/repositories/CachedImageRepository';
 import MatrixBridge from './src/bridge/MatrixBridge';
 import WebhookRepository from './src/repositories/WebhookRepository';
 import UserRepository from './src/repositories/UserRepository';
@@ -108,7 +108,7 @@ const startup = async () => {
     }
   }
 
-  const imageRepository = new UploadedImageFromDatabase(database);
+  const imageRepository = new CachedImageFromDatabase(database);
   const userRepository = new UserRepository(database);
   const webhookRepository = new WebhookRepository(database);
   const hookCallRepository = new HookCallRepository(database);
