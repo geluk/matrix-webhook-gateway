@@ -72,7 +72,7 @@ export default class Database {
     if (migrations.pending.length === 1) {
       logger.info('There is one pending migration');
     } else {
-      logger.info(`There are ${migrations} pending migrations`);
+      logger.info(`There are ${migrations.pending.length} pending migrations`);
     }
     const result = await this._knex.migrate.latest();
     if (is<MigrationResult>(result)) {
