@@ -6,10 +6,15 @@ All releases are published as Docker images on https://hub.docker.com/r/geluk/ma
 
 To get started quickly, an example compose file is provided below:
 ```yaml
+
 version: "3.6"
 services:
   matrix-webhooks:
     image: geluk/matrix-webhook-gateway:latest
+    # Default settings shown here for reference:
+    # environment:
+    #   WEBHOOK_CONFIG: /config/gateway-config.yaml
+    #   WEBHOOK_APPSERVICE_CONFIG: /data/appservice-webhook-gateway.yaml
     volumes:
       - ./data:/data
       - ./config:/config
@@ -21,7 +26,6 @@ services:
     restart: unless-stopped
     # Defaults shown below, these can be uncommented and edited if required:
     #user: 953:953
-    #command: --config /config/gateway-config.yaml --appservice-config /data/appservice-webhook-gateway.yaml
 ```
 
 ## Without Docker

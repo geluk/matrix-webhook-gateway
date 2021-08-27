@@ -8,8 +8,9 @@ RUN npx ttsc --outDir out
 FROM node:16-buster
 WORKDIR /app
 
-ENV GATEWAY_CONFIG /config/gateway-config.yaml
-ENV APPSERVICE_CONFIG /data/appservice-webhook-gateway.yaml
+ENV WEBHOOK_CONFIG /config/gateway-config.yaml
+ENV WEBHOOK_APPSERVICE_CONFIG /data/appservice-webhook-gateway.yaml
+ENV WEBHOOK_AUTO_MIGRATE true
 
 RUN mkdir /data
 RUN mkdir /config
@@ -23,7 +24,4 @@ EXPOSE 8023
 USER 953:953
 
 ENTRYPOINT ["/usr/local/bin/node", "entry.js"]
-CMD ["--config", \
-    "/config/gateway-config.yaml", \
-    "--appservice-config", \
-    "/data/appservice-webhook-gateway.yaml"]
+CMD []

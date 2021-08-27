@@ -13,22 +13,29 @@ import MatrixBridge from './src/bridge/MatrixBridge';
 import WebhookRepository from './src/repositories/WebhookRepository';
 import UserRepository from './src/repositories/UserRepository';
 import PluginCollection from './src/webhooks/PluginCollection';
+import parseBoolean from './src/util/parseBoolean';
 
 const { argv } = yargs(process.argv.slice(2))
   .version(false)
   .strict(true)
   .demandCommand(0, 0)
   .usage('$0 [options]')
-  .string('c')
-  .alias('c', 'config')
-  .nargs('c', 1)
-  .default('c', './gateway-config.yaml')
-  .describe('c', 'Path to the configuration file.')
-  .string('a')
-  .alias('a', 'appservice-config')
-  .nargs('a', 1)
-  .default('a', './appservice.yaml')
-  .describe('a', 'Where the generated appservice.yaml should be placed.')
+  .option('config', {
+    alias: 'c',
+    type: 'string',
+    nargs: 1,
+    describe: 'Path to the configuration file.',
+    default: () => process.env.WEBHOOK_CONFIG ?? './gateway-config.yaml',
+    defaultDescription: './gateway-config.yaml',
+  })
+  .option('appservice-config', {
+    alias: 'a',
+    type: 'string',
+    nargs: 1,
+    describe: 'Where the generated appservice.yaml should be placed.',
+    default: () => process.env.WEBHOOK_APPSERVICE_CONFIG ?? './appservice.yaml',
+    defaultDescription: './appservice.yaml',
+  })
   .boolean('clear-plugin-cache')
   .default('clear-plugin-cache', false)
   .describe(
@@ -38,17 +45,18 @@ const { argv } = yargs(process.argv.slice(2))
   .option('migrate', {
     type: 'number',
     description: 'Apply the specified number of migrations. To migrate up, supply a '
-    + 'positive number. To migrate down, supply a negative number. '
-    + 'Implies --no-auto-migrate.',
+      + 'positive number. To migrate down, supply a negative number. '
+      + 'Implies --no-auto-migrate.',
     nargs: 1,
   })
   .option('migrate-status', {
     type: 'boolean',
     description: 'Print the migration status, then exit.',
   })
-  .boolean('auto-migrate')
-  .default('auto-migrate', true)
-  .hide('auto-migrate')
+  .option('auto-migrate', {
+    default: () => parseBoolean(process.env.WEBHOOK_AUTO_MIGRATE) ?? true,
+    hidden: true,
+  })
   .describe(
     'no-auto-migrate',
     'Do not perform automatic migrations. This will cause the application to '
@@ -80,7 +88,14 @@ process.on('unhandledRejection', (error) => {
   process.exit(1);
 });
 
-const config = ConfigReader.loadConfig(argv.c, argv.a);
+const config = ConfigReader.loadConfig(
+  // This is a quirk in the type annotations for yargs, it incorrectly determines
+  // the type of configuration keys as functions if they have a function as
+  // default value generator, even though yargs has already evaluated those
+  // generators for us.
+  argv.config as unknown as string,
+  argv['appservice-config'] as unknown as string,
+);
 if (typeof config === 'undefined') {
   logger.fatal('Could not load configuration file, application will now exit');
   process.exit(1);
