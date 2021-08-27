@@ -124,7 +124,7 @@ export default class ConfigReader {
           logger.error(`The field '${field}' has an invalid value: '${error.value}'`);
         } else if (
           field === 'database.connection'
-           && error.message.startsWith('no (or more than one) schemas match')
+          && error.message.startsWith('no (or more than one) schemas match')
         ) {
           logger.error(`The field '${field}' has invalid properties`);
         } else if (error.message === 'has additional properties') {
@@ -160,8 +160,6 @@ export default class ConfigReader {
   }
 
   private static generateAppServiceConfig(config: Configuration, path: string): void {
-    logger.debug('Generating appservice.yaml');
-
     let appserviceTemplate: string;
     try {
       appserviceTemplate = fs.readFileSync(APPSERVICE_TEMPLATE, 'utf8');
@@ -171,8 +169,23 @@ export default class ConfigReader {
       return;
     }
 
+    let existing;
+    try {
+      existing = fs.readFileSync(path, 'utf8');
+    } catch (error) {
+      // If we can't read the file, we'll just try to write it anyway,
+      // since it might not exist yet. If writing fails as well, we want to
+      // report the write failure rather than this one.
+    }
+
     const rendered = Mustache.render(appserviceTemplate, config);
 
+    if (existing === rendered) {
+      logger.debug('Appservice registration file is up to date');
+      return;
+    }
+
+    logger.debug(`Generating appservice registration file: '${path}'`);
     try {
       fs.writeFileSync(path, rendered);
     } catch (error) {
