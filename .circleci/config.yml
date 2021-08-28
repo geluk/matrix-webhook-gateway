@@ -86,7 +86,6 @@ jobs:
     steps:
     - attach_workspace:
         at: ./out
-    - checkout
     - run:
         name: Publish release
         command: echo Publishing for tag << pipeline.git.tag >>
