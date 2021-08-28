@@ -5,30 +5,20 @@ import User from '../models/User';
 import Webhook from '../models/Webhook';
 import logger, { getKnexLogger } from '../util/logger';
 import toSnakeCase from '../util/toSnakeCase';
+import typescriptMigrationSource, {
+  MigrationFile,
+} from './TypescriptMigrationSource';
 
-export type Model =
-  | User
-  | Webhook;
+export type Model = User | Webhook;
 
-export type MigrationResult = [
-  number,
-  string[],
-];
+export type MigrationResult = [number, string[]];
 
 export interface MigrationStatus {
-  pending: PendingMigration[];
+  pending: MigrationFile[];
   completed: string[];
 }
 
-type KnexMigrationStatus = [
-  string[],
-  PendingMigration[],
-];
-
-interface PendingMigration {
-  file: string,
-  directory: string,
-}
+type KnexMigrationStatus = [string[], MigrationFile[]];
 
 export default class Database {
   private _knex: Knex<Model, unknown[]>;
@@ -42,6 +32,9 @@ export default class Database {
       connection: config.connection,
       wrapIdentifier: (value, origImpl) => origImpl(toSnakeCase(value)),
       useNullAsDefault: true, // Required for SQLite support
+      migrations: {
+        migrationSource: typescriptMigrationSource,
+      },
       pool: {
         // Type annotations are not available here.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -93,21 +86,31 @@ export default class Database {
     if (migrations.completed.length === 1) {
       logger.info('There is one completed migration');
     } else {
-      logger.info(`There are ${migrations.completed.length} completed migrations`);
+      logger.info(
+        `There are ${migrations.completed.length} completed migrations`,
+      );
     }
     if (migrations.pending.length === 1) {
       logger.info('There is one pending migration');
     } else {
       logger.info(`There are ${migrations.pending.length} pending migrations`);
     }
-    if (requestedMigrations > 0 && migrations.pending.length < requestedMigrations) {
+    if (
+      requestedMigrations > 0 &&
+      migrations.pending.length < requestedMigrations
+    ) {
       throw new Error(
         `Unable to perform ${requestedMigrations} migration(s) up. There aren't that many pending migrations.`,
       );
     }
-    if (requestedMigrations < 0 && migrations.completed.length < Math.abs(requestedMigrations)) {
+    if (
+      requestedMigrations < 0 &&
+      migrations.completed.length < Math.abs(requestedMigrations)
+    ) {
       throw new Error(
-        `Unable to perform ${Math.abs(requestedMigrations)} migration(s) down. There aren't that many completed migrations.`,
+        `Unable to perform ${Math.abs(
+          requestedMigrations,
+        )} migration(s) down. There aren't that many completed migrations.`,
       );
     }
 
@@ -118,7 +121,9 @@ export default class Database {
         logger.info(` - ${migration}`);
       }
     } else {
-      logger.info(`Migrating down by ${Math.abs(requestedMigrations)} migration(s)`);
+      logger.info(
+        `Migrating down by ${Math.abs(requestedMigrations)} migration(s)`,
+      );
       for (let i = 0; i < Math.abs(requestedMigrations); i += 1) {
         const [, [migration]] = await this._knex.migrate.down();
         logger.info(` - ${migration}`);

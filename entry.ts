@@ -44,9 +44,10 @@ const { argv } = yargs(process.argv.slice(2))
   )
   .option('migrate', {
     type: 'number',
-    description: 'Apply the specified number of migrations. To migrate up, supply a '
-      + 'positive number. To migrate down, supply a negative number. '
-      + 'Implies --no-auto-migrate.',
+    description:
+      'Apply the specified number of migrations. To migrate up, supply a ' +
+      'positive number. To migrate down, supply a negative number. ' +
+      'Implies --no-auto-migrate.',
     nargs: 1,
   })
   .option('migrate-status', {
@@ -59,8 +60,8 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .describe(
     'no-auto-migrate',
-    'Do not perform automatic migrations. This will cause the application to '
-    + 'exit with a non-zero exit code if there are pending migrations.',
+    'Do not perform automatic migrations. This will cause the application to ' +
+      'exit with a non-zero exit code if there are pending migrations.',
   )
   .count('v')
   .alias('v', 'verbose')
@@ -128,7 +129,11 @@ const startup = async () => {
   const webhookRepository = new WebhookRepository(database);
   const hookCallRepository = new HookCallRepository(database);
 
-  const bridge = new MatrixBridge(config.app_service, imageRepository, userRepository);
+  const bridge = new MatrixBridge(
+    config.app_service,
+    imageRepository,
+    userRepository,
+  );
   const plugins = new PluginCollection(config.webhooks, bridge);
   const matcher = new Matcher(webhookRepository, plugins);
   const webhookListener = new WebhookListener(
@@ -161,7 +166,9 @@ const migrateAndQuit = async (migrations: number) => {
     await database.migrateBy(migrations);
   } catch (error) {
     logger.error(error.message);
-    logger.fatal('Encountered an error performing migrations, application will now exit');
+    logger.fatal(
+      'Encountered an error performing migrations, application will now exit',
+    );
     process.exit(1);
   }
   logger.info('Migration successful, application will now exit');
@@ -174,7 +181,9 @@ const printMigrationStatus = async () => {
   if (migrations.completed.length === 1) {
     logger.info('There is one completed migration');
   } else {
-    logger.info(`There are ${migrations.completed.length} completed migrations`);
+    logger.info(
+      `There are ${migrations.completed.length} completed migrations`,
+    );
   }
   for (const migration of migrations.completed) {
     logger.info(` - ${migration}`);
@@ -186,7 +195,7 @@ const printMigrationStatus = async () => {
     logger.info(`There are ${migrations.pending.length} pending migrations`);
   }
   for (const migration of migrations.pending) {
-    logger.info(` - ${migration.file}`);
+    logger.info(` - ${migration.typescriptFileName}`);
   }
   process.exit(1);
 };
@@ -203,6 +212,8 @@ const entry = async () => {
 
 entry().catch((error) => {
   logger.prettyError(error);
-  logger.fatal('Encountered an error during startup, application will now exit');
+  logger.fatal(
+    'Encountered an error during startup, application will now exit',
+  );
   process.exit(1);
 });
