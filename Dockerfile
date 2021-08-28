@@ -18,6 +18,10 @@ RUN chown 953:953 /app /data /config
 COPY --from=build /build/out /app
 COPY --from=build /build/node_modules /app/node_modules
 COPY --from=build /build/templates /app/templates
+# Versions 0.12 and older only support Typescript migrations.
+# For backwards compatibility, we copy the Typescript migration files
+# into the image as well.
+COPY --from=build /build/migrations /app/migrations
 
 EXPOSE 8020
 EXPOSE 8023
