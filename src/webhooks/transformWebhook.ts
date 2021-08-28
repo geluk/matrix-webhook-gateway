@@ -4,8 +4,10 @@ import logger from '../util/logger';
 import {
   AppriseJsonWebhook_1_0,
   AppriseJsonWebhook_Unknown,
-  DiscordWebhook, SlackWebhook,
-  Turt2liveWebhook, WebhookContent,
+  DiscordWebhook,
+  SlackWebhook,
+  Turt2liveWebhook,
+  WebhookContent,
 } from './formats';
 import { WebhookMessage } from '../pluginApi/v2';
 
@@ -13,7 +15,6 @@ export default function transformWebhook(
   webhook: WebhookContent,
 ): WebhookMessage {
   const content: WebhookMessage = {
-    version: '2',
     text: '',
   };
 
@@ -43,7 +44,9 @@ export default function transformWebhook(
   if (is<SlackWebhook>(webhook)) {
     content.text = webhook.text;
     if (webhook.mrkdwn) {
-      logger.debug('Received a markdown-formatted webhook, but markdown is not supported.');
+      logger.debug(
+        'Received a markdown-formatted webhook, but markdown is not supported.',
+      );
     }
     content.username = webhook.username;
     if (webhook.icon_url) {

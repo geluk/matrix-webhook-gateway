@@ -3,8 +3,8 @@ import { PluginBase, WebhookMessage } from '../../src/pluginApi/v2';
 import * as f from '../../src/formatting/formatting';
 
 type SampleContent = {
-  message: string,
-  recipient: string,
+  message: string;
+  recipient: string;
 };
 
 export const format = 'sample';
@@ -29,7 +29,7 @@ export default class SamplePlugin extends PluginBase {
     // `body` is now guaranteed to be of the type `SampleContent`, so we can
     // safely interpolate its properties into the webhook message.
     return {
-      version: '2',
+      username: 'SamplePlugin',
       text: f.fmt(
         'Hello, ',
         f.strong(body.recipient),

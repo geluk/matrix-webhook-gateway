@@ -8,7 +8,6 @@ test('transforms Slack-style webhooks', () => {
   };
 
   const expectedOutput: WebhookMessage = {
-    version: '2',
     text: 'A new message',
   };
 
@@ -23,7 +22,6 @@ test('transforms Discord-style webhooks', () => {
   };
 
   const expectedOutput: WebhookMessage = {
-    version: '2',
     text: 'A new message',
     username: 'user',
     icon: {

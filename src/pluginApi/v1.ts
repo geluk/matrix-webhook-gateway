@@ -9,8 +9,7 @@ export interface WebhookMessage {
 }
 
 export interface WebhookPlugin {
-  version: '1',
-  format: string,
-  init?: () => unknown,
-  transform: (body: unknown) => WebhookMessage | undefined,
+  format: string;
+  init?: () => unknown;
+  transform: (body: unknown) => WebhookMessage | undefined;
 }
