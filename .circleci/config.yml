@@ -78,8 +78,10 @@ jobs:
     - run:
         name: Publish Docker image
         command: |
+          echo Images to push:
+          docker image ls
           echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
-          docker push $IMAGE_NAME:dev
+          docker push -a $IMAGE_NAME
   publish-github-release:
     docker:
     - image: cibuilds/github:0.10
