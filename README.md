@@ -33,12 +33,11 @@ services:
 ```
 
 ## Without Docker
-It is also possible to run the application directly. In the future, releases
-will be provided to simplify this, but for now, the best option is to clone the
-repository, and run the application (`npm ci && npm run start`).
+It is also possible to run the application directly. Download the
+[latest release](https://github.com/geluk/matrix-webhook-gateway/releases)
+and extract it. Start the application by running `node entry.js`
 Commandline options can be used to alter the default configuration file
-location. Run `npm run start -- <options>` to add them. For a list of available
-options, try `npm run start -- --help`.
+location. For a list of available options, try `node entry.js --help`.
 
 # Configuration
 A new configuration file (`/config/gateway-config.yaml` in Docker, or
