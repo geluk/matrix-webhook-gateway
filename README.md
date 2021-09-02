@@ -1,3 +1,5 @@
+`matrix-webhook-gateway` lets you create and manage webhooks in Matrix. The application is configured using a simple configuration file, and can be managed directly in Matrix. A powerful plugin system is available, allowing you to easily add handlers for various types of webhooks.
+
 # Installation
 
 ## Docker
