@@ -18,8 +18,10 @@ services:
     #   WEBHOOK_CONFIG: /config/gateway-config.yaml
     #   WEBHOOK_APPSERVICE_CONFIG: /data/appservice-webhook-gateway.yaml
     volumes:
+      # Dynamic data, the application will write to this directory
       - ./data:/data
-      - ./config:/config
+      # Static configuration, can be mounted read-only
+      - ./config:/config:ro
     ports:
         # This port is used to listen for incoming webhooks.
       - 8020:8020
