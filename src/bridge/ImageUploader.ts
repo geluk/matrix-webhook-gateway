@@ -15,7 +15,11 @@ export interface UploadRequest {
 }
 
 export interface UploadClient {
-  uploadContent: (request: UploadRequest) => Promise<string>;
+  uploadContent: (
+    data: Buffer,
+    contentType?: string,
+    filename?: string,
+  ) => Promise<string>;
 }
 
 function hash(input: hasha.HashaInput): string {
@@ -28,10 +32,12 @@ function hash(input: hasha.HashaInput): string {
 export default class ImageUploader {
   public constructor(
     private client: UploadClient,
-    private downloader: (url: string, etag?: string) => Promise<DownloadResponse>,
+    private downloader: (
+      url: string,
+      etag?: string,
+    ) => Promise<DownloadResponse>,
     private imageRepository: CachedImageRepository,
-  ) {
-  }
+  ) {}
 
   public async uploadImage(url: string): Promise<undefined | string> {
     const existingImage = await this.imageRepository.findByUrl(url);
@@ -52,16 +58,23 @@ export default class ImageUploader {
       logger.debug(`Found stale image in cache for URL '${url}'`);
     }
 
-    const download = await this.downloader(url, existingImage?.cache_details?.etag ?? undefined);
+    const download = await this.downloader(
+      url,
+      existingImage?.cache_details?.etag ?? undefined,
+    );
 
     if (download.status === 'error') {
-      logger.info(`Error ${download.statusCode} while trying to download '${url}'`);
+      logger.info(
+        `Error ${download.statusCode} while trying to download '${url}'`,
+      );
       return undefined;
     }
     if (download.status === 'not-modified') {
       if (!existingImage) {
         // We didn't supply an If-None-Match header, but we still got a 304. Weird.
-        logger.info(`Received an unexpected 304 while trying to download '${url}'`);
+        logger.info(
+          `Received an unexpected 304 while trying to download '${url}'`,
+        );
         return undefined;
       }
       // The existing image was successfully revalidated, and the downloader
@@ -71,7 +84,10 @@ export default class ImageUploader {
         revalidateAfter: download.revalidateAfter,
         etag: download.etag,
       };
-      await this.imageRepository.updateCacheDetails(existingImage.url_hash, details);
+      await this.imageRepository.updateCacheDetails(
+        existingImage.url_hash,
+        details,
+      );
       return existingImage.matrix_url;
     }
 
@@ -79,7 +95,9 @@ export default class ImageUploader {
     // new image, or an updated version of a cached image.
 
     if (!download.contentType) {
-      logger.warn(`Unable to upload '${url}' to Matrix: could not determine content type.`);
+      logger.warn(
+        `Unable to upload '${url}' to Matrix: could not determine content type.`,
+      );
       return undefined;
     }
 
@@ -96,7 +114,10 @@ export default class ImageUploader {
         etag: download.etag,
       };
       logger.debug(`Image re-downloaded with unchanged content from '${url}'`);
-      await this.imageRepository.updateCacheDetails(existingImage.url_hash, details);
+      await this.imageRepository.updateCacheDetails(
+        existingImage.url_hash,
+        details,
+      );
       return existingImage.matrix_url;
     }
 
@@ -105,16 +126,24 @@ export default class ImageUploader {
     // In the future, we may also want to reuse the old uploaded_image table
     // so we can be a bit more smart about this.
     // For now, we'll just upload the image.
-    const uploadResponse = await this.client.uploadContent({
-      name: `webhook-gateway-upload-${randomString(40)}.${mime.getExtension(download.contentType)}`,
-      stream: download.buffer,
-      type: download.contentType,
-    });
-    const result: {
-      content_uri: string,
-    } | undefined = JSON.parse(uploadResponse);
-    if (!is<{content_uri: string}>(result)) {
-      logger.error(`Unable to parse Matrix upload response while trying to upload ${url}, got: `, result);
+    const filename = `webhook-gateway-upload-${randomString(
+      40,
+    )}.${mime.getExtension(download.contentType)}`;
+    const uploadResponse = await this.client.uploadContent(
+      download.buffer,
+      download.contentType,
+      filename,
+    );
+    const result:
+      | {
+          content_uri: string;
+        }
+      | undefined = JSON.parse(uploadResponse);
+    if (!is<{ content_uri: string }>(result)) {
+      logger.error(
+        `Unable to parse Matrix upload response while trying to upload ${url}, got: `,
+        result,
+      );
       return undefined;
     }
 

@@ -1,5 +1,9 @@
 import {
-  Bridge, MatrixUser, WeakEvent, Request, Intent,
+  Bridge,
+  MatrixUser,
+  WeakEvent,
+  Request,
+  Intent,
 } from 'matrix-appservice-bridge';
 import { is } from 'typescript-is';
 
@@ -12,9 +16,7 @@ import PrivateRoomCollection from './PrivateRoomCollection';
 import { EmojiIcon, UrlIcon } from '../webhooks/formats';
 import ImageUploader from './ImageUploader';
 import { CachedImageRepository } from '../repositories/CachedImageRepository';
-import {
-  fmt, Text, toHtml, toPlain,
-} from '../formatting/formatting';
+import { fmt, Text, toHtml, toPlain } from '../formatting/formatting';
 import ProfileInfo from './ProfileInfo';
 import downloader from '../downloads/downloader';
 
@@ -42,7 +44,10 @@ export default class MatrixBridge {
         onEvent: this.handleEvent.bind(this),
       },
     });
-    this.privateRoomCollection = new PrivateRoomCollection(userRepository, this.bridge);
+    this.privateRoomCollection = new PrivateRoomCollection(
+      userRepository,
+      this.bridge,
+    );
   }
 
   public async sendMessage(
@@ -91,7 +96,9 @@ export default class MatrixBridge {
   // in here, as failure to send a typing event is not a failure condition
   // any of our callers are interested about. Instead, we just log it.
   public sendTyping(roomId: string, typing: boolean): void {
-    this.bridge.getIntent().sendTyping(roomId, typing)
+    this.bridge
+      .getIntent()
+      .sendTyping(roomId, typing)
       .catch((error) => {
         logger.warn('Unable to send typing event:', error);
       });
@@ -104,7 +111,9 @@ export default class MatrixBridge {
       if ((error.message as string).indexOf('not in room') < 0) {
         throw error;
       }
-      logger.debug(`User ${userId} already left ${roomId}, leave not necessary`);
+      logger.debug(
+        `User ${userId} already left ${roomId}, leave not necessary`,
+      );
       return undefined;
     }
   }
@@ -124,7 +133,11 @@ export default class MatrixBridge {
       if (icon.url.startsWith('mxc://')) {
         await intent.setAvatarUrl(icon.url);
       } else {
-        const client = new ImageUploader(intent.getClient(), downloader, this.imageRepository);
+        const client = new ImageUploader(
+          intent.botSdkIntent.underlyingClient,
+          downloader,
+          this.imageRepository,
+        );
         const result = await client.uploadImage(icon.url);
         if (result) {
           await intent.setAvatarUrl(result);
@@ -135,9 +148,9 @@ export default class MatrixBridge {
 
   async getProfileInfo(userId: string): Promise<ProfileInfo> {
     const intent = this.bridge.getIntentFromLocalpart(userId);
-    const profile = await intent.getProfileInfo(intent.userId) as {
-      displayname: string,
-      avatar_url: string,
+    const profile = (await intent.getProfileInfo(intent.userId)) as {
+      displayname: string;
+      avatar_url: string;
     };
     return {
       id: intent.userId,
@@ -146,7 +159,10 @@ export default class MatrixBridge {
     };
   }
 
-  public async sendSecret(userId: string, ...message: Text[]): Promise<unknown> {
+  public async sendSecret(
+    userId: string,
+    ...message: Text[]
+  ): Promise<unknown> {
     const room = await this.privateRoomCollection.getPrivateRoom(userId);
     return this.sendMessage(room, fmt(...message));
   }
@@ -157,13 +173,21 @@ export default class MatrixBridge {
 
   public async start(): Promise<void> {
     logger.silly('Starting Matrix bridge');
-    await this.bridge.run(this.config.listen_port, undefined, undefined, this.config.listen_host);
-    logger.info(`Matrix bridge running on ${this.config.listen_host}:${this.config.listen_port}`);
+    await this.bridge.run(
+      this.config.listen_port,
+      undefined,
+      this.config.listen_host,
+    );
+    logger.info(
+      `Matrix bridge running on ${this.config.listen_host}:${this.config.listen_port}`,
+    );
     await this.getIntent().ensureRegistered(true);
 
-    const icon = this.config.bot_avatar_url ? {
-      url: this.config.bot_avatar_url,
-    } : 'clear';
+    const icon = this.config.bot_avatar_url
+      ? {
+          url: this.config.bot_avatar_url,
+        }
+      : 'clear';
 
     await this.setProfileDetails(undefined, this.config.bot_user_name, icon);
   }
@@ -181,7 +205,9 @@ export default class MatrixBridge {
       .then((results) => {
         const handled = results.reduce((p, c) => p || c);
         if (!handled) {
-          logger.debug(`Event ignored: ${event.type} from ${event.sender} in ${event.room_id}, state: ${event.state_key} content:`);
+          logger.debug(
+            `Event ignored: ${event.type} from ${event.sender} in ${event.room_id}, state: ${event.state_key} content:`,
+          );
           logger.silly(event.content);
         }
       })
