@@ -1,11 +1,11 @@
-FROM node:16-buster AS build
+FROM node:current-bullseye-slim AS build
 WORKDIR /build
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . ./
 RUN npx ttsc --outDir out
 
-FROM node:16-buster
+FROM node:current-bullseye-slim
 WORKDIR /app
 
 ENV WEBHOOK_CONFIG /config/gateway-config.yaml
