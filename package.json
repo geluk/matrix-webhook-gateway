@@ -19,7 +19,7 @@
     "html-entities": "^2.3.2",
     "is-my-json-valid": "^2.20.5",
     "js-yaml": "^3.14.1",
-    "knex": "^0.21.16",
+    "knex": "^0.95.10",
     "matrix-appservice-bridge": "^3.0.0",
     "mime": "^2.5.2",
     "mssql": "^6.3.1",
