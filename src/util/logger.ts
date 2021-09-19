@@ -1,5 +1,6 @@
 import { Knex } from 'knex';
 import { Logger } from 'tslog';
+import { is } from 'typescript-is';
 
 const logger = new Logger({
   name: 'webhook-srv',
@@ -68,3 +69,20 @@ export function getKnexLogger(): Knex.Logger {
     enableColors: true,
   };
 }
+
+export const logExt = {
+  prettyError(error: unknown): void {
+    if (error instanceof Error) {
+      logger.prettyError(error);
+    } else {
+      logger.error(error);
+    }
+  },
+  tryLogMessage(error: unknown): void {
+    if (error instanceof Error) {
+      logger.error(error.message);
+    } else {
+      logger.error(error);
+    }
+  },
+};

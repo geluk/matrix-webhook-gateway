@@ -3,7 +3,7 @@ import fs from 'fs';
 import validator from 'is-my-json-valid';
 import Mustache from 'mustache';
 
-import logger from '../util/logger';
+import logger, { logExt } from '../util/logger';
 import Configuration from './Configuration';
 import randomString from '../util/randomString';
 
@@ -16,7 +16,10 @@ const CONFIG_SCHEMA = `${TEMPLATES_DIR}/gateway-config.schema.yaml`;
 Mustache.escape = (text) => text;
 
 export default class ConfigReader {
-  public static loadConfig(configPath: string, appservicePath: string): Configuration | undefined {
+  public static loadConfig(
+    configPath: string,
+    appservicePath: string,
+  ): Configuration | undefined {
     if (!fs.existsSync(configPath)) {
       if (!this.generateConfig(configPath)) {
         logger.error('Could not generate configuration file');
@@ -38,7 +41,7 @@ export default class ConfigReader {
       validatedConfig = validationResult;
     } catch (error) {
       logger.error('Could not validate configuration file');
-      logger.error(error.message);
+      logExt.tryLogMessage(error);
       return undefined;
     }
 
@@ -53,16 +56,19 @@ export default class ConfigReader {
       rawYaml = fs.readFileSync(path, 'utf8');
     } catch (error) {
       logger.error('Could not read configuration file');
-      logger.error(error.message);
+      logExt.tryLogMessage(error);
       return undefined;
     }
 
     let config: string | undefined | Record<string, unknown>;
     try {
-      config = YAML.safeLoad(rawYaml) as string | undefined | Record<string, unknown>;
+      config = YAML.safeLoad(rawYaml) as
+        | string
+        | undefined
+        | Record<string, unknown>;
     } catch (error) {
       logger.error('Could not parse configuration file');
-      logger.error(error.message);
+      logExt.tryLogMessage(error);
       return undefined;
     }
     if (config === null) {
@@ -77,13 +83,15 @@ export default class ConfigReader {
   }
 
   private static generateConfig(path: string): boolean {
-    logger.info(`Configuration file '${path}' not found, a new one will be generated.`);
+    logger.info(
+      `Configuration file '${path}' not found, a new one will be generated.`,
+    );
     let configTemplate: string;
     try {
       configTemplate = fs.readFileSync(CONFIG_TEMPLATE, 'utf8');
     } catch (error) {
       logger.error('Could not read configuration file template');
-      logger.error(error.message);
+      logExt.tryLogMessage(error);
       return false;
     }
     const view = {
@@ -96,7 +104,7 @@ export default class ConfigReader {
       fs.writeFileSync(path, config);
     } catch (error) {
       logger.error(`Could not write generated configuration file to '${path}'`);
-      logger.error(error.message);
+      logExt.tryLogMessage(error);
       return false;
     }
 
@@ -105,7 +113,9 @@ export default class ConfigReader {
     return true;
   }
 
-  private static validateConfig(config: Record<string, unknown>): Configuration | undefined {
+  private static validateConfig(
+    config: Record<string, unknown>,
+  ): Configuration | undefined {
     const schema = YAML.safeLoad(fs.readFileSync(CONFIG_SCHEMA, 'utf8'));
     if (typeof schema !== 'object') {
       logger.error('Could not read configuration schema');
@@ -121,10 +131,12 @@ export default class ConfigReader {
       val.errors.forEach((error) => {
         const field = error.field.substr('data.'.length);
         if (error.message === 'must be an enum value') {
-          logger.error(`The field '${field}' has an invalid value: '${error.value}'`);
+          logger.error(
+            `The field '${field}' has an invalid value: '${error.value}'`,
+          );
         } else if (
-          field === 'database.connection'
-          && error.message.startsWith('no (or more than one) schemas match')
+          field === 'database.connection' &&
+          error.message.startsWith('no (or more than one) schemas match')
         ) {
           logger.error(`The field '${field}' has invalid properties`);
         } else if (error.message === 'has additional properties') {
@@ -159,13 +171,16 @@ export default class ConfigReader {
     return Configuration.from(config);
   }
 
-  private static generateAppServiceConfig(config: Configuration, path: string): void {
+  private static generateAppServiceConfig(
+    config: Configuration,
+    path: string,
+  ): void {
     let appserviceTemplate: string;
     try {
       appserviceTemplate = fs.readFileSync(APPSERVICE_TEMPLATE, 'utf8');
     } catch (error) {
       logger.error('Could not read appservice template');
-      logger.error(error.message);
+      logExt.tryLogMessage(error);
       return;
     }
 
@@ -189,8 +204,10 @@ export default class ConfigReader {
     try {
       fs.writeFileSync(path, rendered);
     } catch (error) {
-      logger.error(`Could not write generated appservice configuration to '${path}'`);
-      logger.error(error.message);
+      logger.error(
+        `Could not write generated appservice configuration to '${path}'`,
+      );
+      logExt.tryLogMessage(error);
     }
   }
 }

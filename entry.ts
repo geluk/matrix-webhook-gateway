@@ -3,7 +3,7 @@ import yargs from 'yargs/yargs';
 
 import ConfigReader from './src/configuration/ConfigReader';
 import Database from './src/repositories/Database';
-import logger, { configureLogger } from './src/util/logger';
+import logger, { configureLogger, logExt } from './src/util/logger';
 import WebhookService from './src/WebhookService';
 import WebhookListener from './src/webhooks/WebhookListener';
 import HookCallRepository from './src/repositories/HookCallRepository';
@@ -154,7 +154,7 @@ const startup = async () => {
     await webhookService.start();
     await webhookListener.start();
   } catch (error) {
-    logger.prettyError(error);
+    logExt.prettyError(error);
     logger.fatal('Could not start webhook-gateway');
     process.exit(1);
   }
@@ -165,7 +165,7 @@ const migrateAndQuit = async (migrations: number) => {
   try {
     await database.migrateBy(migrations);
   } catch (error) {
-    logger.error(error.message);
+    logExt.tryLogMessage(error);
     logger.fatal(
       'Encountered an error performing migrations, application will now exit',
     );

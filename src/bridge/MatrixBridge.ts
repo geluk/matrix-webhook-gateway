@@ -108,7 +108,10 @@ export default class MatrixBridge {
     try {
       return await this.bridge.getIntentFromLocalpart(userId).leave(roomId);
     } catch (error) {
-      if ((error.message as string).indexOf('not in room') < 0) {
+      if (
+        error instanceof Error &&
+        (error.message as string).indexOf('not in room') < 0
+      ) {
         throw error;
       }
       logger.debug(
