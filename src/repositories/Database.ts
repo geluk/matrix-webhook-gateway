@@ -1,4 +1,4 @@
-import * as Knex from 'knex';
+import { knex, Knex } from 'knex';
 import { is } from 'typescript-is';
 import DatabaseConfiguration from '../configuration/DatabaseConfiguration';
 import User from '../models/User';
@@ -49,7 +49,7 @@ export default class Database {
         },
       },
     };
-    this._knex = Knex.default(knexConfig);
+    this._knex = knex(knexConfig);
   }
 
   public get knex(): Knex<Model, unknown[]> {

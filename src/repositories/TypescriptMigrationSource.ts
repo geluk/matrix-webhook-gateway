@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Migration, MigrationSource } from 'knex';
+import { Knex } from 'knex';
 
 export type MigrationFile = {
   fullPath: string;
@@ -10,7 +10,7 @@ export type MigrationFile = {
 const MIGRATIONS_DIR = path.resolve('migrations');
 const VALID_EXTENSIONS = ['.js', '.ts'];
 
-const typescriptMigrationSource: MigrationSource<MigrationFile> = {
+const typescriptMigrationSource: Knex.MigrationSource<MigrationFile> = {
   async getMigrations(
     _loadExtensions: readonly string[],
   ): Promise<MigrationFile[]> {
@@ -40,7 +40,7 @@ const typescriptMigrationSource: MigrationSource<MigrationFile> = {
     return migration.typescriptFileName;
   },
 
-  getMigration(migration: MigrationFile): Migration {
+  getMigration(migration: MigrationFile): Knex.Migration {
     // eslint-disable-next-line
     const loadedMigration = require(migration.fullPath);
     return loadedMigration;

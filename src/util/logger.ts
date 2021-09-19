@@ -1,4 +1,4 @@
-import Knex from 'knex';
+import { Knex } from 'knex';
 import { Logger } from 'tslog';
 
 const logger = new Logger({
@@ -9,7 +9,15 @@ const logger = new Logger({
 });
 export default logger;
 
-type LogLevel = 'silly' | 'debug' | 'trace' | 'info' | 'warn' | 'error' | 'fatal';
+type LogLevel =
+  | 'silly'
+  | 'debug'
+  | 'trace'
+  | 'info'
+  | 'warn'
+  | 'error'
+  | 'fatal';
+
 function getLevel(verbosity: number): LogLevel {
   switch (verbosity) {
     case 0:
