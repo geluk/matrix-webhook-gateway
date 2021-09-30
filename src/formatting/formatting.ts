@@ -95,7 +95,7 @@ export function em(inner: Text): Format {
   };
 }
 
-export function ol(entries: Text[]): Format {
+export function ol(...entries: Text[]): Format {
   return {
     formatHtml(): string {
       const fEntries = entries.map((e) => `<li>${toHtml(e)}</li>\n`);
@@ -123,7 +123,11 @@ export function table(head: Text[], rows: Text[][]): Format {
   return {
     formatHtml(): string {
       const fHead = head.map((h) => `<td>${toHtml(h)} </td>`).join('');
-      const fBody = rows.map((r) => `<tr>${r.map((c) => `<td>${toHtml(c)} </td>`).join('')}</tr>`).join('\n');
+      const fBody = rows
+        .map(
+          (r) => `<tr>${r.map((c) => `<td>${toHtml(c)} </td>`).join('')}</tr>`,
+        )
+        .join('\n');
 
       return `<table><thead><tr>${fHead}</tr></thead><tbody>${fBody}</tbody></table>`;
     },
@@ -134,7 +138,7 @@ export function table(head: Text[], rows: Text[][]): Format {
   };
 }
 
-export function ul(entries: Text[]): Format {
+export function ul(...entries: Text[]): Format {
   return {
     formatHtml(): string {
       const fEntries = entries.map((e) => `<li>${toHtml(e)}</li>\n`);
@@ -249,7 +253,9 @@ export function brace(...args: Text[]): Format {
 export function user(profileInfo: ProfileInfo): Format {
   return {
     formatHtml(): string {
-      return `<a href="https://matrix.to/#/${encode(profileInfo.id)}">${encode(profileInfo.displayname)}</a>`;
+      return `<a href="https://matrix.to/#/${encode(profileInfo.id)}">${encode(
+        profileInfo.displayname,
+      )}</a>`;
     },
     formatPlain(): string {
       return `${profileInfo.id} (${profileInfo.displayname})`;
@@ -260,7 +266,9 @@ export function user(profileInfo: ProfileInfo): Format {
 export function room(roomId: string): Format {
   return {
     formatHtml(): string {
-      return `<a href="https://matrix.to/#/${encode(roomId)}">${encode(roomId)}</a>`;
+      return `<a href="https://matrix.to/#/${encode(roomId)}">${encode(
+        roomId,
+      )}</a>`;
     },
     formatPlain(): string {
       return roomId;
