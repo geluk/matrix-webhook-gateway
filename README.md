@@ -184,7 +184,7 @@ be rendered both in plaintext and as HTML.
 
 For example, creating an ordered list:
 ```js
-ol(a('https://example.com', 'first'), 'second', 'third')
+ol([a('https://example.com', 'first'), 'second', 'third'])
 ```
 This generates the following plaintext:
 ```
