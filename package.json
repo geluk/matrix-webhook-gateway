@@ -22,7 +22,7 @@
     "knex": "^0.95.11",
     "matrix-appservice-bridge": "^3.0.0",
     "mime": "^2.5.2",
-    "tedious": "^12.2.0",
+    "tedious": "^12.3.0",
     "mustache": "^4.2.0",
     "mysql": "^2.18.1",
     "node-fetch": "^2.6.2",
