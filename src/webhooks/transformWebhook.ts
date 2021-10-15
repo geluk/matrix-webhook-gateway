@@ -22,7 +22,17 @@ export default function transformWebhook(
   // handled nicely. TODO: Allow enforcing a specific format by postfixing
   // the webhook URL with that format, e.g. /hook/<id>/slack
   if (is<Turt2liveWebhook>(webhook)) {
-    content.text = webhook.text;
+    if (webhook.format === 'html') {
+      content.text = {
+        formatHtml: () => webhook.text,
+        // For now, we'll just pass through the HTML-formatted text.
+        // In the future, we should probably strip HTML tags to generate the plaintext message,
+        // or even try to transform them to ASCII pseudo-formatting.
+        formatPlain: () => webhook.text,
+      }
+    } else {
+      content.text = webhook.text;
+    }
     content.username = webhook.displayName;
   }
   if (is<DiscordWebhook>(webhook)) {
