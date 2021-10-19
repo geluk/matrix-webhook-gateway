@@ -13,7 +13,7 @@ import {
 import { WebhookMessage, PluginBase } from '../../src/pluginApi/v2';
 
 interface IssueOpened {
-  secret: string;
+  secret?: string;
   action: 'opened';
   number: number;
   issue: Issue;
@@ -22,7 +22,7 @@ interface IssueOpened {
 }
 
 interface IssueClosed {
-  secret: string;
+  secret?: string;
   action: 'closed';
   number: number;
   issue: Issue;
@@ -31,7 +31,7 @@ interface IssueClosed {
 }
 
 interface IssueAssigned {
-  secret: string;
+  secret?: string;
   action: 'assigned';
   number: number;
   issue: Issue;
@@ -40,7 +40,7 @@ interface IssueAssigned {
 }
 
 interface PullRequestOpened {
-  secret: string;
+  secret?: string;
   action: 'opened';
   number: number;
   pull_request: PullRequest;
@@ -50,7 +50,7 @@ interface PullRequestOpened {
 }
 
 interface PullRequestPushed {
-  secret: string;
+  secret?: string;
   action: 'synchronized';
   number: number;
   pull_request: PullRequest;
@@ -60,7 +60,7 @@ interface PullRequestPushed {
 }
 
 interface PullRequestClosed {
-  secret: string;
+  secret?: string;
   action: 'closed';
   number: number;
   pull_request: PullRequest;
@@ -69,7 +69,7 @@ interface PullRequestClosed {
 }
 
 interface CommentCreated {
-  secret: string;
+  secret?: string;
   action: 'created';
   issue: Issue;
   comment: Comment;
@@ -78,7 +78,7 @@ interface CommentCreated {
 }
 
 interface CommentEdited {
-  secret: string;
+  secret?: string;
   action: 'edited';
   number: number;
   changes: unknown;
@@ -89,7 +89,7 @@ interface CommentEdited {
 }
 
 interface CommentDeleted {
-  secret: string;
+  secret?: string;
   action: 'deleted';
   issue: Issue;
   comment: Comment;
@@ -98,7 +98,7 @@ interface CommentDeleted {
 }
 
 interface ChangesPushed {
-  secret: string;
+  secret?: string;
   ref: string;
   before: string;
   after: string;
@@ -289,7 +289,7 @@ interface Label {
 export const format = 'gitea';
 
 export default class GiteaPlugin extends PluginBase {
-  public async init() {}
+  public async init() { }
 
   public async transform(body: any): Promise<WebhookMessage | undefined> {
     if (is<IssueOpened>(body)) {
