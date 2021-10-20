@@ -206,7 +206,7 @@ interface Repository {
     pull: boolean;
   };
   has_issues: boolean;
-  internal_tracker: {
+  internal_tracker?: {
     enable_time_tracker: boolean;
     allow_only_contributors_to_track_time: boolean;
     enable_issue_dependencies: boolean;
