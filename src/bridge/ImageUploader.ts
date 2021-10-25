@@ -1,6 +1,5 @@
 import * as hasha from 'hasha';
 import * as mime from 'mime';
-import { is } from 'typescript-is';
 import { DownloadResponse } from '../downloads/downloader';
 
 import { CachedImageRepository } from '../repositories/CachedImageRepository';
@@ -129,23 +128,11 @@ export default class ImageUploader {
     const filename = `webhook-gateway-upload-${randomString(
       40,
     )}.${mime.getExtension(download.contentType)}`;
-    const uploadResponse = await this.client.uploadContent(
+    const contentUri = await this.client.uploadContent(
       download.buffer,
       download.contentType,
       filename,
     );
-    const result:
-      | {
-          content_uri: string;
-        }
-      | undefined = JSON.parse(uploadResponse);
-    if (!is<{ content_uri: string }>(result)) {
-      logger.error(
-        `Unable to parse Matrix upload response while trying to upload ${url}, got: `,
-        result,
-      );
-      return undefined;
-    }
 
     // We already had an image cached for this URL, but we need to update it.
     if (existingImage) {
@@ -157,7 +144,7 @@ export default class ImageUploader {
     await this.imageRepository.addOrUpdate({
       url_hash: existingImage?.url_hash || hash(url),
       original_url: url,
-      matrix_url: result.content_uri,
+      matrix_url: contentUri,
       last_retrieved: new Date(),
       content_hash: contentHash,
       cache_details: {
@@ -166,6 +153,6 @@ export default class ImageUploader {
       },
     });
 
-    return result.content_uri;
+    return contentUri;
   }
 }

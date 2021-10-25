@@ -4,13 +4,9 @@ import CachedImage from '../models/CachedImage';
 import { CachedImageRepository } from '../repositories/CachedImageRepository';
 import ImageUploader, { UploadClient } from './ImageUploader';
 
-type UploadResponse =
-  | { content_uri: string }
-  | undefined;
-
-function getClient(response?: UploadResponse): UploadClient {
+function getClient(response: string): UploadClient {
   return {
-    uploadContent: async (_rq) => JSON.stringify(response),
+    uploadContent: async (_rq) => response,
   };
 }
 
@@ -70,9 +66,11 @@ function getRepository(): CachedImageRepository {
 test('Returns correct content URL', async () => {
   const repository = getRepository();
 
-  const uploader = new ImageUploader(getClient({
-    content_uri: 'mxc://example',
-  }), getOkDownloader(), repository);
+  const uploader = new ImageUploader(
+    getClient('mxc://example'),
+    getOkDownloader(),
+    repository,
+  );
 
   const result = await uploader.uploadImage('http://example.com');
 
@@ -83,9 +81,11 @@ test('Returns URL from repository if the image already exists and is fresh', asy
   const repository = getRepository();
   repository.findByUrl = async (_url) => getImage(new Date(Date.now() + 10000));
 
-  const uploader = new ImageUploader(getClient({
-    content_uri: 'mxc://new',
-  }), getOkDownloader(), repository);
+  const uploader = new ImageUploader(
+    getClient('mxc://new'),
+    getOkDownloader(),
+    repository,
+  );
 
   const result = await uploader.uploadImage('http://example.com');
 
@@ -96,9 +96,11 @@ test('Re-downloads image if it already exists but is stale', async () => {
   const repository = getRepository();
   repository.findByUrl = async (_url) => getImage(new Date(Date.now()));
 
-  const uploader = new ImageUploader(getClient({
-    content_uri: 'mxc://new',
-  }), getOkDownloader(), repository);
+  const uploader = new ImageUploader(
+    getClient('mxc://new'),
+    getOkDownloader(),
+    repository,
+  );
 
   const result = await uploader.uploadImage('http://example.com');
 
@@ -112,9 +114,11 @@ test('Updates cache if a stale image is revalidated', async () => {
     updateCacheDetails: jest.fn(),
   };
 
-  const uploader = new ImageUploader(getClient({
-    content_uri: 'mxc://new',
-  }), getNotModifiedDownloader(), repository);
+  const uploader = new ImageUploader(
+    getClient('mxc://new'),
+    getNotModifiedDownloader(),
+    repository,
+  );
 
   await uploader.uploadImage('http://example.com');
 
@@ -125,9 +129,11 @@ test('Updates cache if a stale image is revalidated', async () => {
 test('Returns undefined if the image could not be downloaded', async () => {
   const repository = getRepository();
 
-  const uploader = new ImageUploader(getClient({
-    content_uri: 'mxc://new',
-  }), getErrorDownloader(), repository);
+  const uploader = new ImageUploader(
+    getClient('mxc://new'),
+    getErrorDownloader(),
+    repository,
+  );
 
   const result = await uploader.uploadImage('http://example.com');
 
@@ -141,9 +147,11 @@ test('Updates cache if a redownloaded image evaluates to the same content hash',
     updateCacheDetails: jest.fn(),
   };
 
-  const uploader = new ImageUploader(getClient({
-    content_uri: 'mxc://new',
-  }), getOkDownloader('existing'), repository);
+  const uploader = new ImageUploader(
+    getClient('mxc://new'),
+    getOkDownloader('existing'),
+    repository,
+  );
 
   await uploader.uploadImage('http://example.com');
 
