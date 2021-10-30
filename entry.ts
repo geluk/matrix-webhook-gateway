@@ -3,16 +3,8 @@ import yargs from 'yargs/yargs';
 
 import ConfigReader from './src/configuration/ConfigReader';
 import Database from './src/repositories/Database';
+import startup from './src/startup';
 import logger, { configureLogger, logExt } from './src/util/logger';
-import WebhookService from './src/WebhookService';
-import WebhookListener from './src/webhooks/WebhookListener';
-import HookCallRepository from './src/repositories/HookCallRepository';
-import Matcher from './src/webhooks/Matcher';
-import CachedImageFromDatabase from './src/repositories/CachedImageRepository';
-import MatrixBridge from './src/bridge/MatrixBridge';
-import WebhookRepository from './src/repositories/WebhookRepository';
-import UserRepository from './src/repositories/UserRepository';
-import PluginCollection from './src/webhooks/PluginCollection';
 import parseBoolean from './src/util/parseBoolean';
 
 const { argv } = yargs(process.argv.slice(2))
@@ -61,7 +53,7 @@ const { argv } = yargs(process.argv.slice(2))
   .describe(
     'no-auto-migrate',
     'Do not perform automatic migrations. This will cause the application to ' +
-      'exit with a non-zero exit code if there are pending migrations.',
+    'exit with a non-zero exit code if there are pending migrations.',
   )
   .count('v')
   .alias('v', 'verbose')
@@ -101,64 +93,6 @@ if (typeof config === 'undefined') {
   logger.fatal('Could not load configuration file, application will now exit');
   process.exit(1);
 }
-
-const startup = async () => {
-  const database = new Database(config.database);
-
-  try {
-    await database.assertConnected();
-  } catch (error) {
-    logger.fatal('Unable to connect to the database: ', error);
-    process.exit(1);
-  }
-
-  if (argv['auto-migrate']) {
-    await database.migrate();
-  } else {
-    const migrations = await database.getMigrationStatus();
-    if (migrations.pending.length > 0) {
-      logger.fatal(
-        'Application failed to start: there are pending migrations, and --no-auto-migrate was specified',
-      );
-      process.exit(1);
-    }
-  }
-
-  const imageRepository = new CachedImageFromDatabase(database);
-  const userRepository = new UserRepository(database);
-  const webhookRepository = new WebhookRepository(database);
-  const hookCallRepository = new HookCallRepository(database);
-
-  const bridge = new MatrixBridge(
-    config.app_service,
-    imageRepository,
-    userRepository,
-  );
-  const plugins = new PluginCollection(config.webhooks, bridge);
-  const matcher = new Matcher(webhookRepository, plugins);
-  const webhookListener = new WebhookListener(
-    config.webhooks,
-    matcher,
-    hookCallRepository,
-  );
-  const webhookService = new WebhookService(
-    bridge,
-    webhookRepository,
-    webhookListener.onWebhookResult,
-    config,
-  );
-  try {
-    if (argv['clear-plugin-cache']) {
-      plugins.clearCache();
-    }
-    await webhookService.start();
-    await webhookListener.start();
-  } catch (error) {
-    logExt.prettyError(error);
-    logger.fatal('Could not start webhook-gateway');
-    process.exit(1);
-  }
-};
 
 const migrateAndQuit = async (migrations: number) => {
   const database = new Database(config.database);
@@ -200,13 +134,14 @@ const printMigrationStatus = async () => {
   process.exit(1);
 };
 
+
 const entry = async () => {
   if (argv['migrate-status']) {
     await printMigrationStatus();
   } else if (argv.migrate) {
     await migrateAndQuit(argv.migrate);
   } else {
-    await startup();
+    await startup(argv['clear-plugin-cache'], argv['auto-migrate'] as unknown as boolean, config);
   }
 };
 
