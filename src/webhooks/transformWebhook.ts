@@ -1,5 +1,5 @@
 import { is } from 'typescript-is';
-import { br, fmt, strong } from '../formatting/formatting';
+import { br, fmt, strong, Text } from '../formatting/formatting';
 import logger from '../util/logger';
 import {
   AppriseJsonWebhook_1_0,
@@ -13,6 +13,7 @@ import { WebhookMessage } from '../pluginApi/v2';
 
 export default function transformWebhook(
   webhook: WebhookContent,
+  textTransform: (text: string) => Text,
 ): WebhookMessage {
   const content: WebhookMessage = {
     text: '',
@@ -31,12 +32,12 @@ export default function transformWebhook(
         formatPlain: () => webhook.text,
       }
     } else {
-      content.text = webhook.text;
+      content.text = textTransform(webhook.text);
     }
     content.username = webhook.displayName;
   }
   if (is<DiscordWebhook>(webhook)) {
-    content.text = webhook.content;
+    content.text = textTransform(webhook.content);
     content.username = webhook.username;
     if (webhook.avatar_url) {
       content.icon = {
@@ -46,13 +47,13 @@ export default function transformWebhook(
   }
 
   if (is<AppriseJsonWebhook_1_0>(webhook)) {
-    content.text = fmt(strong(`${webhook.title}`), br(), webhook.message);
+    content.text = fmt(strong(`${textTransform(webhook.title)}`), br(), textTransform(webhook.message));
   } else if (is<AppriseJsonWebhook_Unknown>(webhook)) {
-    content.text = webhook.message;
+    content.text = textTransform(webhook.message);
   }
 
   if (is<SlackWebhook>(webhook)) {
-    content.text = webhook.text;
+    content.text = textTransform(webhook.text);
     if (webhook.mrkdwn) {
       logger.debug(
         'Received a markdown-formatted webhook, but markdown is not supported.',

@@ -68,6 +68,8 @@ export default class WebhookListener {
       logger.debug(`Looking up webhook '${path}'`);
     }
 
+    const replaceEmoji = !('ignore_emoji' in rq.query);
+
     let match;
     try {
       match = await this.webhookMatcher.matchRequest(path, plugin);
@@ -93,7 +95,7 @@ export default class WebhookListener {
 
     let result;
     try {
-      result = await this.webhookMatcher.executeHook(match, rq);
+      result = await this.webhookMatcher.executeHook(match, rq, { replaceEmoji });
     } catch (error) {
       logger.error(`An error occurred while executing plugin ${match.pluginName}`, error);
     }

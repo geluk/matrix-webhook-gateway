@@ -1,4 +1,5 @@
 import { encode } from 'html-entities';
+import { emojify } from 'node-emoji';
 import ProfileInfo from '../bridge/ProfileInfo';
 
 export interface Format {
@@ -187,6 +188,18 @@ export function preview(maxLength: number, content: string): Format {
   };
 }
 
+export function renderEmoji(content: string): Format {
+
+  return {
+    formatHtml(): string {
+      return encode(emojify(content));
+    },
+    formatPlain(): string {
+      return emojify(content);
+    }
+  }
+}
+
 // Control flow
 // -------------
 export function ifHtml(...args: Text[]): Format {
@@ -247,7 +260,7 @@ export function quote(...args: Text[]): Format {
   };
 }
 
-export function brace(...args: Text[]): Format {
+export function parenthesize(...args: Text[]): Format {
   return {
     formatHtml(): string {
       return `(${args.map(toHtml).join('')})`;
