@@ -20,6 +20,17 @@ export interface MigrationStatus {
 
 type KnexMigrationStatus = [string[], MigrationFile[]];
 
+function identifierToSnakeCase(value: string) {
+  // Unfortunately, SQLite may produce values that are undefined or null,
+  // even though the type annotations in Knex claim that this can't happen.
+  // For this reason, we'll use a safeguard that returns the original value
+  // if it is null, undefined, or the empty string.
+  if (value) {
+    return toSnakeCase(value);
+  }
+  return value;
+}
+
 export default class Database {
   private _knex: Knex<Model, unknown[]>;
 
@@ -30,7 +41,7 @@ export default class Database {
       log: getKnexLogger(),
       client: config.driver,
       connection: config.connection,
-      wrapIdentifier: (value, origImpl) => origImpl(toSnakeCase(value)),
+      wrapIdentifier: (value, origImpl) => origImpl(identifierToSnakeCase(value)),
       useNullAsDefault: true, // Required for SQLite support
       migrations: {
         migrationSource: typescriptMigrationSource,
