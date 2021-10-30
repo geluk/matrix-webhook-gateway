@@ -11,7 +11,7 @@ import PluginCollection from "./webhooks/PluginCollection";
 import WebhookListener from "./webhooks/WebhookListener";
 import WebhookService from "./WebhookService";
 
-export default async function startup(clearPluginCache: boolean, autoMigrate: boolean, config: Configuration) {
+export default async function startup(clearPluginCache: boolean, autoMigrate: boolean, config: Configuration): Promise<void> {
     const database = new Database(config.database);
 
     try {

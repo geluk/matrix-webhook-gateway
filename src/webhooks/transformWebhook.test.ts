@@ -1,7 +1,7 @@
 import { DiscordWebhook, SlackWebhook } from './formats';
 import transformWebhook from './transformWebhook';
 import { renderEmoji, toPlain } from '../formatting/formatting';
-import { identity } from '../util/functional';
+import identity from '../util/functional';
 
 test('transforms Slack-style webhooks', () => {
   const call: SlackWebhook = {

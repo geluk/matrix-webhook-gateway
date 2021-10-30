@@ -9,7 +9,7 @@ import * as v2 from '../pluginApi/v2';
 import PluginCollection from './PluginCollection';
 import transformWebhook from './transformWebhook';
 import { renderEmoji } from '../formatting/formatting';
-import { identity } from '../util/functional';
+import identity from '../util/functional';
 
 export interface Request {
   path: string,

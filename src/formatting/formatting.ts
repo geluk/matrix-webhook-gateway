@@ -224,7 +224,7 @@ export function ifPlain(...args: Text[]): Format {
   };
 }
 
-export function ifNotEmpty(text: string | null | undefined, ...args: Text[]) {
+export function ifNotEmpty(text: string | null | undefined, ...args: Text[]): Format {
   return {
     formatHtml(): string {
       return !text ? '' : args.map(toHtml).join('');

@@ -1,6 +1,5 @@
 import { Knex } from 'knex';
 import { Logger } from 'tslog';
-import { is } from 'typescript-is';
 
 const logger = new Logger({
   name: 'webhook-srv',

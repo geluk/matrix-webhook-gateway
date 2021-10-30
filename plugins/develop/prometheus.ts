@@ -35,7 +35,7 @@ const alertStatusIcon: Record<AlertStatus, string> = {
 export const format = 'prometheus';
 
 export default class WebhookPlugin extends PluginBase {
-  public async init() {}
+  public async init() { }
 
   public async transform(body: unknown): Promise<WebhookMessage | undefined> {
     if (!is<PrometheusWebhook>(body)) {
@@ -61,7 +61,7 @@ export default class WebhookPlugin extends PluginBase {
         cond(body.alerts.length > 1, 's'),
         ` ${body.status}`,
         cond(body.truncatedAlerts > 0, ` (${body.truncatedAlerts} truncated)`),
-        ul(body.alerts.map(makeAlert)),
+        ul(...body.alerts.map(makeAlert)),
       ),
     };
   }
