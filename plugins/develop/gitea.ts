@@ -6,6 +6,7 @@ import {
   brace,
   code,
   fmt,
+  ifNotEmpty,
   preview,
   quote,
   truncate,
@@ -426,7 +427,7 @@ export default class GiteaPlugin extends PluginBase {
           ' to ',
           fmtAfter,
           ' ',
-          brace(a(body.compare_url, 'compare')),
+          ifNotEmpty(body.compare_url, brace(a(body.compare_url, 'compare'))),
         ),
       };
     }

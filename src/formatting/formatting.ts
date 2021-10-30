@@ -151,9 +151,8 @@ export function ul(...entries: Text[]): Format {
   };
 }
 
-// Control flow
-// -------------
-
+// Text processing
+// ---------------
 export function truncate(maxLength: number, content: string): Format {
   const impl = () => {
     if (content.length <= maxLength) {
@@ -208,6 +207,17 @@ export function ifPlain(...args: Text[]): Format {
     },
     formatPlain(): string {
       return args.map(toPlain).join('');
+    },
+  };
+}
+
+export function ifNotEmpty(text: string | null | undefined, ...args: Text[]) {
+  return {
+    formatHtml(): string {
+      return !text ? '' : args.map(toHtml).join('');
+    },
+    formatPlain(): string {
+      return !text ? '' : args.map(toPlain).join('');
     },
   };
 }

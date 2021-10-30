@@ -22,3 +22,26 @@ test('code formatting', () => {
   expect(formatted.formatHtml()).toBe('<code>a code block</code>');
   expect(formatted.formatPlain()).toBe('a code block');
 });
+
+describe('ifNotEmpty', () => {
+  test('renders if text is not empty', () => {
+    const formatted = ifNotEmpty('abc', 'def');
+    expect(formatted.formatPlain()).toBe('def')
+  });
+
+  test('does not render if text is empty', () => {
+    const formatted = ifNotEmpty('', 'def');
+    expect(formatted.formatPlain()).toBe('')
+  });
+
+  test('does not render if text is null', () => {
+    const formatted = ifNotEmpty(null, 'def');
+    expect(formatted.formatPlain()).toBe('')
+  });
+
+  test('does not render if text is undefined', () => {
+    const formatted = ifNotEmpty(undefined, 'def');
+    expect(formatted.formatPlain()).toBe('')
+  });
+});
+
