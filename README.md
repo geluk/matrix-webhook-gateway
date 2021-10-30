@@ -3,10 +3,12 @@
 # Installation
 
 ## Docker
+
 The recommended way to run the application service is using Docker.
 All releases are published as Docker images on https://hub.docker.com/r/geluk/matrix-webhook-gateway.
 
 To get started quickly, an example compose file is provided below:
+
 ```yaml
 
 version: "3.6"
@@ -33,6 +35,7 @@ services:
 ```
 
 ## Without Docker
+
 It is also possible to run the application directly. Download the
 [latest release](https://github.com/geluk/matrix-webhook-gateway/releases)
 and extract it. Start the application by running `node entry.js`
@@ -40,6 +43,7 @@ Commandline options can be used to alter the default configuration file
 location. For a list of available options, try `node entry.js --help`.
 
 # Configuration
+
 A new configuration file (`/config/gateway-config.yaml` in Docker, or
 `./gateway-config.yaml` outside Docker) is generated on first startup. The
 webhook gateway will use the settings in this file to automatically generate an
@@ -47,22 +51,26 @@ appservice registration file (default location:
 `/data/appservice-webhook-gateway.yaml` in Docker, `./appservice.yaml` outside).
 You should copy this file to your Matrix server, and add it to your Synapse
 configuration:
+
 ```yaml
- app_service_config_files:
- - "./appservices/appservice-webhook-gateway.yaml"
+app_service_config_files:
+  - './appservices/appservice-webhook-gateway.yaml'
 ```
+
 If your webhook and Matrix server live on the same host, you can also choose to
 directly point Matrix to the generated appservice file.
 
 # Usage
 
 ## Set up a webhook
+
 Invite the bot to a new channel:
 ```
 /invite @_webhook:yourmatrixserver.tld
 ```
 
 To create a webhook in the channel, enter the following command:
+
 ```
 -hook create <webhook_name>
 ```
@@ -71,23 +79,29 @@ The bot will create a new user for this webhook, invite it, and send you the
 webhook URL in a private message.
 
 To list all enabled webhooks in a channel, use:
+
 ```
 -hook list
 ```
 
 To delete a webhook, use:
+
 ```
 -hook delete <id>
 ```
+
 Where `<id>` is the numeric ID of a webhook as returned by `-hook list`.
 
 A webhook user will automatically update its username and avatar if the relevant
 fields in the webhook are set. Alternatively, you can use commands to set
 the profile details of a user.
+
 ```
 -hook set name <id> <username>
 ```
+
 or:
+
 ```
 -hook set avatar <id> <url>
 ```
@@ -96,6 +110,7 @@ or:
 
 To call the webhook, send a `POST` request with a JSON body to the webhook URL. 
 Several formats are supported, such as Slack:
+
 ```json
 {
   "text": "I am a webhook message",
@@ -103,7 +118,9 @@ Several formats are supported, such as Slack:
   "icon_url": "https://example.com/hook.png"
 }
 ```
+
 Discord:
+
 ```json
 {
   "content": "I am a webhook message",
@@ -111,7 +128,9 @@ Discord:
   "icon_url": "https://example.com/hook.png"
 }
 ```
+
 Apprise:
+
 ```json
 {
   "version": "1.0",
@@ -119,8 +138,10 @@ Apprise:
   "message": "I am a webhook message"
 }
 ```
+
 As well as the format exposed by
 [turt2live/matrix-appservice-webhooks](https://github.com/turt2live/matrix-appservice-webhooks):
+
 ```
 {
   "text": "Hello world!",
@@ -129,6 +150,7 @@ As well as the format exposed by
   "avatarUrl": "http://i.imgur.com/IDOBtEJ.png"
 }
 ```
+
 Other formats can be supported by writing a custom plugin, see below.
 
 # Webhook user management
@@ -150,10 +172,11 @@ will still only be posted to the room in which they were created.
 To support arbitrary JSON POSTs, you can write a custom plugin to interpret the
 message body and format it into something the webhook gateway understands.
 
-A plugin is a Typescript file dropped into `/data/plugins`, which needs to
-conform to a specific format.
+A plugin is a Typescript file dropped into `/data/plugins` (or `./plugins` if
+you don't use the Docker release), which needs to conform to a specific format.
 
-A sample plugin can be found
+The format of a plugin file is best explained by looking at an example, which
+you can find
 [here](https://github.com/geluk/matrix-webhook-gateway/blob/master/plugins/develop/sample.ts).
 
 [this plugin](https://github.com/geluk/matrix-webhook-gateway/blob/master/plugins/develop/prometheus.ts)
@@ -162,7 +185,7 @@ as sent by Prometheus
 [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/).
 
 To execute a plugin, you must append its name (as specified by the `format` key
-in your plugin definition) to the webhook URL. For instance, to execute the 
+in your plugin definition) to the webhook URL. For instance, to execute the
 sample plugin, send a POST to
 `https://your-webhook-gateway-url/hook/your-webhook/sample`
 
@@ -173,8 +196,9 @@ is by copying the sample plugin, adapting it to your needs, and installing it
 in the right directory.
 
 If you're writing a more complicated plugin and would like to have access to
-code analysis, you can clone the repository and write your plugin in the 
-`./plugins/develop` directory.
+code analysis, you can clone the repository and write your plugin in the
+`./plugins/develop` directory. This way, features like type hints and automatic
+imports will work correctly.
 
 ### Formatting API
 
@@ -183,16 +207,21 @@ content, a formatting API is available. This lets you build messages that will
 be rendered both in plaintext and as HTML.
 
 For example, creating an ordered list:
+
 ```js
-ol([a('https://example.com', 'first'), 'second', 'third'])
+ol([a('https://example.com', 'first'), 'second', 'third']);
 ```
+
 This generates the following plaintext:
+
 ```
 1. first (https://example.com)
 2. second
 3. third
 ```
+
 While generating the following HTML content:
+
 1. [first](https://example.com)
 2. second
 3. third
@@ -225,8 +254,8 @@ loaded one by one. The loading process of a plugin looks like this:
    are resolved correctly during the loading process.
 6. The plugin is `require()`d and some basic integrity checks are performed
    against the resulting object to validate that it is correctly formed.
-7. The plugin class is instantiated, the `init()` function is executed, 
-  and the plugin is added to the list of active plugins.
+7. The plugin class is instantiated, the `init()` function is executed,
+   and the plugin is added to the list of active plugins.
 
 # Development setup
 
@@ -245,16 +274,17 @@ Username: `dev`
 Password: `appservice-dev`
 
 Start the app service:
+
 ```bash
 npm ci
 npm run start
 ```
 
 Invite the webhook management user using the following Matrix command:
+
 ```
 /invite @webhook:matrix.local
 ```
-
 
 # References
 
@@ -262,5 +292,6 @@ Invite the webhook management user using the following Matrix command:
 - [turt2live](https://github.com/turt2live/matrix-appservice-webhooks), whose project inspired me to develop this application.
 
 ## Useful documentation
+
 - https://matrix.org/docs/spec/client_server/r0.6.1
 - https://matrix.org/docs/spec/application_service/r0.1.2
