@@ -39,6 +39,9 @@ jobs:
         paths:
           - webhook-gateway.tar.gz
           - VERSION
+    - store_artifacts:
+        path: out/webhook-gateway.tar.gz
+        destination: webhook-gateway.tar.gz
   docker-build:
     executor: main
     steps:
