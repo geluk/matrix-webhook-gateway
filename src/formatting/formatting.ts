@@ -249,26 +249,31 @@ export function cond(condition: boolean, ...args: Text[]): Format {
 // General formatting
 // ------------------
 
-export function quote(...args: Text[]): Format {
+export function surroundWith(left: string, right: string, ...args: Text[]): Format {
   return {
     formatHtml(): string {
-      return `"${args.map(toHtml).join('')}"`;
+      return left + args.map(toHtml).join('') + right;
     },
     formatPlain(): string {
-      return `"${args.map(toPlain).join('')}"`;
+      return left + args.map(toPlain).join('') + right;
     },
   };
 }
 
-export function parenthesize(...args: Text[]): Format {
-  return {
-    formatHtml(): string {
-      return `(${args.map(toHtml).join('')})`;
-    },
-    formatPlain(): string {
-      return `(${args.map(toPlain).join('')})`;
-    },
-  };
+export function quote(...args: Text[]): Format {
+  return surroundWith('"', '"', ...args);
+}
+
+export function parens(...args: Text[]): Format {
+  return surroundWith("(", ")", ...args);
+}
+
+export function braces(...args: Text[]): Format {
+  return surroundWith("{", "}", ...args);
+}
+
+export function brackets(...args: Text[]): Format {
+  return surroundWith("[", "]", ...args);
 }
 
 // Matrix shortcuts

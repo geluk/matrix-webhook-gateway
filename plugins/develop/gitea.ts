@@ -3,10 +3,10 @@ import {
   a,
   blockquote,
   br,
-  brace,
   code,
   fmt,
   ifNotEmpty,
+  parens,
   preview,
   quote,
   truncate,
@@ -427,7 +427,7 @@ export default class GiteaPlugin extends PluginBase {
           ' to ',
           fmtAfter,
           ' ',
-          ifNotEmpty(body.compare_url, brace(a(body.compare_url, 'compare'))),
+          ifNotEmpty(body.compare_url, parens(a(body.compare_url, 'compare'))),
         ),
       };
     }
