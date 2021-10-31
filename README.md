@@ -259,9 +259,10 @@ loaded one by one. The loading process of a plugin looks like this:
 
 # Development setup
 
-Run `start-matrix.sh` in `./local-dev` to set up a local appservice
-development environment with Docker. This will start up a Synapse and an Element
-instance, which you can use for testing the appservice.
+
+Run `start-matrix.sh` (`start-matrix.ps` on Windows)  in `./local-dev` to set
+up a local appservice development environment with Docker. This will start up
+a Synapse and an Element instance, which you can use for testing the appservice.
 
 ```bash
 cd local-dev
@@ -270,10 +271,10 @@ cd local-dev
 
 Go to http://localhost:8009 and log in using the following credentials:
 
-Username: `dev`  
+Username: `dev`
 Password: `appservice-dev`
 
-Start the app service:
+Start the application service:
 
 ```bash
 npm ci
@@ -285,6 +286,20 @@ Invite the webhook management user using the following Matrix command:
 ```
 /invite @webhook:matrix.local
 ```
+
+## Troubleshooting:
+ - If the appservice shows an `ECONNREFUSED` error, it cannot connect to the
+   Synapse server. Make sure Synapse is accessible at http://127.0.0.1:8008
+   or modify the configuration file to point it to the right URL.
+ - If the appservice starts successfully, but doesn't respond to invitations,
+   Synapse can't reach the appservice. Make sure the appservice can be reached
+   from the Synapse container. You can test this by executing the following command
+   within the `local-dev` directory:
+   `docker-compose exec synapse curl 172.31.0.1:8023/health`
+   On Windows, if you're using Docker with the WSL backend, you may need to update
+   the IP address in `local-dev/synapse-config/appservices/webhook-dev.yml` from
+   `http://172.31.0.1:8023` (the default gateway of the Docker network)
+   to your computer's IP address.
 
 # References
 
