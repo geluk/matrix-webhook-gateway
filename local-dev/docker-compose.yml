@@ -21,7 +21,7 @@ services:
       matrix:
         ipv4_address: 172.31.0.10
   riot:
-    image: vectorim/riot-web
+    image: vectorim/element-web
     volumes:
     - ./riot.json:/app/config.json
     ports:
