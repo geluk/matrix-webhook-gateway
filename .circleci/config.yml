@@ -32,7 +32,7 @@ jobs:
         command: npm run dist
     - run:
         name: Compress artifacts
-        command: tar -czf webhook-gateway.tar.gz ./webhook-gateway
+        command: tar -czf webhook-gateway.tar.gz webhook-gateway
         working_directory: ./out
     - persist_to_workspace:
         root: out
