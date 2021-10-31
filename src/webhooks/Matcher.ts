@@ -72,7 +72,13 @@ export default class Matcher {
     }
 
     logger.debug(`Invoking plugin: '${match.pluginName}'`);
-    const content = await this.plugins.apply(request.body, match.pluginName);
+    let content;
+    try {
+      content = await this.plugins.apply(request.body, match.pluginName);
+    } catch (error) {
+      logger.error(`Error executing plugin '${match.pluginName}'`, error);
+      return undefined;
+    }
     if (content === undefined) {
       logger.debug(`Plugin '${match.pluginName}' rejected the webhook.`);
       return undefined;
