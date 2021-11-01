@@ -19,5 +19,7 @@
     },
     "exclude": [
         "plugins",
+        "jest.config.ts",
+        "knexfile.ts"
     ],
 }

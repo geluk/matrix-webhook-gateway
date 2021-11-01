@@ -33,5 +33,9 @@ module.exports = {
       },
     ],
   },
-  ignorePatterns: ['plugins'],
+  ignorePatterns: [
+    'plugins',
+    'jest.config.ts',
+    'knexfile.ts'
+  ],
 };
