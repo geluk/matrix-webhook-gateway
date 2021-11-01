@@ -77,6 +77,7 @@ export default class SamplePlugin extends PluginBase {
         'Hello, ',
         f.strong(body.recipient),
         '! You have a new message: ',
+        f.br(),
         f.blockquote(body.message),
       ),
 
