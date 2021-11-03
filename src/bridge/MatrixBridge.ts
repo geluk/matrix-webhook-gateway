@@ -17,7 +17,7 @@ import { EmojiIcon, UrlIcon } from '../webhooks/formats';
 import ImageUploader from './ImageUploader';
 import { CachedImageRepository } from '../repositories/CachedImageRepository';
 import { fmt, Text, toHtml, toPlain } from '../formatting/formatting';
-import ProfileInfo from './ProfileInfo';
+import { ProfileInfo } from './ProfileInfo';
 import downloader from '../downloads/downloader';
 
 export default class MatrixBridge {

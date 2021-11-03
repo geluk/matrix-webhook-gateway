@@ -1,6 +1,6 @@
 import { encode } from 'html-entities';
 import { emojify } from 'node-emoji';
-import ProfileInfo from '../bridge/ProfileInfo';
+import { NameAndId } from '../bridge/ProfileInfo';
 
 /**
  * The base type for any formattable text.
@@ -571,6 +571,13 @@ export function cond(condition: boolean, ...args: Text[]): Format {
 // General formatting
 // ------------------
 
+/**
+ * Surround text with a start and end sequence.
+ * @param left The string to put at the beginning.
+ * @param right The string to put at the end.
+ * @param args The text to place between `left` and `right`.
+ * @returns An object that produces the surrounded text.
+ */
 export function surroundWith(
   left: string,
   right: string,
@@ -586,37 +593,77 @@ export function surroundWith(
   };
 }
 
+/**
+ * Surround text with double quotes.
+ * @param args The text to be surrounded.
+ * @returns An object that produces the quoted text.
+ */
 export function quote(...args: Text[]): Format {
   return surroundWith('"', '"', ...args);
 }
 
+/**
+ * Surround text with single quotes.
+ * @param args The text to be surrounded.
+ * @returns An object that produces the quoted text.
+ */
+export function singleQuote(...args: Text[]): Format {
+  return surroundWith("'", "'", ...args);
+}
+
+/**
+ * Surround text with parentheses.
+ * @param args The text to be surrounded.
+ * @returns An object that produces the parenthesised text.
+ */
 export function parens(...args: Text[]): Format {
   return surroundWith('(', ')', ...args);
 }
 
+/**
+ * Surround text with curly braces.
+ * @param args The text to be surrounded.
+ * @returns An object that produces the surrounded text.
+ */
 export function braces(...args: Text[]): Format {
   return surroundWith('{', '}', ...args);
 }
 
+/**
+ * Surround text with brackets.
+ * @param args The text to be surrounded.
+ * @returns An object that produces the surrounded text.
+ */
 export function brackets(...args: Text[]): Format {
   return surroundWith('[', ']', ...args);
 }
 
 // Matrix shortcuts
 // -------------
-export function user(profileInfo: ProfileInfo): Format {
+
+/**
+ * Create a Matrix user link.
+ * @param nameAndId Display name and id of the user.
+ * @returns An object representing a link to the user's profile.
+ */
+export function user(nameAndId: NameAndId): Format {
   return {
     formatHtml(): string {
-      return `<a href="https://matrix.to/#/${encode(profileInfo.id)}">${encode(
-        profileInfo.displayname,
+      return `<a href="https://matrix.to/#/${encode(nameAndId.id)}">${encode(
+        nameAndId.displayname,
       )}</a>`;
     },
     formatPlain(): string {
-      return `${profileInfo.id} (${profileInfo.displayname})`;
+      return `${nameAndId.id} (${nameAndId.displayname})`;
     },
   };
 }
 
+/**
+ * Create a Matrix room link.
+ * @param roomId ID of the room to link to.
+ * @returns An object representing a link to the room.
+ */
 export function room(roomId: string): Format {
   return {
     formatHtml(): string {
@@ -630,10 +677,33 @@ export function room(roomId: string): Format {
   };
 }
 
+/**
+ * Change the foreground colour of text.
+ * @param color a six-character hexadecimal colour code.
+ * @param inner Text to be coloured.
+ * @returns An object representing the coloured text.
+ */
 export function fg(color: string, inner: Text): Format {
   return {
     formatHtml(): string {
       return `<span data-mx-color="${color}">${toHtml(inner)}</span>`;
+    },
+    formatPlain(): string {
+      return toFormat(inner).formatPlain();
+    },
+  };
+}
+
+/**
+ * Change the background colour of text.
+ * @param color a six-character hexadecimal colour code.
+ * @param inner Text to be coloured.
+ * @returns An object representing the coloured text.
+ */
+export function bg(color: string, inner: Text): Format {
+  return {
+    formatHtml(): string {
+      return `<span data-mx-bg-color="${color}">${toHtml(inner)}</span>`;
     },
     formatPlain(): string {
       return toFormat(inner).formatPlain();

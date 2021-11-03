@@ -1,5 +1,8 @@
-export default interface ProfileInfo {
-  id: string,
-  displayname: string,
-  avatarUrl: string,
+export interface ProfileInfo extends NameAndId {
+  avatarUrl: string;
+}
+
+export interface NameAndId {
+  id: string;
+  displayname: string;
 }
