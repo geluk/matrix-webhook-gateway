@@ -65,6 +65,7 @@ directly point Matrix to the generated appservice file.
 ## Set up a webhook
 
 Invite the bot to a new channel:
+
 ```
 /invite @_webhook:yourmatrixserver.tld
 ```
@@ -108,7 +109,7 @@ or:
 
 ## Call the webhook
 
-To call the webhook, send a `POST` request with a JSON body to the webhook URL. 
+To call the webhook, send a `POST` request with a JSON body to the webhook URL.
 Several formats are supported, such as Slack:
 
 ```json
@@ -209,7 +210,7 @@ be rendered both in plaintext and as HTML.
 For example, creating an ordered list:
 
 ```js
-ol([a('https://example.com', 'first'), 'second', 'third']);
+ol(a('https://example.com', 'first'), 'second', 'third');
 ```
 
 This generates the following plaintext:
@@ -259,8 +260,7 @@ loaded one by one. The loading process of a plugin looks like this:
 
 # Development setup
 
-
-Run `start-matrix.sh` (`start-matrix.ps` on Windows)  in `./local-dev` to set
+Run `start-matrix.sh` (`start-matrix.ps` on Windows) in `./local-dev` to set
 up a local appservice development environment with Docker. This will start up
 a Synapse and an Element instance, which you can use for testing the appservice.
 
