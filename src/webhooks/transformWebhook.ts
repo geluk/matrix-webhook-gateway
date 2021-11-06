@@ -1,4 +1,5 @@
 import { is } from 'typescript-is';
+import * as HTMLParser from 'node-html-parser';
 import { br, fmt, strong, Text } from '../formatting/formatting';
 import logger from '../util/logger';
 import {
@@ -26,17 +27,15 @@ export default function transformWebhook(
     if (webhook.format === 'html') {
       content.text = {
         formatHtml: () => webhook.text,
-        // For now, we'll just pass through the HTML-formatted text.
-        // In the future, we should probably strip HTML tags to generate the plaintext message,
-        // or even try to transform them to ASCII pseudo-formatting.
-        formatPlain: () => webhook.text,
-      }
+        // We could try to transform HTML tags to ASCII pseudo-formatting here.
+        // For now, we'll just strip the HTML tags.
+        formatPlain: () => HTMLParser.parse(webhook.text).text,
+      };
     } else {
       content.text = textTransform(webhook.text);
     }
     content.username = webhook.displayName;
-  }
-  if (is<DiscordWebhook>(webhook)) {
+  } else if (is<DiscordWebhook>(webhook)) {
     content.text = textTransform(webhook.content);
     content.username = webhook.username;
     if (webhook.avatar_url) {
@@ -44,15 +43,15 @@ export default function transformWebhook(
         url: webhook.avatar_url,
       };
     }
-  }
-
-  if (is<AppriseJsonWebhook_1_0>(webhook)) {
-    content.text = fmt(strong(`${textTransform(webhook.title)}`), br(), textTransform(webhook.message));
+  } else if (is<AppriseJsonWebhook_1_0>(webhook)) {
+    content.text = fmt(
+      strong(`${textTransform(webhook.title)}`),
+      br(),
+      textTransform(webhook.message),
+    );
   } else if (is<AppriseJsonWebhook_Unknown>(webhook)) {
     content.text = textTransform(webhook.message);
-  }
-
-  if (is<SlackWebhook>(webhook)) {
+  } else if (is<SlackWebhook>(webhook)) {
     content.text = textTransform(webhook.text);
     if (webhook.mrkdwn) {
       logger.debug(
