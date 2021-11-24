@@ -21,7 +21,7 @@
     "js-yaml": "^3.14.1",
     "knex": "^0.95.11",
     "matrix-appservice-bridge": "^3.0.0",
-    "mime": "^2.5.2",
+    "mime": "^2.6.0",
     "mustache": "^4.2.0",
     "mysql": "^2.18.1",
     "node-emoji": "^1.11.0",
