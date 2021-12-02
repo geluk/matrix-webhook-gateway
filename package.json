@@ -17,7 +17,7 @@
     "express": "^4.17.1",
     "hasha": "^5.2.2",
     "html-entities": "^2.3.2",
-    "is-my-json-valid": "^2.20.5",
+    "is-my-json-valid": "^2.20.6",
     "js-yaml": "^3.14.1",
     "knex": "^0.95.14",
     "matrix-appservice-bridge": "^3.0.0",
