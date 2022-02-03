@@ -4,6 +4,8 @@ import {
   WeakEvent,
   Request,
   Intent,
+  ClientEncryptionSession,
+  ClientEncryptionStore,
 } from 'matrix-appservice-bridge';
 import { is } from 'typescript-is';
 
@@ -20,6 +22,20 @@ import { fmt, Text, toHtml, toPlain } from '../formatting/formatting';
 import { ProfileInfo } from './ProfileInfo';
 import downloader from '../downloads/downloader';
 
+const encMap = new Map<string, ClientEncryptionSession>();
+const encryptionStore: ClientEncryptionStore = {
+  async getStoredSession(userId: string) {
+    return encMap.get(userId) || null;
+  },
+  async setStoredSession(session: ClientEncryptionSession) {
+    logger.info('Set session', session.userId, session.deviceId);
+    encMap.set(session.userId, session);
+  },
+  async updateSyncToken() {
+    // No-op
+  },
+};
+
 export default class MatrixBridge {
   private bridge: Bridge;
 
@@ -32,12 +48,22 @@ export default class MatrixBridge {
     private imageRepository: CachedImageRepository,
     userRepository: UserRepository,
   ) {
+    let bridgEncryption;
+    if (config.pantalaimon_url) {
+      logger.info(`Connecting to Pantalaimon at ${config.pantalaimon_url}`);
+      bridgEncryption = {
+        homeserverUrl: config.pantalaimon_url,
+        store: encryptionStore,
+      };
+    }
+
     this.bridge = new Bridge({
       homeserverUrl: config.homeserver_url,
       domain: config.homeserver_name,
       registration: config.toAppServiceRegistration(),
       disableStores: true,
       logRequestOutcome: false,
+      bridgeEncryption: bridgEncryption,
       controller: {
         onUserQuery: this.handleUserQuery.bind(this),
         onLog: forwardMatrixLog,

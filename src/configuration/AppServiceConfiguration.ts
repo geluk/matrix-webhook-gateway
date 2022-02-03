@@ -21,6 +21,8 @@ export default class AppServiceConfiguration {
 
   homeserver_url: string;
 
+  pantalaimon_url: string;
+
   listen_host: string;
 
   listen_port: number;
@@ -45,6 +47,7 @@ export default class AppServiceConfiguration {
     this.homeserver_name = config.homeserver_name;
     this.app_service_url = config.app_service_url;
     this.homeserver_url = config.homeserver_url ?? 'http://127.0.0.1:8008';
+    this.pantalaimon_url = config.pantalaimon_url ?? null;
     this.listen_host = config.listen_host ?? '0.0.0.0';
     this.listen_port = config.listen_port ?? 8023;
     this.bot_user_name = config.bot_user_name ?? 'Webhook';
