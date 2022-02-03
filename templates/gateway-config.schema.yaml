@@ -26,6 +26,8 @@ properties:
         minLength: 1
       homeserver_url:
         type: string
+      pantalaimon_url:
+        type: string
       listen_host:
         type: string
       listen_port:

@@ -25,6 +25,9 @@ app_service:
   app_service_url: http://127.0.0.1:8023
   # URL used by the application service to communicate with the homeserver.
   homeserver_url: http://127.0.0.1:8008
+  # If you use pantalaimon for encryption forwarding, uncomment this and
+  # set the correct URL here:
+  #pantalaimon_url: http://127.0.0.1:8009
   # Address and port used to listen for incoming events from the homeserver.
   listen_host: '0.0.0.0'
   listen_port: 8023
