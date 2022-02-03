@@ -185,6 +185,10 @@ may also be interesting to look at. It generates a message from an alert notific
 as sent by Prometheus
 [Alertmanager](https://prometheus.io/docs/alerting/latest/alertmanager/).
 
+Several plugins are available in the [plugin/develop](./plugins/develop)
+directory. Note that these plugins are intended as a starting point and are
+usually based on the default configuration for the application they support.
+
 To execute a plugin, you must append its name (as specified by the `format` key
 in your plugin definition) to the webhook URL. For instance, to execute the
 sample plugin, send a POST to
@@ -288,18 +292,19 @@ Invite the webhook management user using the following Matrix command:
 ```
 
 ## Troubleshooting:
- - If the appservice shows an `ECONNREFUSED` error, it cannot connect to the
-   Synapse server. Make sure Synapse is accessible at http://127.0.0.1:8008
-   or modify the configuration file to point it to the right URL.
- - If the appservice starts successfully, but doesn't respond to invitations,
-   Synapse can't reach the appservice. Make sure the appservice can be reached
-   from the Synapse container. You can test this by executing the following command
-   within the `local-dev` directory:
-   `docker-compose exec synapse curl 172.31.0.1:8023/health`
-   On Windows, if you're using Docker with the WSL backend, you may need to update
-   the IP address in `local-dev/synapse-config/appservices/webhook-dev.yml` from
-   `http://172.31.0.1:8023` (the default gateway of the Docker network)
-   to your computer's IP address.
+
+- If the appservice shows an `ECONNREFUSED` error, it cannot connect to the
+  Synapse server. Make sure Synapse is accessible at http://127.0.0.1:8008
+  or modify the configuration file to point it to the right URL.
+- If the appservice starts successfully, but doesn't respond to invitations,
+  Synapse can't reach the appservice. Make sure the appservice can be reached
+  from the Synapse container. You can test this by executing the following command
+  within the `local-dev` directory:
+  `docker-compose exec synapse curl 172.31.0.1:8023/health`
+  On Windows, if you're using Docker with the WSL backend, you may need to update
+  the IP address in `local-dev/synapse-config/appservices/webhook-dev.yml` from
+  `http://172.31.0.1:8023` (the default gateway of the Docker network)
+  to your computer's IP address.
 
 # References
 
