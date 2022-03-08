@@ -62,7 +62,7 @@ export default class ConfigReader {
 
     let config: string | undefined | Record<string, unknown>;
     try {
-      config = YAML.safeLoad(rawYaml) as
+      config = YAML.load(rawYaml) as
         | string
         | undefined
         | Record<string, unknown>;
@@ -116,7 +116,7 @@ export default class ConfigReader {
   private static validateConfig(
     config: Record<string, unknown>,
   ): Configuration | undefined {
-    const schema = YAML.safeLoad(fs.readFileSync(CONFIG_SCHEMA, 'utf8'));
+    const schema = YAML.load(fs.readFileSync(CONFIG_SCHEMA, 'utf8'));
     if (typeof schema !== 'object') {
       logger.error('Could not read configuration schema');
       return undefined;
