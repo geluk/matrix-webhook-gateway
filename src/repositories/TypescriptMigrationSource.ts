@@ -10,6 +10,11 @@ export type MigrationFile = {
 const MIGRATIONS_DIR = path.resolve('migrations');
 const VALID_EXTENSIONS = ['.js', '.ts'];
 
+// We use a custom migration source here, which always uses `.ts` as the
+// migration file name extension. This prevents a migration name mismatch
+// when Typescript and Javascript migrations are used with the same database.
+// This can happen when running a development build and a production build
+// against the same database.
 const typescriptMigrationSource: Knex.MigrationSource<MigrationFile> = {
   async getMigrations(
     _loadExtensions: readonly string[],
