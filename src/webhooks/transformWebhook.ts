@@ -24,6 +24,7 @@ export default function transformWebhook(
   // handled nicely. TODO: Allow enforcing a specific format by postfixing
   // the webhook URL with that format, e.g. /hook/<id>/slack
   if (is<Turt2liveWebhook>(webhook)) {
+    logger.silly('Matched turt2live webhook format.');
     if (webhook.format === 'html') {
       content.text = {
         formatHtml: () => webhook.text,
@@ -36,6 +37,7 @@ export default function transformWebhook(
     }
     content.username = webhook.displayName;
   } else if (is<DiscordWebhook>(webhook)) {
+    logger.silly('Matched Discord webhook format.');
     content.text = textTransform(webhook.content);
     content.username = webhook.username;
     if (webhook.avatar_url) {
@@ -44,14 +46,17 @@ export default function transformWebhook(
       };
     }
   } else if (is<AppriseJsonWebhook_1_0>(webhook)) {
+    logger.silly('Matched Apprise JSON version 1.0 webhook format.');
     content.text = fmt(
       strong(textTransform(webhook.title)),
       br(),
       textTransform(webhook.message),
     );
   } else if (is<AppriseJsonWebhook_Unknown>(webhook)) {
+    logger.silly('Matched Apprise JSON unknown version webhook format.');
     content.text = textTransform(webhook.message);
   } else if (is<SlackWebhook>(webhook)) {
+    logger.silly('Matched Slack webhook format.');
     content.text = textTransform(webhook.text);
     if (webhook.mrkdwn) {
       logger.debug(
