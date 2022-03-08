@@ -78,13 +78,20 @@ jobs:
               docker tag $IMAGE_NAME:dev $IMAGE_NAME:$(./ci/tag.sh --major)
               docker tag $IMAGE_NAME:dev $IMAGE_NAME:$(./ci/tag.sh --minor)
               docker tag $IMAGE_NAME:dev $IMAGE_NAME:$(./ci/tag.sh --patch)
-    - run:
-        name: Publish Docker image
-        command: |
-          echo Images to push:
-          docker image ls
-          echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
-          docker push -a $IMAGE_NAME
+    - when:
+        condition:
+          not:
+            matches:
+              pattern: "^pull/\\d+$"
+              value: << pipeline.git.branch >>
+        steps:
+        - run:
+            name: Publish Docker image
+            command: |
+              echo Images to push:
+              docker image ls
+              echo "$DOCKER_HUB_PW" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+              docker push -a $IMAGE_NAME
   publish-github-release:
     docker:
     - image: cibuilds/github:0.10
@@ -115,7 +122,7 @@ workflows:
         # The Docker build job will always push the :dev tag,
         # and if a git tag is set, it will also push either a
         # pre-release tag or a release tag, so this job also
-        # nees to run on al tags and branches.
+        # needs to run on all tags and branches.
         filters:
           tags:
             only: /.*/
