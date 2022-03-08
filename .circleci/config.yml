@@ -8,7 +8,7 @@ executors:
     docker:
       # This image has both Node and Docker pre-installed,
       # so we can use it for everything.
-    - image: cimg/node:16.7.0
+    - image: cimg/node:16.14
 jobs:
   npm-build:
     executor: main
