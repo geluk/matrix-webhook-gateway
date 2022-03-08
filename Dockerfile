@@ -1,7 +1,8 @@
-FROM node:lts-bullseye-slim AS build
+FROM node:lts-bullseye AS build
 WORKDIR /build
 COPY package.json package-lock.json ./
-RUN npm ci
+# This is necessary to get @vscode/sqlite3 to build.
+RUN npm ci --python=/usr/bin/python3
 COPY . ./
 RUN npx ttsc --outDir out
 

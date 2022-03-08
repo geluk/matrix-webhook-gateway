@@ -18,7 +18,10 @@ export interface MigrationStatus {
   completed: string[];
 }
 
-type KnexMigrationStatus = [string[], MigrationFile[]];
+interface KnexMigration {
+  name: string;
+}
+type KnexMigrationStatus = [KnexMigration[], MigrationFile[]];
 
 function identifierToSnakeCase(value: string) {
   // Unfortunately, SQLite may produce values that are undefined or null,
@@ -150,11 +153,11 @@ export default class Database {
     logger.silly('Retrieving migration status');
     const migrations = await this._knex.migrate.list();
     if (!is<KnexMigrationStatus>(migrations)) {
-      logger.error('Failed to read migration status: ', migrations);
+      logger.error('Knex returned unknown migration status: ', migrations);
       throw new Error('Unable to retrieve migration status');
     }
     return {
-      completed: migrations[0],
+      completed: migrations[0].map((m) => m.name),
       pending: migrations[1],
     };
   }

@@ -17,7 +17,9 @@ jobs:
     - run:
         name: Check Node version
         command: node --version
-    - node/install-packages
+    - node/install-packages:
+        # This is necessary to get @vscode/sqlite3 to build.
+        override-ci-command: npm ci --python=/usr/bin/python3
     - run:
         name: Run linter
         command: npm run lint
