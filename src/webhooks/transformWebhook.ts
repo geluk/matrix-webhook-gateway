@@ -45,7 +45,7 @@ export default function transformWebhook(
     }
   } else if (is<AppriseJsonWebhook_1_0>(webhook)) {
     content.text = fmt(
-      strong(`${textTransform(webhook.title)}`),
+      strong(textTransform(webhook.title)),
       br(),
       textTransform(webhook.message),
     );
