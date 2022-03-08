@@ -1,11 +1,12 @@
-FROM node:current-bullseye-slim AS build
+FROM node:lts-bullseye-slim AS build
 WORKDIR /build
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . ./
 RUN npx ttsc --outDir out
 
-FROM node:current-bullseye-slim
+# Once the next LTS version of Node is released, we should pin this to LTS.
+FROM node:17-bullseye-slim
 WORKDIR /app
 
 ENV WEBHOOK_CONFIG /config/gateway-config.yaml
