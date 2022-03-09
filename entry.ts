@@ -2,100 +2,98 @@ import { Logging as MatrixLogger } from 'matrix-appservice-bridge';
 import yargs from 'yargs/yargs';
 
 import ConfigReader from './src/configuration/ConfigReader';
+import DatabaseConfiguration from './src/configuration/DatabaseConfiguration';
 import Database from './src/repositories/Database';
 import startup from './src/startup';
 import logger, { configureLogger, logExt } from './src/util/logger';
 import parseBoolean from './src/util/parseBoolean';
 
-const { argv } = yargs(process.argv.slice(2))
-  .version(false)
-  .strict(true)
-  .demandCommand(0, 0)
-  .usage('$0 [options]')
-  .option('config', {
-    alias: 'c',
-    type: 'string',
-    nargs: 1,
-    describe: 'Path to the configuration file.',
-    default: () => process.env.WEBHOOK_CONFIG ?? './gateway-config.yaml',
-    defaultDescription: './gateway-config.yaml',
-  })
-  .option('appservice-config', {
-    alias: 'a',
-    type: 'string',
-    nargs: 1,
-    describe: 'Where the generated appservice.yaml should be placed.',
-    default: () => process.env.WEBHOOK_APPSERVICE_CONFIG ?? './appservice.yaml',
-    defaultDescription: './appservice.yaml',
-  })
-  .boolean('clear-plugin-cache')
-  .default('clear-plugin-cache', false)
-  .describe(
-    'clear-plugin-cache',
-    'Clear the plugin cache before compiling plugins.',
-  )
-  .option('migrate', {
-    type: 'number',
-    description:
-      'Apply the specified number of migrations. To migrate up, supply a ' +
-      'positive number. To migrate down, supply a negative number. ' +
-      'Implies --no-auto-migrate.',
-    nargs: 1,
-  })
-  .option('migrate-status', {
-    type: 'boolean',
-    description: 'Print the migration status, then exit.',
-  })
-  .option('auto-migrate', {
-    default: () => parseBoolean(process.env.WEBHOOK_AUTO_MIGRATE) ?? true,
-    hidden: true,
-  })
-  .describe(
-    'no-auto-migrate',
-    'Do not perform automatic migrations. This will cause the application to ' +
-    'exit with a non-zero exit code if there are pending migrations.',
-  )
-  .count('v')
-  .alias('v', 'verbose')
-  .describe('v', 'Log verbosity, repeat multiple times to raise.')
-  .help('h')
-  .alias('h', 'help')
-  .check((a) => {
-    if (a.migrate !== undefined && Number.isNaN(a.migrate)) {
-      throw new Error('Invalid number of migrations supplied.');
-    }
-    return true;
+const parseArgs = async () => {
+  const { argv } = await yargs(process.argv.slice(2))
+    .version(false)
+    .strict(true)
+    .demandCommand(0, 0)
+    .usage('$0 [options]')
+    .option('config', {
+      alias: 'c',
+      type: 'string',
+      nargs: 1,
+      describe: 'Path to the configuration file.',
+      default: () => process.env.WEBHOOK_CONFIG ?? './gateway-config.yaml',
+      defaultDescription: './gateway-config.yaml',
+    })
+    .option('appservice-config', {
+      alias: 'a',
+      type: 'string',
+      nargs: 1,
+      describe: 'Where the generated appservice.yaml should be placed.',
+      default: () =>
+        process.env.WEBHOOK_APPSERVICE_CONFIG ?? './appservice.yaml',
+      defaultDescription: './appservice.yaml',
+    })
+    .boolean('clear-plugin-cache')
+    .default('clear-plugin-cache', false)
+    .describe(
+      'clear-plugin-cache',
+      'Clear the plugin cache before compiling plugins.',
+    )
+    .option('migrate', {
+      type: 'number',
+      description:
+        'Apply the specified number of migrations. To migrate up, supply a ' +
+        'positive number. To migrate down, supply a negative number. ' +
+        'Implies --no-auto-migrate.',
+      nargs: 1,
+    })
+    .option('migrate-status', {
+      type: 'boolean',
+      description: 'Print the migration status, then exit.',
+    })
+    .option('auto-migrate', {
+      default: () => parseBoolean(process.env.WEBHOOK_AUTO_MIGRATE) ?? true,
+      hidden: true,
+    })
+    .describe(
+      'no-auto-migrate',
+      'Do not perform automatic migrations. This will cause the application to ' +
+        'exit with a non-zero exit code if there are pending migrations.',
+    )
+    .count('v')
+    .alias('v', 'verbose')
+    .describe('v', 'Log verbosity, repeat multiple times to raise.')
+    .help('h')
+    .alias('h', 'help')
+    .check((a) => {
+      if (a.migrate !== undefined && Number.isNaN(a.migrate)) {
+        throw new Error('Invalid number of migrations supplied.');
+      }
+      return true;
+    });
+
+  return argv;
+};
+
+const initialiseLogging = (verbose: number) => {
+  configureLogger(verbose);
+
+  MatrixLogger.default.configure({
+    console: 'error',
+    maxFiles: 1,
   });
 
-configureLogger(argv.verbose);
+  process.on('unhandledRejection', (error) => {
+    logger.error('Unhandled error:', (error as Error).message);
+    logger.prettyError(error as Error);
+    logger.fatal('Unhandled promise rejection, application will now exit');
+    process.exit(1);
+  });
+};
 
-MatrixLogger.default.configure({
-  console: 'error',
-  maxFiles: 1,
-});
-
-process.on('unhandledRejection', (error) => {
-  logger.error('Unhandled error:', (error as Error).message);
-  logger.prettyError(error as Error);
-  logger.fatal('Unhandled promise rejection, application will now exit');
-  process.exit(1);
-});
-
-const config = ConfigReader.loadConfig(
-  // This is a quirk in the type annotations for yargs, it incorrectly determines
-  // the type of configuration keys as functions if they have a function as
-  // default value generator, even though yargs has already evaluated those
-  // generators for us.
-  argv.config as unknown as string,
-  argv['appservice-config'] as unknown as string,
-);
-if (typeof config === 'undefined') {
-  logger.fatal('Could not load configuration file, application will now exit');
-  process.exit(1);
-}
-
-const migrateAndQuit = async (migrations: number) => {
-  const database = new Database(config.database);
+const migrateAndQuit = async (
+  databaseConfig: DatabaseConfiguration,
+  migrations: number,
+) => {
+  const database = new Database(databaseConfig);
   try {
     await database.migrateBy(migrations);
   } catch (error) {
@@ -109,8 +107,8 @@ const migrateAndQuit = async (migrations: number) => {
   process.exit(0);
 };
 
-const printMigrationStatus = async () => {
-  const database = new Database(config.database);
+const printMigrationStatus = async (databaseConfig: DatabaseConfiguration) => {
+  const database = new Database(databaseConfig);
   const migrations = await database.getMigrationStatus();
   if (migrations.completed.length === 1) {
     logger.info('There is one completed migration');
@@ -134,14 +132,36 @@ const printMigrationStatus = async () => {
   process.exit(1);
 };
 
-
 const entry = async () => {
+  const argv = await parseArgs();
+
+  initialiseLogging(argv.verbose);
+
+  const config = ConfigReader.loadConfig(
+    // This is a quirk in the type annotations for yargs, it incorrectly determines
+    // the type of configuration keys as functions if they have a function as
+    // default value generator, even though yargs has already evaluated those
+    // generators for us.
+    argv.config as unknown as string,
+    argv['appservice-config'] as unknown as string,
+  );
+  if (typeof config === 'undefined') {
+    logger.fatal(
+      'Could not load configuration file, application will now exit',
+    );
+    process.exit(1);
+  }
+
   if (argv['migrate-status']) {
-    await printMigrationStatus();
+    await printMigrationStatus(config.database);
   } else if (argv.migrate) {
-    await migrateAndQuit(argv.migrate);
+    await migrateAndQuit(config.database, argv.migrate);
   } else {
-    await startup(argv['clear-plugin-cache'], argv['auto-migrate'] as unknown as boolean, config);
+    await startup(
+      argv['clear-plugin-cache'],
+      argv['auto-migrate'] as unknown as boolean,
+      config,
+    );
   }
 };
 
