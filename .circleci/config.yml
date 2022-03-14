@@ -135,7 +135,7 @@ workflows:
         # so we exclude all branches here.
         filters:
           tags:
-            only: /^(\d+)(.\d+)?(.\d+)?(-[a-z0-9-]+)?$/
+            only: /^v(\d+)(.\d+)?(.\d+)?(-[a-z0-9-]+)?$/
           branches:
             ignore: /.*/
         requires:
