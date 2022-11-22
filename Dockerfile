@@ -1,4 +1,4 @@
-FROM node:lts-bullseye AS build
+FROM node:lts AS build
 WORKDIR /build
 COPY package.json package-lock.json ./
 # This is necessary to get @vscode/sqlite3 to build.
@@ -6,8 +6,7 @@ RUN npm ci --python=/usr/bin/python3
 COPY . ./
 RUN npx ttsc --outDir out
 
-# Once the next LTS version of Node is released, we should pin this to LTS.
-FROM node:17-bullseye-slim
+FROM node:lts
 WORKDIR /app
 
 ENV WEBHOOK_CONFIG /config/gateway-config.yaml
