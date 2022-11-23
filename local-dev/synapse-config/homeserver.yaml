@@ -51,6 +51,7 @@ enable_registration: true
 
 account_validity:
 
+enable_registration_without_verification: true
 registration_shared_secret: "K#tme*z#,*;Ep1VlN88PZ47OT:C.Z&87c-Caos-+h.lDznq;70"
 
 account_threepid_delegates:
