@@ -5,7 +5,7 @@ import {
   Request,
   Intent,
 } from 'matrix-appservice-bridge';
-import { is } from 'typescript-is';
+import { is } from 'typia';
 
 import MatrixEventHandler from './events/MatrixEventHandler';
 import EventContext from './events/EventContext';

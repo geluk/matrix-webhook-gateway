@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import hasha from 'hasha';
-import * as tts from 'ttypescript';
-import { is } from 'typescript-is';
-import isTransformer from 'typescript-is/lib/transform-inline/transformer';
-import { ModuleKind, ScriptTarget } from 'ttypescript';
+import * as tts from 'typescript';
+import { is } from 'typia';
+import { transform } from 'typia/lib/transform'
+import { ModuleKind, ScriptTarget } from 'typescript';
 import { Logger } from 'tslog';
 
 import logger from '../util/logger';
@@ -133,9 +133,7 @@ export class PluginLoader {
         flag: 'w',
       });
     }, undefined, undefined, {
-      before: [isTransformer(prog, {
-        functionBehavior: 'ignore',
-      })],
+      before: [transform(prog)],
     });
 
     fs.unlinkSync(sourcePath);

@@ -1,4 +1,4 @@
-import { is } from 'typescript-is';
+import { is } from 'typia';
 import * as HTMLParser from 'node-html-parser';
 import { br, fmt, strong, Text } from '../formatting/formatting';
 import logger from '../util/logger';

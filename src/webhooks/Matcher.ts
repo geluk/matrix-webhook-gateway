@@ -1,4 +1,4 @@
-import { is } from 'typescript-is';
+import { is } from 'typia';
 
 import Webhook from '../models/Webhook';
 import WebhookRepository from '../repositories/WebhookRepository';

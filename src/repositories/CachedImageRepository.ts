@@ -1,5 +1,5 @@
 import hasha from 'hasha';
-import { assertType } from 'typescript-is';
+import { assert } from 'typia';
 import CachedImage, { CacheDetails } from '../models/CachedImage';
 import logger from '../util/logger';
 import Database from './Database';
@@ -59,9 +59,9 @@ export default class CachedImageFromDatabase implements CachedImageRepository {
       let details;
       try {
         details = JSON.parse(repr.cache_details);
-        assertType<{ revalidateAfter: string }>(details);
+        assert<{ revalidateAfter: string }>(details);
         details.revalidateAfter = new Date(details.revalidateAfter);
-        assertType<CacheDetails>(details);
+        assert<CacheDetails>(details);
       } catch (error) {
         logger.warn('Failed to look up image cache details: ', error);
       }

@@ -1,25 +1,20 @@
 {
-    "extends": "@tsconfig/node16/tsconfig.json",
-    "ts-node": {
-        "compiler": "ttypescript"
-    },
-    "compilerOptions": {
-        "target": "ES2016",
-        // Allows line number references from logging code.
-        "sourceMap": true,
-        "outDir": "out/webhook-gateway",
-        "strictNullChecks": true,
-        "plugins": [
-            { 
-                "transform": "typescript-is/lib/transform-inline/transformer",
-                "functionBehavior": "basic",
-                "ignoreMethods": "true"
-            },
-        ],
-    },
-    "exclude": [
-        "plugins",
-        "jest.config.ts",
-        "knexfile.ts"
-    ],
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2016",
+    // Allows line number references from logging code.
+    "sourceMap": true,
+    "outDir": "out/webhook-gateway",
+    "strictNullChecks": true,
+    "plugins": [
+      {
+        "transform": "typia/lib/transform"
+      }
+    ]
+  },
+  "exclude": [
+    "plugins",
+    "jest.config.ts",
+    "knexfile.ts"
+  ]
 }

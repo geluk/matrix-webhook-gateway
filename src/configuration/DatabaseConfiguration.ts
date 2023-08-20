@@ -1,4 +1,4 @@
-import { is } from 'typescript-is';
+import { is } from 'typia';
 
 export type ConnectionConfiguration =
   | string

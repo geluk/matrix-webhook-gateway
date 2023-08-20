@@ -1,4 +1,4 @@
-import { is } from 'typescript-is';
+import { is } from 'typia';
 import * as v1 from '../../src/pluginApi/v1'
 
 // This is a sample plugin for the (legacy) v1 plugin API.

@@ -1,8 +1,6 @@
 export default {
   collectCoverage: true,
-  collectCoverageFrom: [
-    '**/*.ts',
-  ],
+  collectCoverageFrom: ['**/*.ts'],
   // ../ is required because we have rootDir set to src.
   coverageDirectory: '../out/coverage',
   coverageProvider: 'v8',
@@ -17,21 +15,10 @@ export default {
 
   errorOnDeprecated: true,
   maxWorkers: '50%',
-  moduleFileExtensions: [
-    'ts',
-    'js',
-  ],
+  moduleFileExtensions: ['ts', 'js'],
   rootDir: 'src',
   testEnvironment: 'node',
-  testMatch: [
-    '**/?(*.)+(test).ts',
-  ],
+  testMatch: ['**/?(*.)+(test).ts'],
 
   preset: 'ts-jest',
-
-  globals: {
-    'ts-jest': {
-      compiler: 'ttypescript',
-    },
-  },
 };

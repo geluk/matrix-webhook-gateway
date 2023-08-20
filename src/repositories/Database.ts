@@ -1,5 +1,5 @@
 import { knex, Knex } from 'knex';
-import { is } from 'typescript-is';
+import { is } from 'typia';
 import DatabaseConfiguration from '../configuration/DatabaseConfiguration';
 import User from '../models/User';
 import Webhook from '../models/Webhook';

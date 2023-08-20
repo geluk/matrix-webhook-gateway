@@ -1,4 +1,4 @@
-import { is } from 'typescript-is';
+import { is } from 'typia';
 import { PluginBase, WebhookMessage } from '../../src/pluginApi/v2';
 import * as f from '../../src/formatting/formatting';
 
