@@ -1,4 +1,4 @@
-import { Logging as MatrixLogger } from 'matrix-appservice-bridge';
+import { Logger as MatrixLogger } from 'matrix-appservice-bridge';
 import yargs from 'yargs/yargs';
 
 import ConfigReader from './src/configuration/ConfigReader';
@@ -76,7 +76,7 @@ const parseArgs = async () => {
 const initialiseLogging = (verbose: number) => {
   configureLogger(verbose);
 
-  MatrixLogger.default.configure({
+  MatrixLogger.configure({
     console: 'error',
     maxFiles: 1,
   });

@@ -1,7 +1,9 @@
 import mime from 'mime';
-import fetch from 'node-fetch';
 import logger from '../util/logger';
 import parseCacheControl from './cacheControl';
+
+// eslint-disable-next-line
+const fetch = require('node-fetch');
 
 export type DownloadResponse =
   | ContentResponse
@@ -27,16 +29,23 @@ export interface ErrorResponse {
   statusCode: number;
 }
 
-function determineContentType(contentType: string | null, url: string): string | null {
+function determineContentType(
+  contentType: string | null,
+  url: string,
+): string | null {
   if (!contentType) {
-    logger.debug('Could not determine content type from response headers, trying URL');
+    logger.debug(
+      'Could not determine content type from response headers, trying URL',
+    );
     return mime.getType(url);
   }
   return contentType;
 }
 
-export default async function downloader(url: string, etag?: string)
-  : Promise<DownloadResponse> {
+export default async function downloader(
+  url: string,
+  etag?: string,
+): Promise<DownloadResponse> {
   const headers = {
     'User-Agent': 'matrix-webhook-gateway/0',
   } as Record<string, string>;
@@ -49,7 +58,9 @@ export default async function downloader(url: string, etag?: string)
     headers,
   });
 
-  const revalidateAfter = parseCacheControl(response.headers.get('Cache-Control'));
+  const revalidateAfter = parseCacheControl(
+    response.headers.get('Cache-Control'),
+  );
   if (response.status === 304) {
     return {
       status: 'not-modified',
@@ -66,7 +77,10 @@ export default async function downloader(url: string, etag?: string)
   return {
     status: 'ok',
     buffer: await response.buffer(),
-    contentType: determineContentType(response.headers.get('Content-Type'), url),
+    contentType: determineContentType(
+      response.headers.get('Content-Type'),
+      url,
+    ),
     revalidateAfter,
     etag: response.headers.get('ETag'),
   };
