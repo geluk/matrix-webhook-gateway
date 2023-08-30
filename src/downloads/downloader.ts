@@ -1,9 +1,7 @@
+import fetch from 'node-fetch';
 import mime from 'mime';
 import logger from '../util/logger';
 import parseCacheControl from './cacheControl';
-
-// eslint-disable-next-line
-const fetch = require('node-fetch');
 
 export type DownloadResponse =
   | ContentResponse
