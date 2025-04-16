@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "matrix-webhook-gateway",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
