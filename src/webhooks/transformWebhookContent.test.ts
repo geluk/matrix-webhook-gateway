@@ -1,5 +1,5 @@
 import { DiscordWebhook, SlackWebhook } from './formats';
-import transformWebhook from './transformWebhook';
+import transformWebhookContent from './transformWebhookContent';
 import { renderEmoji, toPlain } from '../formatting/formatting';
 import identity from '../util/functional';
 
@@ -8,7 +8,7 @@ test('transforms Slack-style webhooks', () => {
     text: 'A new message',
   };
 
-  const output = transformWebhook(call, identity);
+  const output = transformWebhookContent(call, identity);
   const formatted = toPlain(output.text);
 
   expect(formatted).toBe('A new message');
@@ -21,7 +21,7 @@ test('transforms Discord-style webhooks', () => {
     avatar_url: 'http://example.com',
   };
 
-  const output = transformWebhook(call, identity);
+  const output = transformWebhookContent(call, identity);
   const formatted = toPlain(output.text);
 
   expect(output.icon).toEqual({ url: 'http://example.com' });
@@ -36,7 +36,7 @@ test('Executes text replacement function', () => {
     avatar_url: 'http://example.com',
   };
 
-  const output = transformWebhook(call, renderEmoji);
+  const output = transformWebhookContent(call, renderEmoji);
   const formatted = toPlain(output.text);
 
   expect(formatted).toBe('HE SUN☀️THE SUN☀️THE SUN☀️THE');

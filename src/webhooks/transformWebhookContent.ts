@@ -12,7 +12,7 @@ import {
 } from './formats';
 import { WebhookMessage } from '../pluginApi/v2';
 
-export default function transformWebhook(
+export default function transformWebhookContent(
   webhook: WebhookContent,
   textTransform: (text: string) => Text,
 ): WebhookMessage {

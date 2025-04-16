@@ -93,15 +93,15 @@ export default class WebhookListener {
       }
     }
 
-    let result;
+    let message;
     try {
-      result = await this.webhookMatcher.executeHook(match, rq, { replaceEmoji });
+      message = await this.webhookMatcher.generateWebhookMessage(match, rq, { replaceEmoji });
     } catch (error) {
       logger.error(`An error occurred while executing plugin ${match.pluginName}`, error);
     }
-    if (result) {
+    if (message) {
       logger.silly('Request body: ', rq.body);
-      this.onWebhookResult.notify(result).catch((error) => {
+      this.onWebhookResult.notify(message).catch((error) => {
         logger.error('Failed to handle webhook invocation: ', error);
       });
     }

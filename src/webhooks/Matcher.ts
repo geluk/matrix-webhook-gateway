@@ -7,7 +7,7 @@ import { WebhookContent } from './formats';
 import * as v1 from '../pluginApi/v1';
 import * as v2 from '../pluginApi/v2';
 import PluginCollection from './PluginCollection';
-import transformWebhook from './transformWebhook';
+import transformWebhookContent from './transformWebhookContent';
 import { renderEmoji } from '../formatting/formatting';
 import identity from '../util/functional';
 
@@ -53,13 +53,13 @@ export default class Matcher {
     };
   }
 
-  public async executeHook(match: Match, request: Request, options: WebhookOptions): Promise<WebhookResult | undefined> {
+  public async generateWebhookMessage(match: Match, request: Request, options: WebhookOptions): Promise<WebhookResult | undefined> {
     if (match.pluginName === undefined) {
       if (is<WebhookContent>(request.body)) {
         const textTransform = options.replaceEmoji ? renderEmoji : identity;
         return {
           webhook: match.webhook,
-          content: transformWebhook(request.body, textTransform),
+          content: transformWebhookContent(request.body, textTransform),
         };
       }
       logger.warn('Received an unrecognised webhook: ', request.body);
