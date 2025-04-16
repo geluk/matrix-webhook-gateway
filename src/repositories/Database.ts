@@ -38,11 +38,16 @@ export default class Database {
   private _knex: Knex<Model, unknown[]>;
 
   public constructor(config: DatabaseConfiguration) {
-    logger.debug(`Creating DB connection with ${config.driver}`);
+    let driver = config.driver;
+    if (driver == "sqlite3") {
+      driver = "better-sqlite3";
+    }
+
+    logger.debug(`Creating DB connection with ${driver}`);
     const knexConfig: Knex.Config = {
       debug: false, // Set to true to enable query debugging
       log: getKnexLogger(),
-      client: config.driver,
+      client: driver,
       connection: config.connection,
       wrapIdentifier: (value, origImpl) => origImpl(identifierToSnakeCase(value)),
       useNullAsDefault: true, // Required for SQLite support
@@ -53,10 +58,11 @@ export default class Database {
         // Type annotations are not available here.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         afterCreate: (conn: any, done: any) => {
-          if (config.driver === 'sqlite3') {
+          if (driver === 'better-sqlite3') {
             // On SQLite, foreign keys are disabled by default.
             // See https://github.com/knex/knex/issues/453
-            conn.run('PRAGMA foreign_keys = ON;', done);
+            conn.prepare('PRAGMA foreign_keys = O').run();
+            done(false, conn)
           } else {
             done(false, conn);
           }
