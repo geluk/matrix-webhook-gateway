@@ -114,7 +114,7 @@ export default class CommandParser {
       {
         const hookId = this.parseNumber(2);
         if (
-          this.args.length !== 4
+          this.args.length < 4
           || (this.args[1] !== 'name'
           && this.args[1] !== 'avatar')
           || hookId === undefined
@@ -124,11 +124,15 @@ export default class CommandParser {
           );
           return undefined;
         }
+
+        const property = this.args[1];
+        const value = this.args.toSpliced(0, 3).join(" ");
+
         return this.createCommand({
           type: 'setWebhookProperty',
           webhook_id: hookId,
-          property: this.args[1],
-          value: this.args[3],
+          property,
+          value,
         });
       }
       default:
