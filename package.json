@@ -22,7 +22,7 @@
     "is-my-json-valid": "^2.20.6",
     "js-yaml": "^4.1.0",
     "knex": "^3.1.0",
-    "matrix-appservice-bridge": "^9.0.1",
+    "matrix-appservice-bridge": "^10.3.1",
     "mime": "^3.0.0",
     "mustache": "^4.2.0",
     "mysql": "^2.18.1",
