@@ -10,61 +10,67 @@ import Matcher from "./webhooks/Matcher";
 import PluginCollection from "./webhooks/PluginCollection";
 import WebhookListener from "./webhooks/WebhookListener";
 import WebhookService from "./WebhookService";
+import SubscriptionAgent from "./feeds/SubscriptionAgent";
+
 
 export default async function startup(clearPluginCache: boolean, autoMigrate: boolean, config: Configuration): Promise<void> {
-    const database = new Database(config.database);
+  const database = new Database(config.database);
 
-    try {
-        await database.assertConnected();
-    } catch (error) {
-        logger.fatal('Unable to connect to the database: ', error);
-        process.exit(1);
+  try {
+    await database.assertConnected();
+  } catch (error) {
+    logger.fatal('Unable to connect to the database: ', error);
+    process.exit(1);
+  }
+
+  if (autoMigrate) {
+    await database.migrate();
+  } else {
+    const migrations = await database.getMigrationStatus();
+    if (migrations.pending.length > 0) {
+      logger.fatal(
+        'Application failed to start: there are pending migrations, and --no-auto-migrate was specified',
+      );
+      process.exit(1);
     }
+  }
 
-    if (autoMigrate) {
-        await database.migrate();
-    } else {
-        const migrations = await database.getMigrationStatus();
-        if (migrations.pending.length > 0) {
-            logger.fatal(
-                'Application failed to start: there are pending migrations, and --no-auto-migrate was specified',
-            );
-            process.exit(1);
-        }
+  const imageRepository = new CachedImageFromDatabase(database);
+  const userRepository = new UserRepository(database);
+  const webhookRepository = new WebhookRepository(database);
+  const hookCallRepository = new HookCallRepository(database);
+
+  const bridge = new MatrixBridge(
+    config.app_service,
+    imageRepository,
+    userRepository,
+  );
+  const plugins = new PluginCollection(config.webhooks, bridge);
+  const matcher = new Matcher(webhookRepository, plugins);
+  const webhookListener = new WebhookListener(
+    config.webhooks,
+    matcher,
+    hookCallRepository,
+  );
+  const webhookService = new WebhookService(
+    bridge,
+    webhookRepository,
+    webhookListener.onWebhookResult,
+    config,
+  );
+
+  const feedSubscriptionAgent = new SubscriptionAgent();
+
+  try {
+    if (clearPluginCache) {
+      plugins.clearCache();
     }
-
-    const imageRepository = new CachedImageFromDatabase(database);
-    const userRepository = new UserRepository(database);
-    const webhookRepository = new WebhookRepository(database);
-    const hookCallRepository = new HookCallRepository(database);
-
-    const bridge = new MatrixBridge(
-        config.app_service,
-        imageRepository,
-        userRepository,
-    );
-    const plugins = new PluginCollection(config.webhooks, bridge);
-    const matcher = new Matcher(webhookRepository, plugins);
-    const webhookListener = new WebhookListener(
-        config.webhooks,
-        matcher,
-        hookCallRepository,
-    );
-    const webhookService = new WebhookService(
-        bridge,
-        webhookRepository,
-        webhookListener.onWebhookResult,
-        config,
-    );
-    try {
-        if (clearPluginCache) {
-            plugins.clearCache();
-        }
-        await webhookService.start();
-        await webhookListener.start();
-    } catch (error) {
-        logExt.prettyError(error);
-        logger.fatal('Could not start webhook-gateway');
-        process.exit(1);
-    }
+    await webhookService.start();
+    await webhookListener.start();
+    feedSubscriptionAgent.start();
+  } catch (error) {
+    logExt.prettyError(error);
+    logger.fatal('Could not start webhook-gateway');
+    process.exit(1);
+  }
 };
