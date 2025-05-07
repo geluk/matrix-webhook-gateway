@@ -26,7 +26,7 @@ import {
 import Observable from './util/Observable';
 import { WebhookResult } from './webhooks/Matcher';
 
-const HOOK_SECRET_LENGTH = 48;
+const HOOK_SECRET_BYTES = 48;
 
 export default class WebhookService {
   bridge: MatrixBridge;
@@ -109,7 +109,7 @@ export default class WebhookService {
     );
 
     const webhook = {
-      path: `/hook/${randomString(HOOK_SECRET_LENGTH)}`,
+      path: `/hook/${randomString(HOOK_SECRET_BYTES)}`,
       user_id: userId,
       room_id: context.message.event.room_id,
     };
@@ -123,7 +123,7 @@ export default class WebhookService {
       logger.debug(`${webhook.user_id} was unable to join ${webhook.room_id}`);
       context.reply(
         'I am unable to invite a webhook user to this room.\n' +
-          'Please make sure I am allowed to invite users, then try again.',
+        'Please make sure I am allowed to invite users, then try again.',
       );
       return;
     }
@@ -192,12 +192,12 @@ export default class WebhookService {
   private async rotateWebhook(command: RotateWebhookCommand, context: Command) {
     const webhook = await this.webhookRepository.getById(command.webhookId);
     if (webhook) {
-      webhook.path = `/hook/${randomString(HOOK_SECRET_LENGTH)}`;
+      webhook.path = `/hook/${randomString(HOOK_SECRET_BYTES)}`;
       await this.webhookRepository.update(webhook);
       const secret = this.bridge.sendSecret(
         context.message.event.sender,
         `Your webhook for ${webhook.user_id} in ${context.message.event.room_id} was rotated.\n ` +
-          `URL: ${this.config.webhooks.public_url}${webhook.path}`,
+        `URL: ${this.config.webhooks.public_url}${webhook.path}`,
       );
 
       this.bridge.sendTyping(webhook.room_id, false);
