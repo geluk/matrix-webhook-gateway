@@ -1,6 +1,5 @@
 import { is } from 'typia';
-import * as HTMLParser from 'node-html-parser';
-import { br, fmt, strong, Text } from '../formatting/formatting';
+import { br, fmt, fromHtml, strong, Text } from '../formatting/formatting';
 import logger from '../util/logger';
 import {
   AppriseJsonWebhook_1_0,
@@ -26,12 +25,7 @@ export default function transformWebhookContent(
   if (is<Turt2liveWebhook>(webhook)) {
     logger.silly('Matched turt2live webhook format.');
     if (webhook.format === 'html') {
-      content.text = {
-        formatHtml: () => webhook.text,
-        // We could try to transform HTML tags to ASCII pseudo-formatting here.
-        // For now, we'll just strip the HTML tags.
-        formatPlain: () => HTMLParser.parse(webhook.text).text,
-      };
+      content.text = fromHtml(webhook.text);
     } else {
       content.text = textTransform(webhook.text);
     }
