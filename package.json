@@ -32,6 +32,7 @@
     "node-watch": "^0.7.4",
     "oracledb": "^6.0.3",
     "pg": "^8.11.3",
+    "rss-parser": "^3.13.0",
     "tedious": "^16.4.0",
     "tslog": "^3.3.0",
     "typescript": "^5.8.3",

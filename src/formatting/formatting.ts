@@ -1,5 +1,6 @@
 import { encode } from 'html-entities';
 import { emojify } from 'node-emoji';
+import HTMLParser from "node-html-parser"
 import { NameAndId } from '../bridge/ProfileInfo';
 
 /**
@@ -92,6 +93,23 @@ export function fmt(...args: Text[]): Format {
       return formattableArgs.map(toPlain).join('');
     },
   };
+}
+
+/**
+ * Generate a formattable object from HTML. The HTML content is passed through
+ * unchanged, while the plain text content will be generated from the HTML.
+ * Currently, it just strips all HTML tags, but this may change in the future.
+ *
+ * @param html A string containing the HTML to be formatted.
+ * @returns A formattable representation of the original HTML.
+ */
+export function fromHtml(html: string): Format {
+  return {
+    formatHtml: () => html,
+    // We could try to transform HTML tags to ASCII pseudo-formatting here.
+    // For now, we'll just strip the HTML tags.
+    formatPlain: () => HTMLParser.parse(html).text,
+  }
 }
 
 /**

@@ -1,0 +1,137 @@
+meta {
+  name: Gitea issue closed
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{endpoint}}/hook/{{webhook}}/gitea
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "secret": "",
+      "action": "closed",
+      "number": 209,
+      "issue": {
+          "id": 222,
+          "url": "https://git.geluk.io/api/v1/repos/galaxias/provisioning/issues/209",
+          "html_url": "https://git.geluk.io/galaxias/provisioning/issues/209",
+          "number": 209,
+          "user": {
+              "id": 3,
+              "login": "wf",
+              "full_name": "Wim de With",
+              "email": "wf@dewith.io",
+              "avatar_url": "https://git.geluk.io/user/avatar/wf/-1",
+              "language": "",
+              "is_admin": false,
+              "last_login": "0001-01-01T00:00:00Z",
+              "created": "2020-02-08T16:55:08Z",
+              "restricted": false,
+              "username": "wf"
+          },
+          "original_author": "",
+          "original_author_id": 0,
+          "title": "Issue to test webhook",
+          "body": "Some text",
+          "ref": "",
+          "labels": [],
+          "milestone": null,
+          "assignee": null,
+          "assignees": null,
+          "state": "closed",
+          "is_locked": false,
+          "comments": 3,
+          "created_at": "2021-08-11T11:15:28Z",
+          "updated_at": "2021-08-11T11:35:06Z",
+          "closed_at": "2021-08-11T11:35:06Z",
+          "due_date": null,
+          "pull_request": null,
+          "repository": {
+              "id": 16,
+              "name": "provisioning",
+              "owner": "galaxias",
+              "full_name": "galaxias/provisioning"
+          }
+      },
+      "repository": {
+          "id": 16,
+          "owner": {
+              "id": 4,
+              "login": "galaxias",
+              "full_name": "",
+              "email": "",
+              "avatar_url": "https://git.geluk.io/user/avatar/galaxias/-1",
+              "language": "",
+              "is_admin": false,
+              "last_login": "1970-01-01T00:00:00Z",
+              "created": "2020-03-11T17:22:03Z",
+              "restricted": false,
+              "username": "galaxias"
+          },
+          "name": "provisioning",
+          "full_name": "galaxias/provisioning",
+          "description": "",
+          "empty": false,
+          "private": true,
+          "fork": false,
+          "template": false,
+          "parent": null,
+          "mirror": false,
+          "size": 8193,
+          "html_url": "https://git.geluk.io/galaxias/provisioning",
+          "ssh_url": "git@geluk.io:galaxias/provisioning.git",
+          "clone_url": "https://git.geluk.io/galaxias/provisioning.git",
+          "original_url": "",
+          "website": "",
+          "stars_count": 2,
+          "forks_count": 0,
+          "watchers_count": 3,
+          "open_issues_count": 15,
+          "open_pr_counter": 1,
+          "release_counter": 0,
+          "default_branch": "master",
+          "archived": false,
+          "created_at": "2020-03-11T17:22:20Z",
+          "updated_at": "2021-08-11T08:39:29Z",
+          "permissions": {
+              "admin": true,
+              "push": true,
+              "pull": true
+          },
+          "has_issues": true,
+          "internal_tracker": {
+              "enable_time_tracker": false,
+              "allow_only_contributors_to_track_time": true,
+              "enable_issue_dependencies": true
+          },
+          "has_wiki": true,
+          "has_pull_requests": true,
+          "has_projects": false,
+          "ignore_whitespace_conflicts": false,
+          "allow_merge_commits": true,
+          "allow_rebase": true,
+          "allow_rebase_explicit": true,
+          "allow_squash_merge": true,
+          "avatar_url": "",
+          "internal": false,
+          "mirror_interval": ""
+      },
+      "sender": {
+          "id": 3,
+          "login": "wf<script>alert('hi');</script>",
+          "full_name": "Wim de With",
+          "email": "wf@dewith.io",
+          "avatar_url": "https://git.geluk.io/user/avatar/wf/-1",
+          "language": "",
+          "is_admin": false,
+          "last_login": "0001-01-01T00:00:00Z",
+          "created": "2020-02-08T16:55:08Z",
+          "restricted": false,
+          "username": "wf<script>alert('hi');</script>"
+      }
+  }
+}
