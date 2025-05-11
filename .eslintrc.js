@@ -33,6 +33,7 @@ module.exports = {
         argsIgnorePattern: '^_',
       },
     ],
+    '@typescript-eslint/no-use-before-define': ['off'], // needed for functions that are defined later in a file
   },
   ignorePatterns: [
     'plugins',
