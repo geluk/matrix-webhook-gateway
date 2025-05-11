@@ -10,7 +10,8 @@
       {
         "transform": "typia/lib/transform"
       }
-    ]
+    ],
+    "resolveJsonModule": true
   },
   "exclude": [
     "plugins",

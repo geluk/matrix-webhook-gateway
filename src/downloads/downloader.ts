@@ -3,7 +3,9 @@ import mime from 'mime';
 import logger from '../util/logger';
 import { CacheDetails, isCacheFresh, parseCacheControl } from './caching';
 
-const USER_AGENT = 'matrix-webhook-gateway/0';
+import PACKAGE from "../../package.json";
+
+const USER_AGENT = `matrix-webhook-gateway/${PACKAGE.version}`;
 
 export type DownloadResponse =
   | Fresh
