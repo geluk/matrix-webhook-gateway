@@ -61,7 +61,7 @@ export default class Database {
           if (driver === 'better-sqlite3') {
             // On SQLite, foreign keys are disabled by default.
             // See https://github.com/knex/knex/issues/453
-            conn.prepare('PRAGMA foreign_keys = O').run();
+            conn.prepare('PRAGMA foreign_keys = ON').run();
             done(false, conn)
           } else {
             done(false, conn);
