@@ -1,12 +1,19 @@
 import fetch from 'node-fetch';
 import mime from 'mime';
 import logger from '../util/logger';
-import parseCacheControl from './cacheControl';
+import { CacheDetails, isCacheFresh, parseCacheControl } from './caching';
+
+const USER_AGENT = 'matrix-webhook-gateway/0';
 
 export type DownloadResponse =
+  | Fresh
   | ContentResponse
   | NotModifiedResponse
   | ErrorResponse;
+
+export interface Fresh {
+  status: 'fresh';
+}
 
 export interface ContentResponse {
   status: 'ok';
@@ -27,28 +34,19 @@ export interface ErrorResponse {
   statusCode: number;
 }
 
-function determineContentType(
-  contentType: string | null,
-  url: string,
-): string | null {
-  if (!contentType) {
-    logger.debug(
-      'Could not determine content type from response headers, trying URL',
-    );
-    return mime.getType(url);
-  }
-  return contentType;
-}
-
 export default async function downloader(
   url: string,
-  etag?: string,
+  cacheDetails?: CacheDetails,
 ): Promise<DownloadResponse> {
+  if (cacheDetails && isCacheFresh(cacheDetails)) {
+    return { status: 'fresh' };
+  }
+
   const headers = {
-    'User-Agent': 'matrix-webhook-gateway/0',
+    'User-Agent': USER_AGENT,
   } as Record<string, string>;
-  if (etag) {
-    headers['If-None-Match'] = etag;
+  if (cacheDetails?.etag) {
+    headers['If-None-Match'] = cacheDetails.etag;
   }
 
   const response = await fetch(url, {
@@ -82,4 +80,17 @@ export default async function downloader(
     revalidateAfter,
     etag: response.headers.get('ETag'),
   };
+}
+
+function determineContentType(
+  contentType: string | null,
+  url: string,
+): string | null {
+  if (!contentType) {
+    logger.debug(
+      'Could not determine content type from response headers, trying URL',
+    );
+    return mime.getType(url);
+  }
+  return contentType;
 }

@@ -1,13 +1,20 @@
 import hasha from 'hasha';
-import { assert } from 'typia';
-import CachedImage, { CacheDetails } from '../models/CachedImage';
+import CachedImage from '../models/CachedImage';
 import logger from '../util/logger';
 import Database from './Database';
+import {
+  CacheDetails,
+  parseCacheDetails,
+  stringifyCacheDetails,
+} from '../downloads/caching';
 
 export interface CachedImageRepository {
   addOrUpdate(entity: CachedImage): Promise<void>;
   findByUrl(url: string): Promise<CachedImage | undefined>;
-  updateCacheDetails(urlHash: string, cacheDetails: CacheDetails): Promise<void>;
+  updateCacheDetails(
+    urlHash: string,
+    cacheDetails: CacheDetails,
+  ): Promise<void>;
 }
 
 export interface CachedImageRepr {
@@ -29,16 +36,12 @@ export default class CachedImageFromDatabase implements CachedImageRepository {
   public async addOrUpdate(entity: CachedImage): Promise<void> {
     logger.debug(`Adding cached image with hash ${entity.url_hash}`);
 
-    const {
-      cache_details: cacheDetails,
-      ...rest
-    } = entity;
+    const { cache_details: cacheDetails, ...rest } = entity;
 
-    await this.database.knex<CachedImageRepr>('image_cache')
-      .insert({
-        cache_details: JSON.stringify(cacheDetails),
-        ...rest,
-      });
+    await this.database.knex<CachedImageRepr>('image_cache').insert({
+      cache_details: stringifyCacheDetails(cacheDetails),
+      ...rest,
+    });
   }
 
   public async findByUrl(url: string): Promise<CachedImage | undefined> {
@@ -51,17 +54,15 @@ export default class CachedImageFromDatabase implements CachedImageRepository {
 
   private async findByHash(urlHash: string): Promise<CachedImage | undefined> {
     logger.debug(`Looking up cached image with hash ${urlHash}`);
-    const repr = await this.database.knex<CachedImageRepr>('image_cache')
+    const repr = await this.database
+      .knex<CachedImageRepr>('image_cache')
       .where('url_hash', '=', urlHash)
       .first();
 
     if (repr) {
       let details;
       try {
-        details = JSON.parse(repr.cache_details);
-        assert<{ revalidateAfter: string }>(details);
-        details.revalidateAfter = new Date(details.revalidateAfter);
-        assert<CacheDetails>(details);
+        details = parseCacheDetails(repr.cache_details);
       } catch (error) {
         logger.warn('Failed to look up image cache details: ', error);
       }
@@ -74,12 +75,16 @@ export default class CachedImageFromDatabase implements CachedImageRepository {
     return undefined;
   }
 
-  public async updateCacheDetails(urlHash: string, cacheDetails: CacheDetails): Promise<void> {
-    logger.debug(`Updating revalidateAfter for ${urlHash}`);
-    return this.database.knex<CachedImageRepr>('image_cache')
+  public async updateCacheDetails(
+    urlHash: string,
+    cacheDetails: CacheDetails,
+  ): Promise<void> {
+    logger.debug(`Updating cache details for ${urlHash}`);
+    return this.database
+      .knex<CachedImageRepr>('image_cache')
       .where('url_hash', '=', urlHash)
       .update({
-        cache_details: JSON.stringify(cacheDetails),
+        cache_details: stringifyCacheDetails(cacheDetails),
         last_retrieved: new Date(),
       });
   }

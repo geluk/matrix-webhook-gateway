@@ -1,11 +1,11 @@
 import * as hasha from 'hasha';
 import * as mime from 'mime';
-import { DownloadResponse } from '../downloads/downloader';
-
-import { CachedImageRepository } from '../repositories/CachedImageRepository';
 
 import logger from '../util/logger';
 import randomString from '../util/randomString';
+import { CacheDetails } from '../downloads/caching';
+import { DownloadResponse } from '../downloads/downloader';
+import { CachedImageRepository } from '../repositories/CachedImageRepository';
 
 export interface UploadRequest {
   name: string;
@@ -33,7 +33,7 @@ export default class ImageUploader {
     private client: UploadClient,
     private downloader: (
       url: string,
-      etag?: string,
+      cacheDetails?: CacheDetails,
     ) => Promise<DownloadResponse>,
     private imageRepository: CachedImageRepository,
   ) {}
@@ -41,26 +41,19 @@ export default class ImageUploader {
   public async uploadImage(url: string): Promise<undefined | string> {
     const existingImage = await this.imageRepository.findByUrl(url);
 
-    if (existingImage) {
-      // We already downloaded this image earlier, let's see if it's still
-      // fresh (i.e. we're allowed to cache it, and the cache duration has not
-      // expired yet).
-      const now = new Date();
-      if (now < (existingImage.cache_details?.revalidateAfter ?? 0)) {
-        logger.debug(`Found fresh image in cache for URL '${url}'`);
-        return existingImage.matrix_url;
-      }
-      // The image is stale. We may still be able to use it, but we'll need
-      // to confirm it with the server before we do so. If we have an ETag
-      // available, we'll make a conditional request, which will will allow
-      // the server to return a 304 if our cached copy is still up to date.
-      logger.debug(`Found stale image in cache for URL '${url}'`);
+    const download = await this.downloader(url, existingImage?.cache_details);
+
+    // We already downloaded this image earlier, and it's still fresh (i.e.
+    // we're allowed to cache it, and the cache duration has not expired yet).
+    if (download.status === 'fresh') {
+      logger.debug(`Found fresh image in cache for URL '${url}'`);
+      // existingImage can never be undefined in this situation.
+      return existingImage?.matrix_url;
     }
 
-    const download = await this.downloader(
-      url,
-      existingImage?.cache_details?.etag ?? undefined,
-    );
+    // The image was stale. We checked with the server whether we could still
+    // use it.
+    logger.debug(`Found stale image in cache for URL '${url}'`);
 
     if (download.status === 'error') {
       logger.info(
@@ -68,9 +61,14 @@ export default class ImageUploader {
       );
       return undefined;
     }
+
+    // We had an ETag available, and made a conditional request, which allowed
+    // the server to indicate with an 304 status that our cached copy is still
+    // up to date.
     if (download.status === 'not-modified') {
       if (!existingImage) {
-        // We didn't supply an If-None-Match header, but we still got a 304. Weird.
+        // We didn't supply an ETag in the If-None-Match header, but we still
+        // got a 304. Weird.
         logger.info(
           `Received an unexpected 304 while trying to download '${url}'`,
         );
@@ -81,7 +79,7 @@ export default class ImageUploader {
       // write it back to the database.
       const details = {
         revalidateAfter: download.revalidateAfter,
-        etag: download.etag,
+        etag: download.etag ?? undefined,
       };
       await this.imageRepository.updateCacheDetails(
         existingImage.url_hash,
@@ -110,7 +108,7 @@ export default class ImageUploader {
       // cache entry.
       const details = {
         revalidateAfter: download.revalidateAfter,
-        etag: download.etag,
+        etag: download.etag ?? undefined,
       };
       logger.debug(`Image re-downloaded with unchanged content from '${url}'`);
       await this.imageRepository.updateCacheDetails(
@@ -149,7 +147,7 @@ export default class ImageUploader {
       content_hash: contentHash,
       cache_details: {
         revalidateAfter: download.revalidateAfter,
-        etag: download.etag,
+        etag: download.etag ?? undefined,
       },
     });
 
