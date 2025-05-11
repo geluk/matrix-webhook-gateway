@@ -4,7 +4,7 @@ COPY package.json package-lock.json ./
 # This is necessary to get @vscode/sqlite3 to build.
 RUN npm ci --python=/usr/bin/python3
 COPY . ./
-RUN npx ttsc --outDir out
+RUN npx tsc --outDir out
 
 FROM node:lts
 WORKDIR /app
