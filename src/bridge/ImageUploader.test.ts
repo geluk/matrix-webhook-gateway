@@ -10,8 +10,15 @@ function getClient(response: string): UploadClient {
   };
 }
 
-function getOkDownloader(content?: string):
-(url: string) => Promise<DownloadResponse> {
+function getFreshDownloader(): (url: string) => Promise<DownloadResponse> {
+  return async (_url: string) => ({
+    status: 'fresh',
+  });
+}
+
+function getOkDownloader(
+  content?: string,
+): (url: string) => Promise<DownloadResponse> {
   return async (_url: string) => ({
     contentType: 'image/png',
     status: 'ok',
@@ -21,8 +28,9 @@ function getOkDownloader(content?: string):
   });
 }
 
-function getNotModifiedDownloader():
-(url: string) => Promise<DownloadResponse> {
+function getNotModifiedDownloader(): (
+  url: string,
+) => Promise<DownloadResponse> {
   return async (_url: string) => ({
     status: 'not-modified',
     revalidateAfter: new Date(),
@@ -30,8 +38,7 @@ function getNotModifiedDownloader():
   });
 }
 
-function getErrorDownloader():
-(url: string) => Promise<DownloadResponse> {
+function getErrorDownloader(): (url: string) => Promise<DownloadResponse> {
   return async (_url: string) => ({
     status: 'error',
     statusCode: 404,
@@ -49,7 +56,7 @@ function getImage(revalidateAfter?: Date, content?: string): CachedImage {
     last_retrieved: new Date(),
     matrix_url: 'mxc://existing',
     cache_details: {
-      etag: null,
+      etag: undefined,
       revalidateAfter: revalidateAfter ?? new Date(),
     },
   };
@@ -83,7 +90,7 @@ test('Returns URL from repository if the image already exists and is fresh', asy
 
   const uploader = new ImageUploader(
     getClient('mxc://new'),
-    getOkDownloader(),
+    getFreshDownloader(),
     repository,
   );
 
