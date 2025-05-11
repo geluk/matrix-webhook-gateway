@@ -15,7 +15,7 @@ export default {
 
   errorOnDeprecated: true,
   maxWorkers: '50%',
-  moduleFileExtensions: ['ts', 'js'],
+  moduleFileExtensions: ['ts', 'js', 'json'],
   rootDir: 'src',
   testEnvironment: 'node',
   testMatch: ['**/?(*.)+(test).ts'],
