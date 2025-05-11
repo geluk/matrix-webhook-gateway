@@ -18,4 +18,4 @@ if (-Not (Test-Path "../gateway-config.yaml")) {
 $env:SYNAPSE_UID = 1000
 $env:SYNAPSE_GID = 1000
 
-docker-compose up
+docker compose up
