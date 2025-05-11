@@ -39,7 +39,7 @@ export default class Database {
 
   public constructor(config: DatabaseConfiguration) {
     let driver = config.driver;
-    if (driver == "sqlite3") {
+    if (driver === "sqlite3") {
       driver = "better-sqlite3";
     }
 
