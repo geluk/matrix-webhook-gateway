@@ -2,8 +2,9 @@ import fetch from 'node-fetch';
 import mime from 'mime';
 import logger from '../util/logger';
 import { CacheDetails, isCacheFresh, parseCacheControl } from './caching';
+import VERSION from '../util/version';
 
-const USER_AGENT = 'matrix-webhook-gateway/0';
+const USER_AGENT = `matrix-webhook-gateway/${VERSION}`;
 
 export type DownloadResponse =
   | Fresh

@@ -40,7 +40,7 @@ jobs:
         root: out
         paths:
           - webhook-gateway.tar.gz
-          - VERSION
+          - webhook-gateway/VERSION
     - store_artifacts:
         path: out/webhook-gateway.tar.gz
         destination: webhook-gateway.tar.gz
@@ -106,7 +106,7 @@ jobs:
     - run:
         name: Publish release
         command: |
-          VERSION="$(<out/VERSION)"
+          VERSION="$(<out/webhook-gateway/VERSION)"
           echo publishing $VERSION
           ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} \
             -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} \
