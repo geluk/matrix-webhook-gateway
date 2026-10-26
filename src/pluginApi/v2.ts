@@ -1,4 +1,4 @@
-import { Logger } from 'tslog';
+import type { ILogObj, Logger } from 'tslog';
 import MatrixBridge from '../bridge/MatrixBridge';
 import { Text } from '../formatting/formatting';
 import { EmojiIcon, UrlIcon } from '../webhooks/formats';
@@ -10,13 +10,13 @@ export interface WebhookMessage {
 }
 
 export interface WebhookContext {
-  logger: Logger;
+  logger: Logger<ILogObj>;
   bridge: MatrixBridge;
 }
 
 export abstract class PluginBase {
   public constructor(
-    protected logger: Logger,
+    protected logger: Logger<ILogObj>,
     protected bridge: MatrixBridge,
   ) {}
 

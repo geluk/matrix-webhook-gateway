@@ -1,4 +1,4 @@
-import * as Express from 'express';
+import express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import WebhooksConfiguration from '../configuration/WebhooksConfiguration';
 import HookCallRepository from '../repositories/HookCallRepository';
@@ -7,7 +7,7 @@ import Observable from '../util/Observable';
 import Matcher, { WebhookResult } from './Matcher';
 
 export default class WebhookListener {
-  private app = Express.default();
+  private app = express();
 
   public onWebhookResult = new Observable<WebhookResult>();
 
@@ -21,7 +21,7 @@ export default class WebhookListener {
     logger.silly('Starting webhook listener');
     await this.webhookMatcher.load();
 
-    this.app.use(Express.json());
+    this.app.use(express.json());
     this.app.use((
       err: Error & Record<string, unknown>,
       _rq: Request,
@@ -44,12 +44,16 @@ export default class WebhookListener {
     this.app.post('/hook/:hook', this.handleRequest.bind(this));
     this.app.post('/hook/:hook/:plugin', this.handleRequest.bind(this));
 
-    this.app.use('/*', (rq, rs) => {
+    this.app.use((_rq, rs) => {
       rs.status(404).send('Not Found').end();
     });
 
     this.app.use((err: unknown, _rq: unknown, rs: Response, _next: NextFunction) => {
-      logger.error(err);
+      if (err instanceof Error) {
+        logger.error(err);
+      } else {
+        logger.error(String(err));
+      }
       rs.status(500).send('Internal Server Error').end();
     });
 
@@ -59,7 +63,7 @@ export default class WebhookListener {
   }
 
   private async handleRequest(rq: Request, rs: Response, _next: NextFunction) {
-    const path = rq.params.hook;
+    const path = rq.params.hook as string;
     const plugin = rq.params.plugin as string | undefined;
 
     if (plugin) {

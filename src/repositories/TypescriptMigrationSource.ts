@@ -46,7 +46,6 @@ const typescriptMigrationSource: Knex.MigrationSource<MigrationFile> = {
   },
 
   getMigration(migration: MigrationFile): Promise<Knex.Migration> {
-    // eslint-disable-next-line
     const loadedMigration = require(migration.fullPath);
     return loadedMigration;
   },

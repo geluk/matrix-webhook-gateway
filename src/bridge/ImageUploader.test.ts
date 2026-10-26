@@ -1,4 +1,4 @@
-import hasha from 'hasha';
+import { createHash } from 'node:crypto';
 import { DownloadResponse } from '../downloads/downloader';
 import CachedImage from '../models/CachedImage';
 import { CachedImageRepository } from '../repositories/CachedImageRepository';
@@ -49,10 +49,9 @@ function getImage(revalidateAfter?: Date, content?: string): CachedImage {
   return {
     original_url: 'https://example.com/image.png',
     url_hash: 'asdf',
-    content_hash: hasha(content || 'existing', {
-      algorithm: 'sha256',
-      encoding: 'base64',
-    }),
+    content_hash: createHash('sha256')
+      .update(content || 'existing')
+      .digest('base64'),
     last_retrieved: new Date(),
     matrix_url: 'mxc://existing',
     cache_details: {
@@ -129,8 +128,8 @@ test('Updates cache if a stale image is revalidated', async () => {
 
   await uploader.uploadImage('http://example.com');
 
-  expect(repository.addOrUpdate).toBeCalledTimes(0);
-  expect(repository.updateCacheDetails).toBeCalledTimes(1);
+  expect(repository.addOrUpdate).toHaveBeenCalledTimes(0);
+  expect(repository.updateCacheDetails).toHaveBeenCalledTimes(1);
 });
 
 test('Returns undefined if the image could not be downloaded', async () => {
@@ -162,6 +161,6 @@ test('Updates cache if a redownloaded image evaluates to the same content hash',
 
   await uploader.uploadImage('http://example.com');
 
-  expect(repository.addOrUpdate).toBeCalledTimes(0);
-  expect(repository.updateCacheDetails).toBeCalledTimes(1);
+  expect(repository.addOrUpdate).toHaveBeenCalledTimes(0);
+  expect(repository.updateCacheDetails).toHaveBeenCalledTimes(1);
 });

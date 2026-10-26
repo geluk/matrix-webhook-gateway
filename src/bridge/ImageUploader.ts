@@ -1,5 +1,5 @@
-import * as hasha from 'hasha';
-import * as mime from 'mime';
+import { createHash } from 'node:crypto';
+import { extension } from 'mime-types';
 
 import logger from '../util/logger';
 import randomString from '../util/randomString';
@@ -21,11 +21,8 @@ export interface UploadClient {
   ) => Promise<string>;
 }
 
-function hash(input: hasha.HashaInput): string {
-  return hasha.default(input, {
-    algorithm: 'sha256',
-    encoding: 'base64',
-  });
+function hash(input: string | Buffer): string {
+  return createHash('sha256').update(input).digest('base64');
 }
 
 export default class ImageUploader {
@@ -125,7 +122,7 @@ export default class ImageUploader {
     // For now, we'll just upload the image.
     const filename = `webhook-gateway-upload-${randomString(
       40,
-    )}.${mime.getExtension(download.contentType)}`;
+    )}.${extension(download.contentType) || 'bin'}`;
     const contentUri = await this.client.uploadContent(
       download.buffer,
       download.contentType,

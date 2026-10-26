@@ -1,5 +1,4 @@
-import fetch from 'node-fetch';
-import mime from 'mime';
+import { lookup } from 'mime-types';
 import logger from '../util/logger';
 import { CacheDetails, isCacheFresh, parseCacheControl } from './caching';
 import VERSION from '../util/version';
@@ -73,7 +72,7 @@ export default async function downloader(
   }
   return {
     status: 'ok',
-    buffer: await response.buffer(),
+    buffer: Buffer.from(await response.arrayBuffer()),
     contentType: determineContentType(
       response.headers.get('Content-Type'),
       url,
@@ -91,7 +90,7 @@ function determineContentType(
     logger.debug(
       'Could not determine content type from response headers, trying URL',
     );
-    return mime.getType(url);
+    return lookup(url) || null;
   }
   return contentType;
 }

@@ -1,52 +1,42 @@
-import { Knex } from 'knex';
-import { Logger } from 'tslog';
+import type { Knex } from 'knex';
+import { DefaultLogLevels, Logger } from 'tslog';
+import type { ILogObj } from 'tslog';
 
-const logger = new Logger({
+const logger: Logger<ILogObj> = new Logger({
   name: 'webhook-srv',
-  displayFunctionName: false,
-  displayFilePath: 'hidden',
-  minLevel: 'trace',
+  type: 'pretty',
+  minLevel: 'TRACE',
 });
 export default logger;
 
-type LogLevel =
-  | 'silly'
-  | 'debug'
-  | 'trace'
-  | 'info'
-  | 'warn'
-  | 'error'
-  | 'fatal';
-
-function getLevel(verbosity: number): LogLevel {
+function getLevel(verbosity: number): DefaultLogLevels {
   switch (verbosity) {
     case 0:
-      return 'info';
+      return DefaultLogLevels.INFO;
     case 1:
-      return 'debug';
+      return DefaultLogLevels.DEBUG;
     case 2:
-      return 'trace';
+      return DefaultLogLevels.TRACE;
     default:
-      return 'silly';
+      return DefaultLogLevels.SILLY;
   }
 }
 
-export function configureLogger(verbosity: number): void {
-  logger.setSettings({
-    minLevel: getLevel(verbosity),
-    // This is a bit of a hack, but we need to enable it to prevent matrix-js-sdk
-    // from logging event details directly to the console. It may be possible to
-    // attach your own logger to it though; in that case this can be disabled.
-    // See: https://github.com/matrix-org/matrix-js-sdk/blob/develop/src/logger.js
-    // Should only be done after yargs has finished parsing arguments, because it
-    // wants to write its feedback to the console.
-    overwriteConsole: true,
-  });
-}
-
-const bridgeLog = logger.getChildLogger({
+const bridgeLog = logger.getSubLogger({
   name: 'bridge',
 });
+
+const knexLog = logger.getSubLogger({
+  name: 'knex',
+});
+
+export function configureLogger(verbosity: number): void {
+  const level = getLevel(verbosity);
+  // Sub-loggers copy their settings, so update each one explicitly.
+  logger.settings.minLevel = level;
+  bridgeLog.settings.minLevel = level;
+  knexLog.settings.minLevel = level;
+}
 
 export function forwardMatrixLog(text: string, isError: boolean): void {
   if (isError) {
@@ -57,9 +47,6 @@ export function forwardMatrixLog(text: string, isError: boolean): void {
 }
 
 export function getKnexLogger(): Knex.Logger {
-  const knexLog = logger.getChildLogger({
-    name: 'knex',
-  });
   return {
     warn: (msg: string) => knexLog.warn(msg),
     error: (msg: string) => knexLog.error(msg),
@@ -72,16 +59,16 @@ export function getKnexLogger(): Knex.Logger {
 export const logExt = {
   prettyError(error: unknown): void {
     if (error instanceof Error) {
-      logger.prettyError(error);
-    } else {
       logger.error(error);
+    } else {
+      logger.error(String(error));
     }
   },
   tryLogMessage(error: unknown): void {
     if (error instanceof Error) {
       logger.error(error.message);
     } else {
-      logger.error(error);
+      logger.error(String(error));
     }
   },
 };

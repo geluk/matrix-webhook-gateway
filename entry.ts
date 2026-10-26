@@ -83,7 +83,7 @@ const initialiseLogging = (verbose: number) => {
 
   process.on('unhandledRejection', (error) => {
     logger.error('Unhandled error:', (error as Error).message);
-    logger.prettyError(error as Error);
+    logExt.prettyError(error);
     logger.fatal('Unhandled promise rejection, application will now exit');
     process.exit(1);
   });
@@ -166,7 +166,7 @@ const entry = async () => {
 };
 
 entry().catch((error) => {
-  logger.prettyError(error);
+  logExt.prettyError(error);
   logger.fatal(
     'Encountered an error during startup, application will now exit',
   );

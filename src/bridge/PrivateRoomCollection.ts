@@ -16,7 +16,7 @@ export default class PrivateRoomCollection {
       let members: Record<string, unknown> | undefined;
       try {
         members = await this.bridge.getBot().getJoinedMembers(user.private_room_id);
-      } catch (error) {
+      } catch {
         logger.warn(
           `User ${user.id} has ${user.private_room_id} as their private room, `
           + 'but I am not a member of it. A new private room will be created.',

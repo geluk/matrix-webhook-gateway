@@ -13,7 +13,6 @@ export default class Configuration {
   // correct type, so we can safely assert the types of all properties here.
   // In the case of optional properties, we only need to perform null/undefined
   // checks, and replace those values with their defaults.
-  /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   public static from(config: any) {
     const appService = new AppServiceConfiguration(config.app_service);
