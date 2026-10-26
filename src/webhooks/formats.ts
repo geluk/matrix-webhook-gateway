@@ -29,7 +29,6 @@ export interface SlackWebhook {
 
 // We can be pretty strict about parsing v1.0; its content is well defined:
 // https://github.com/caronc/apprise/wiki/Notify_Custom_JSON
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface AppriseJsonWebhook_1_0 {
   version: '1.0';
   title: string;
@@ -38,7 +37,6 @@ export interface AppriseJsonWebhook_1_0 {
 }
 
 // If that fails, we can fall back to a best-effort match:
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface AppriseJsonWebhook_Unknown {
   version: string;
   title?: string;

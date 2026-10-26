@@ -1,13 +1,13 @@
 import fs from 'fs';
 import path from 'path';
-import hasha from 'hasha';
+import { createHash } from 'node:crypto';
 import * as tts from 'typescript';
 import { is } from 'typia';
 import { transform } from 'typia/lib/transform'
 import { ModuleKind, ScriptTarget } from 'typescript';
-import { Logger } from 'tslog';
 
 import logger from '../util/logger';
+import type { ILogObj, Logger } from 'tslog';
 import * as v1 from '../pluginApi/v1';
 import * as v2 from '../pluginApi/v2';
 import MatrixBridge from '../bridge/MatrixBridge';
@@ -33,7 +33,7 @@ export class PluginLoader {
 
   public async loadPlugin(pluginPath: string, bridge: MatrixBridge | undefined): Promise<LoadResult | undefined> {
     const source = fs.readFileSync(pluginPath, 'utf8');
-    const hash = hasha(source, { algorithm: 'sha256' });
+    const hash = createHash('sha256').update(source).digest('hex');
     const cacheFile = `${this.cacheDirectory}/${hash}.js`;
 
     if (!fs.existsSync(this.cacheDirectory)) {
@@ -61,7 +61,6 @@ export class PluginLoader {
     try {
       // There's no getting around using require() here, as we need to dynamically
       // load the plugin.
-      // eslint-disable-next-line
       pluginFile = require(importFile);
       pluginContainer = pluginFile.default;
     } catch (error) {
@@ -79,7 +78,6 @@ export class PluginLoader {
 
       const pluginLogger = this.createLogger(pluginFile.format);
 
-      // eslint-disable-next-line new-cap
       const instance = new pluginContainer(pluginLogger, bridge);
       await instance.init();
       return {
@@ -108,8 +106,8 @@ export class PluginLoader {
     return undefined;
   }
 
-  private createLogger(pluginName: string): Logger {
-    return logger.getChildLogger({
+  private createLogger(pluginName: string): Logger<ILogObj> {
+    return logger.getSubLogger({
       name: `plg-${pluginName}`,
     });
   }
@@ -124,17 +122,31 @@ export class PluginLoader {
     fs.writeFileSync(sourcePath, source);
     const prog = tts.createProgram([sourcePath], {
       strictNullChecks: true,
-      target: ScriptTarget.ES2016,
+      target: ScriptTarget.ES2022,
       module: ModuleKind.CommonJS,
     });
 
-    prog.emit(undefined, (_name, data) => {
+    const diagnostics: tts.Diagnostic[] = [];
+    const extras = {
+      addDiagnostic: (diagnostic: tts.Diagnostic) => {
+        diagnostics.push(diagnostic);
+        return diagnostics.length - 1;
+      },
+    };
+
+    const emitResult = prog.emit(undefined, (_name, data) => {
       fs.writeFileSync(cachePath, data, {
         flag: 'w',
       });
     }, undefined, undefined, {
-      before: [transform(prog)],
+      before: [transform(prog, undefined, extras)],
     });
+
+    const errors = [...diagnostics, ...emitResult.diagnostics]
+      .filter((diagnostic) => diagnostic.category === tts.DiagnosticCategory.Error);
+    for (const error of errors) {
+      logger.error(tts.flattenDiagnosticMessageText(error.messageText, '\n'));
+    }
 
     fs.unlinkSync(sourcePath);
   }

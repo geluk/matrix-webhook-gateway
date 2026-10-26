@@ -41,6 +41,8 @@ export default class Database {
     let driver = config.driver;
     if (driver === "sqlite3") {
       driver = "better-sqlite3";
+    } else if (driver === "mysql") {
+      driver = "mysql2";
     }
 
     logger.debug(`Creating DB connection with ${driver}`);

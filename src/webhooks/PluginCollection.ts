@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import watch from 'node-watch';
 
 import logger from '../util/logger';
 import * as v1 from '../pluginApi/v1';
@@ -55,15 +54,17 @@ export default class PluginCollection {
       logger.info('No plugins were loaded');
     }
 
-    watch(this.pluginDirectory, {
+    fs.watch(this.pluginDirectory, {
       recursive: true,
-      delay: 1000,
       persistent: false,
-      filter: (f) => f.endsWith('.ts'),
     }, async (evt, name) => {
-      if (evt === 'update' && name) {
-        logger.info(`Plugin ${name} was updated, reloading`);
-        const loadResult = await this.loader.loadPlugin(name, this.bridge);
+      if ((evt === 'change' || evt === 'rename') && name && name.endsWith('.ts')) {
+        const pluginPath = path.join(this.pluginDirectory, name);
+        if (!fs.existsSync(pluginPath)) {
+          return;
+        }
+        logger.info(`Plugin ${pluginPath} was updated, reloading`);
+        const loadResult = await this.loader.loadPlugin(pluginPath, this.bridge);
         if (loadResult) {
           this.plugins[loadResult.identifier] = loadResult.plugin;
         }

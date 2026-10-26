@@ -9,7 +9,7 @@ import { is } from 'typia';
 
 import MatrixEventHandler from './events/MatrixEventHandler';
 import EventContext from './events/EventContext';
-import logger, { forwardMatrixLog } from '../util/logger';
+import logger, { forwardMatrixLog, logExt } from '../util/logger';
 import AppServiceConfiguration from '../configuration/AppServiceConfiguration';
 import UserRepository from '../repositories/UserRepository';
 import PrivateRoomCollection from './PrivateRoomCollection';
@@ -216,7 +216,7 @@ export default class MatrixBridge {
       })
       .catch((error) => {
         logger.error('An error occurred while processing a Matrix event:');
-        logger.prettyError(error, true, false, true, 0);
+        logExt.prettyError(error);
       });
   }
 }

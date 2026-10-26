@@ -1,4 +1,4 @@
-import hasha from 'hasha';
+import { createHash } from 'node:crypto';
 import CachedImage from '../models/CachedImage';
 import logger from '../util/logger';
 import Database from './Database';
@@ -45,10 +45,7 @@ export default class CachedImageFromDatabase implements CachedImageRepository {
   }
 
   public async findByUrl(url: string): Promise<CachedImage | undefined> {
-    const urlHash = hasha(url, {
-      algorithm: 'sha256',
-      encoding: 'base64',
-    });
+    const urlHash = createHash('sha256').update(url).digest('base64');
     return this.findByHash(urlHash);
   }
 

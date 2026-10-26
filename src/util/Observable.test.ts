@@ -9,8 +9,8 @@ test('calls every handler once', async () => {
 
   await obs.notify('message');
 
-  expect(h1).toBeCalledTimes(1);
-  expect(h2).toBeCalledTimes(1);
+  expect(h1).toHaveBeenCalledTimes(1);
+  expect(h2).toHaveBeenCalledTimes(1);
 });
 
 test('forwards message to observer', async () => {
@@ -20,7 +20,7 @@ test('forwards message to observer', async () => {
 
   await obs.notify('message');
 
-  expect(h).toBeCalledWith('message');
+  expect(h).toHaveBeenCalledWith('message');
 });
 
 test('does not call handler when not notified', async () => {
@@ -29,7 +29,7 @@ test('does not call handler when not notified', async () => {
 
   await obs.observe(h);
 
-  expect(h).toBeCalledTimes(0);
+  expect(h).toHaveBeenCalledTimes(0);
 });
 
 test('does not call remaining handlers if one throws', async () => {
@@ -46,10 +46,10 @@ test('does not call remaining handlers if one throws', async () => {
 
   try {
     await obs.notify('message');
-  } catch (error) {
+  } catch {
     // Ignored
   }
 
-  expect(before).toBeCalledTimes(1);
-  expect(after).toBeCalledTimes(0);
+  expect(before).toHaveBeenCalledTimes(1);
+  expect(after).toHaveBeenCalledTimes(0);
 });

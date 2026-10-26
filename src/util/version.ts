@@ -6,7 +6,7 @@ export default VERSION;
 function getVersion(): string {
   try {
     return readFileSync(`${__dirname}/../../VERSION`).toString();
-  } catch (error) {
+  } catch {
     return 'dev';
   }
 }

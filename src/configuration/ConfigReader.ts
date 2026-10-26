@@ -1,4 +1,4 @@
-import YAML from 'js-yaml';
+import { load } from 'js-yaml';
 import fs from 'fs';
 import validator from 'is-my-json-valid';
 import Mustache from 'mustache';
@@ -62,7 +62,7 @@ export default class ConfigReader {
 
     let config: string | undefined | Record<string, unknown>;
     try {
-      config = YAML.load(rawYaml) as
+      config = load(rawYaml) as
         | string
         | undefined
         | Record<string, unknown>;
@@ -116,7 +116,7 @@ export default class ConfigReader {
   private static validateConfig(
     config: Record<string, unknown>,
   ): Configuration | undefined {
-    const schema = YAML.load(fs.readFileSync(CONFIG_SCHEMA, 'utf8'));
+    const schema = load(fs.readFileSync(CONFIG_SCHEMA, 'utf8'));
     if (typeof schema !== 'object') {
       logger.error('Could not read configuration schema');
       return undefined;
@@ -187,7 +187,7 @@ export default class ConfigReader {
     let existing;
     try {
       existing = fs.readFileSync(path, 'utf8');
-    } catch (error) {
+    } catch {
       // If we can't read the file, we'll just try to write it anyway,
       // since it might not exist yet. If writing fails as well, we want to
       // report the write failure rather than this one.
